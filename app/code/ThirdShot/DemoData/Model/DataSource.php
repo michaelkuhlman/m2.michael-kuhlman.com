@@ -51,7 +51,7 @@ class DataSource
         foreach ($this->catalog()['products'] as $p) {
             $rows[$p['sku']] = $p;
             foreach ($p['children'] ?? [] as $child) {
-                $rows[$child['sku']] = $child + [
+                $row = $child + [
                     'type' => 'simple',
                     'category' => $p['category'],
                     'price' => $p['price'],
@@ -60,8 +60,10 @@ class DataSource
                     'parent' => $p['sku'],
                     'description' => $p['description'],
                     'short_description' => $p['short_description'],
-                    'attributes' => ($child['attributes'] ?? []) + ($p['attributes'] ?? []),
                 ];
+                // own values (colour, grip size) win, the parent's specs fill the rest
+                $row['attributes'] = ($child['attributes'] ?? []) + ($p['attributes'] ?? []);
+                $rows[$child['sku']] = $row;
             }
         }
         return $rows;

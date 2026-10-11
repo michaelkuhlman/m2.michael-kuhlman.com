@@ -333,7 +333,7 @@ return [
         'MageOS_RMA' => 1,
         'MageOS_ThemeAdminhtmlSwitcher' => 1,
         'MageOS_ThemeOptimization' => 1,
-        'Swissup_Ignition' => 1,
+        'Swissup_Ignition' => 0,
         'ThirdShot_DemoData' => 1
     ]
 ];

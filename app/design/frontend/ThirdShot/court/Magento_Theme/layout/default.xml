@@ -40,7 +40,6 @@
         <!-- less clutter -->
         <referenceBlock name="catalog.compare.link" remove="true"/>
         <referenceBlock name="catalog.compare.sidebar" remove="true"/>
-        <referenceBlock name="related-product-compare" remove="true"/>
         <referenceBlock name="wishlist_sidebar" remove="true"/>
         <referenceBlock name="sale.reorder.sidebar" remove="true"/>
     </body>

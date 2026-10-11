@@ -16,7 +16,10 @@ use Magento\Catalog\Model\Product\Visibility;
 use Magento\ConfigurableProduct\Helper\Product\Options\Factory as ConfigOptionsFactory;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
 use Magento\Eav\Model\Config as EavConfig;
+use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Filesystem;
 
 class ProductSetup
 {
@@ -32,8 +35,23 @@ class ProductSetup
         private readonly ConfigOptionsFactory $configOptionsFactory,
         private readonly EavConfig $eavConfig,
         private readonly AttributeSetup $attributes,
-        private readonly DataSource $data
+        private readonly DataSource $data,
+        private readonly Filesystem $filesystem
     ) {
+    }
+
+    /** Select attribute label => option id, loaded on first use (any step may need it). */
+    private function option(string $code, string $label, string $sku): int
+    {
+        if (!$this->options) {
+            foreach (self::SELECTS as $c) {
+                $this->options[$c] = $this->attributes->optionMap($c);
+            }
+        }
+        if (!isset($this->options[$code][$label])) {
+            throw new LocalizedException(__('Unknown option "%1" for attribute %2 on %3', $label, $code, $sku));
+        }
+        return $this->options[$code][$label];
     }
 
     /**
@@ -41,9 +59,6 @@ class ProductSetup
      */
     public function install(array $categoryIds, callable $log): void
     {
-        foreach (self::SELECTS as $code) {
-            $this->options[$code] = $this->attributes->optionMap($code);
-        }
         $rows = $this->data->flatProducts();
         // pass 1: simple products and configurable children
         foreach ($rows as $sku => $row) {
@@ -66,6 +81,7 @@ class ProductSetup
         } catch (NoSuchEntityException) {
             $product = $this->productFactory->create();
             $product->setSku($row['sku']);
+            $product->setStoreId(0);
         }
         $isChild = isset($row['parent']);
         $product->setTypeId($type)
@@ -97,10 +113,7 @@ class ProductSetup
         ]);
         foreach ($row['attributes'] ?? [] as $code => $value) {
             if (in_array($code, self::SELECTS, true)) {
-                if (!isset($this->options[$code][$value])) {
-                    continue;
-                }
-                $value = $this->options[$code][$value];
+                $value = $this->option($code, (string) $value, $row['sku']);
             }
             $product->setData($code, $value);
         }
@@ -117,10 +130,10 @@ class ProductSetup
         if (!$files || $product->getMediaGalleryEntries()) {
             return;
         }
-        $tmpDir = sys_get_temp_dir() . '/ts-seed';
-        if (!is_dir($tmpDir)) {
-            mkdir($tmpDir, 0775, true);
-        }
+        // Magento only accepts gallery sources inside pub/media, so stage copies in pub/media/tmp/ts-seed
+        $media = $this->filesystem->getDirectoryWrite(DirectoryList::MEDIA);
+        $media->create('tmp/ts-seed');
+        $tmpDir = rtrim($media->getAbsolutePath('tmp/ts-seed'), '/');
         foreach (array_values($files) as $i => $file) {
             // addImageToMediaGallery moves/renames, so hand it a throwaway copy named after the product
             $copy = $tmpDir . '/' . $this->data->slug($product->getName()) . '-' . ($i + 1) . '.jpg';
@@ -155,7 +168,7 @@ class ProductSetup
         $values = [];
         foreach ($row['children'] as $child) {
             $childIds[] = (int) $this->productRepository->get($child['sku'])->getId();
-            $values[] = ['value_index' => $this->options[$attrCode][$child['attributes'][$attrCode]]];
+            $values[] = ['value_index' => $this->option($attrCode, $child['attributes'][$attrCode], $child['sku'])];
         }
         $product = $this->base($row, $categoryIds, Configurable::TYPE_CODE);
         $files = $this->data->images($row['children'][0]['sku']);

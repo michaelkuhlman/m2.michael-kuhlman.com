@@ -35,6 +35,8 @@ class CmsSetup
             $src = $this->data->buildDir('renders/jpg/' . $name . '.jpg');
             if (is_readable($src)) {
                 $media->writeFile('wysiwyg/thirdshot/' . $name . '.jpg', (string) file_get_contents($src));
+            } else {
+                $log("WARNING: missing editorial image $name.jpg (render scenes + export_jpg first)");
             }
         }
         foreach (glob($this->data->buildDir('cms/blocks') . '/*.html') ?: [] as $file) {
