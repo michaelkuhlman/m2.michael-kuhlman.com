@@ -33,6 +33,9 @@ class CmsSetup
         $media = $this->filesystem->getDirectoryWrite(DirectoryList::MEDIA);
         foreach (self::MEDIA as $name) {
             $src = $this->data->buildDir('renders/jpg/' . $name . '.jpg');
+            if ($media->isExist('wysiwyg/thirdshot/' . $name . '.jpg')) {
+                continue; // never overwrite: some editorial images are made outside this pipeline (e.g. _build/hero)
+            }
             if (is_readable($src)) {
                 $media->writeFile('wysiwyg/thirdshot/' . $name . '.jpg', (string) file_get_contents($src));
             } else {

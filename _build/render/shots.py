@@ -40,8 +40,8 @@ def paddle_flat(sku, balls=("optic", "optic")):
         p.rotation_euler = (R(-3.2), 0, R(-14))
         rng = random.Random(len(sku))
         for k, c in enumerate(balls):
-            mc.ball(c, loc=(0.2 + 0.03 * k, -0.08 - 0.085 * k, 0.037), rot=ct.rand_rot(rng))
-        cam((0.04, -0.01, 0.0), 1.32, az=-4, el=89.5, lens=85)
+            mc.ball(c, loc=(0.125 + 0.035 * k, -0.095 - 0.085 * k, 0.037), rot=ct.rand_rot(rng))
+        cam((0.03, -0.01, 0.0), 1.36, az=-4, el=89.5, lens=85)
     return b
 
 

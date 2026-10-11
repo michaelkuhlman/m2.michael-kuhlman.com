@@ -1,0 +1,41 @@
+<!doctype html><html><head><style>
+html,body{margin:0;width:1920px;height:960px;overflow:hidden;background:#173A2E}
+.s{position:relative;width:1920px;height:960px;overflow:hidden;
+ background:
+  radial-gradient(ellipse 900px 700px at 1380px 380px, rgba(255,236,190,.20), transparent 70%),
+  linear-gradient(180deg,#24563f 0%,#1f4d39 45%,#1a4232 100%);}
+/* court surface in perspective */
+.court{position:absolute;left:-200px;right:-200px;top:300px;height:1200px;transform-origin:50% 0;transform:perspective(900px) rotateX(58deg);
+ background:linear-gradient(180deg,#2c6a50,#235a43);}
+.line{position:absolute;background:#eef3e6;opacity:.92;box-shadow:0 0 2px rgba(255,255,255,.4)}
+.noise{position:absolute;inset:0;opacity:.20;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .9 0'/></filter><rect width='300' height='300' filter='url(%23n)'/></svg>")}
+/* net band */
+.net{position:absolute;left:0;right:0;top:250px;height:70px;
+ background:repeating-linear-gradient(90deg,rgba(10,20,16,.55) 0 2px,transparent 2px 14px),repeating-linear-gradient(0deg,rgba(10,20,16,.55) 0 2px,transparent 2px 14px);
+ border-top:10px solid #f2f0e8;opacity:.55;filter:blur(1.6px)}
+.netshade{position:absolute;left:0;right:0;top:318px;height:60px;background:linear-gradient(180deg,rgba(0,0,0,.25),transparent)}
+.p{position:absolute;filter:drop-shadow(0 30px 28px rgba(5,20,14,.55)) drop-shadow(0 6px 8px rgba(5,20,14,.35))}
+.b{position:absolute;clip-path:circle(47.5% at 50% 47%);filter:drop-shadow(0 14px 10px rgba(5,20,14,.5))}
+.sun{position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,226,160,0) 40%,rgba(255,226,160,.10) 62%,rgba(255,226,160,0) 80%);mix-blend-mode:screen}
+.vig{position:absolute;inset:0;background:radial-gradient(ellipse 1200px 800px at 1300px 520px,transparent 55%,rgba(6,18,13,.55) 100%),linear-gradient(90deg,rgba(14,34,26,.55) 0%,rgba(14,34,26,.2) 38%,transparent 55%)}
+.cast{position:absolute;border-radius:50%;background:rgba(4,16,11,.45);filter:blur(22px)}
+</style></head><body><div class="s">
+ <div class="court"><div class="noise"></div>
+   <div class="line" style="left:50%;top:0;width:8px;height:100%;margin-left:-4px"></div>
+   <div class="line" style="left:0;right:0;top:260px;height:10px"></div>
+   <div class="line" style="left:120px;top:0;width:10px;height:100%"></div>
+   <div class="line" style="right:120px;top:0;width:10px;height:100%"></div>
+ </div>
+ <div class="net"></div><div class="netshade"></div>
+ <div class="cast" style="left:950px;top:705px;width:760px;height:90px"></div>
+ <img class="p" src="cut/TS-APX14_1_paddle.png" style="left:940px;top:150px;height:600px;transform:rotate(-13deg)">
+ <img class="p" src="cut/TS-KLC16-VOLT_1_paddle.png" style="left:1410px;top:160px;height:590px;transform:rotate(12deg)">
+ <img class="p" src="cut/TS-SIG-RAW_1_paddle.png" style="left:1170px;top:95px;height:640px;transform:rotate(-1deg)">
+<div class="cast" style="left:875px;top:810px;width:110px;height:26px;filter:blur(9px);background:rgba(4,16,11,.6)"></div>
+ <div class="cast" style="left:1642px;top:807px;width:118px;height:28px;filter:blur(9px);background:rgba(4,16,11,.6)"></div>
+ <div class="cast" style="left:1518px;top:837px;width:90px;height:22px;filter:blur(8px);background:rgba(4,16,11,.6)"></div>
+ <img class="b" src="cut/TS-SIG-RAW_1_ball.png" style="left:860px;top:705px;width:118px">
+ <img class="b" src="cut/TS-APX14_1_ball.png" style="left:1630px;top:695px;width:126px">
+ <img class="b" src="cut/TS-KLC16-VOLT_1_ball.png" style="left:1510px;top:755px;width:96px;transform:rotate(40deg)">
+ <div class="sun"></div><div class="vig"></div>
+</div></body></html>

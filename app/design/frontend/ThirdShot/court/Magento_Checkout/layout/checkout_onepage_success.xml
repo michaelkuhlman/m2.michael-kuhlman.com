@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="content">
+            <block class="Magento\Framework\View\Element\Text" name="ts.success.note" after="checkout.success">
+                <arguments>
+                    <argument name="text" xsi:type="string"><![CDATA[<p class="ts-demo-checkout-note" style="max-width:720px;margin-top:18px"><strong>Demo store.</strong> This order exists only to show the flow: no email is sent, nothing is charged and nothing ships.</p>]]></argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

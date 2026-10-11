@@ -127,10 +127,11 @@
 
         // gallery
         .product.media {
-            .fotorama__stage { border-radius: @ts-radius; overflow: hidden; background: @ts-sand; }
+            .fotorama__stage, .fotorama__stage__frame, .fotorama__stage__shaft { background: @ts-photo; }
+            .fotorama__stage { border-radius: @ts-radius; overflow: hidden; }
             .fotorama__img { object-fit: cover; }
             .fotorama__nav__frame { border-radius: 10px; overflow: hidden; }
-            .fotorama__thumb { background: @ts-sand; border-radius: 10px; }
+            .fotorama__thumb { background: @ts-photo; border-radius: 10px; }
             .fotorama__thumb-border { border-color: @ts-kitchen; border-radius: 10px; }
             .fotorama__dot { border-color: @ts-muted; }
             .fotorama__active .fotorama__dot { background: @ts-kitchen; border-color: @ts-kitchen; }

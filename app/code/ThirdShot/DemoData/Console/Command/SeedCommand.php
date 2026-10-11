@@ -4,7 +4,7 @@
  *
  * Builds the Third Shot Supply Co. demo catalogue from _build/ (catalog JSON, rendered images, CMS HTML).
  * Idempotent: existing records are updated; images are only attached to products without a gallery.
- * --fresh deletes every TS-* product first (use after re-rendering images).
+ * --fresh resets the galleries of all TS-* products first (use after re-rendering images).
  */
 declare(strict_types=1);
 
@@ -15,7 +15,6 @@ use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Magento\Framework\App\Area;
 use Magento\Framework\App\Cache\Manager as CacheManager;
 use Magento\Framework\App\State;
-use Magento\Framework\Registry;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -33,7 +32,6 @@ class SeedCommand extends Command
 
     public function __construct(
         private readonly State $state,
-        private readonly Registry $registry,
         private readonly AttributeSetup $attributes,
         private readonly CategorySetup $categories,
         private readonly ProductSetup $products,
@@ -51,7 +49,7 @@ class SeedCommand extends Command
     {
         $this->setName('thirdshot:demo:seed')
             ->setDescription('Build the Third Shot Supply Co. demo catalogue and CMS content from _build/')
-            ->addOption('fresh', null, InputOption::VALUE_NONE, 'Delete all TS-* products first')
+            ->addOption('fresh', null, InputOption::VALUE_NONE, 'Reset TS-* product galleries first (re-attach current renders)')
             ->addOption('step', null, InputOption::VALUE_REQUIRED, 'Comma separated: ' . implode(',', self::STEPS));
         parent::configure();
     }
@@ -74,7 +72,7 @@ class SeedCommand extends Command
         }
 
         if ($input->getOption('fresh')) {
-            $this->deleteProducts($log);
+            $this->resetGalleries($log);
         }
         $categoryIds = [];
         $categories = function () use (&$categoryIds, $log): array {
@@ -97,17 +95,16 @@ class SeedCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function deleteProducts(callable $log): void
+    /**
+     * Products are never deleted: MSI queues a source-item cleanup by SKU on delete, and when the cron consumer
+     * runs after re-creation it wipes the new products' stock. Resetting galleries keeps IDs, reviews and orders.
+     */
+    private function resetGalleries(callable $log): void
     {
-        $this->registry->register('isSecureArea', true, true);
         $collection = $this->productCollection->create()->addAttributeToFilter('sku', ['like' => 'TS-%']);
-        // composites first so their links go cleanly
-        $order = ['bundle' => 0, 'grouped' => 1, 'configurable' => 2, 'simple' => 3];
-        $items = $collection->getItems();
-        usort($items, static fn ($a, $b) => ($order[$a->getTypeId()] ?? 9) <=> ($order[$b->getTypeId()] ?? 9));
-        foreach ($items as $item) {
-            $this->productRepository->deleteById($item->getSku());
+        foreach ($collection->getItems() as $item) {
+            $this->products->resetGallery((string) $item->getSku());
         }
-        $log(sprintf('deleted %d products', count($items)));
+        $log(sprintf('reset galleries of %d products', $collection->count()));
     }
 }

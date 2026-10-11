@@ -20,6 +20,9 @@ use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Filesystem;
+use Magento\InventoryApi\Api\Data\SourceItemInterface;
+use Magento\InventoryApi\Api\Data\SourceItemInterfaceFactory;
+use Magento\InventoryApi\Api\SourceItemsSaveInterface;
 
 class ProductSetup
 {
@@ -36,8 +39,34 @@ class ProductSetup
         private readonly EavConfig $eavConfig,
         private readonly AttributeSetup $attributes,
         private readonly DataSource $data,
-        private readonly Filesystem $filesystem
+        private readonly Filesystem $filesystem,
+        private readonly SourceItemInterfaceFactory $sourceItemFactory,
+        private readonly SourceItemsSaveInterface $sourceItemsSave
     ) {
+    }
+
+    /**
+     * Write the MSI source item for the default source explicitly (single-source store), so salable
+     * quantity never depends on the legacy stock sync.
+     */
+    private function saveSourceItem(string $sku, int $qty): void
+    {
+        $item = $this->sourceItemFactory->create();
+        $item->setSourceCode('default');
+        $item->setSku($sku);
+        $item->setQuantity((float) $qty);
+        $item->setStatus($qty > 0 ? SourceItemInterface::STATUS_IN_STOCK : SourceItemInterface::STATUS_OUT_OF_STOCK);
+        $this->sourceItemsSave->execute([$item]);
+    }
+
+    /** Remove all gallery entries (files stay on disk) so addImages() attaches the current renders. */
+    public function resetGallery(string $sku): void
+    {
+        $product = $this->productRepository->get($sku, true, 0, true);
+        if ($product->getMediaGalleryEntries()) {
+            $product->setMediaGalleryEntries([]);
+            $this->productRepository->save($product);
+        }
     }
 
     /** Select attribute label => option id, loaded on first use (any step may need it). */
@@ -157,6 +186,7 @@ class ProductSetup
         }
         $this->addImages($product, $files);
         $this->productRepository->save($product);
+        $this->saveSourceItem($row['sku'], (int) ($row['qty'] ?? 50));
         $log(sprintf('simple %s (%d images)', $row['sku'], count($files)));
     }
 
