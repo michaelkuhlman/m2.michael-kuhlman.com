@@ -44,7 +44,10 @@ Reload, never restart, shared services: `sudo nginx -t && sudo systemctl reload 
   `etc/view.xml` sets 4:5 product images. Layout overrides under `Magento_*/layout/`.
 - `app/code/ThirdShot/DemoData/` - `bin/magento thirdshot:demo:seed [--step=attributes,categories,products,composite,reviews,cms] [--fresh]`.
   Reads `_build/catalog/products.json`, `_build/renders/jpg/*.jpg`, `_build/cms/{pages,blocks}/*.html`. Idempotent;
-  images are attached only to products without a gallery (`--fresh` deletes all `TS-*` products first).
+  images are attached only to products without a gallery; `--fresh` resets the galleries of all `TS-*` products first.
+  **Never delete and re-create products with the same SKUs**: MSI queues a source-item cleanup by SKU on delete, and the
+  cron consumer then wipes the stock of the re-created products ("There are no source items with the in stock status").
+  The seeder writes MSI source items explicitly. The CMS step never overwrites an existing `pub/media/wysiwyg/thirdshot/*.jpg`.
 - `_build/` - everything that produced the content: `brand/brand.py` (logo SVGs from font outlines),
   `textures/` (PIL paddle face art, labels), `render/` (Blender scripts: `studio.py`, `models_*.py`, `shots.py`,
   `scenes.py`), `scripts/` (`render_all.sh`, `render_scenes.sh`, `export_jpg.py`, `deploy_theme.sh`).
@@ -53,9 +56,17 @@ Reload, never restart, shared services: `sudo nginx -t && sudo systemctl reload 
 - **CSS/LESS or template change**: edit under the theme, then `_build/scripts/deploy_theme.sh` (static deploy for the
   theme + cache flush; the static version stamp changes, so Cloudflare and browsers fetch the new files).
 - **PHP change in app/code**: `sudo -u m2 php bin/magento setup:di:compile` then `cache:flush`.
-- **New/changed product photo**: edit `_build/render/*`, `_build/scripts/render_all.sh --force SKU`, then
-  `python3 _build/scripts/export_jpg.py`, then re-seed (`--fresh` or remove that product's gallery first).
-  Blender: `~/.local/bin/blender` 4.4, Cycles CPU (no AVX on this VM: ~75 s per 800x1000 frame), always niced.
+- **Product photos: Blender rendering is PAUSED at Michael's request (2026-10-11); do not start render jobs unless he
+  asks.** 61 renders exist (paddles, balls, bags, covers); 22 products show the branded placeholder
+  (`Magento_Catalog/web/images/product/placeholder/*.jpg` in the theme). When new images exist: put
+  `<SKU>_<n>.jpg` in `_build/renders/jpg/`, then `thirdshot:demo:seed --step=products,composite` (products without a
+  gallery pick them up; `--fresh` to replace existing galleries). Pipeline if resumed: `_build/scripts/render_all.sh SKU`
+  then `export_jpg.py` (Blender 4.4 Cycles CPU, no AVX here: ~75 s per 800x1000 frame, always niced).
+- **Editorial images**: home hero = `pub/media/wysiwyg/thirdshot/hero.jpg`, built from `_build/hero/` (cut-outs of the
+  renders on an HTML/CSS court, screenshotted) - do not regenerate it from anything else. Category banners, story,
+  spotlight and about images: `python3 _build/scripts/compose_editorial.py` (PIL composites of the renders), then copy
+  the changed files into `pub/media/...` and **purge them on Cloudflare** (zone michael-kuhlman.com
+  `854fec09adbc07d0567da5511541656f`, token in `~/.config/cloudflare/kuhlmanpickleball.env`): CF caches media.
 - **CMS content**: edit `_build/cms/...html`, then `thirdshot:demo:seed --step=cms` and `cache:flush`.
 
 ## Quality gates
