@@ -1,0 +1,47 @@
+// Third Shot Court - typography. Replaces blank's Open Sans @font-face set with two
+// self-hosted variable fonts (both SIL OFL 1.1): Fraunces (display) and Inter (UI/body).
+
+& when (@media-common = true) {
+    @font-face {
+        font-family: 'Fraunces';
+        src: url('@{baseDir}fonts/fraunces-latin.woff2') format('woff2');
+        font-weight: 300 800;
+        font-style: normal;
+        font-display: swap;
+    }
+
+    @font-face {
+        font-family: 'Inter';
+        src: url('@{baseDir}fonts/inter-latin.woff2') format('woff2');
+        font-weight: 300 800;
+        font-style: normal;
+        font-display: swap;
+    }
+
+    .items {
+        .lib-list-reset-styles();
+    }
+}
+
+//
+//  Desktop
+//  _____________________________________________
+
+.media-width(@extremum, @break) when (@extremum = 'min') and (@break = @screen__m) {
+    h1 {
+        .lib-css(font-size, @h1__font-size-desktop);
+        .lib-css(margin-bottom, @h1__margin-bottom__desktop);
+    }
+}
+
+//
+//  Common
+//  _____________________________________________
+
+& when (@media-common = true) {
+    .columns {
+        .column.main {
+            max-width: 100%;
+        }
+    }
+}

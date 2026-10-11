@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <font src="fonts/fraunces-latin.woff2"/>
+        <font src="fonts/inter-latin.woff2"/>
+        <link src="images/favicon.svg" rel="icon" type="image/svg+xml" sizes="any"/>
+        <link src="images/apple-touch-icon.png" rel="apple-touch-icon"/>
+        <meta name="theme-color" content="#173A2E"/>
+        <remove src="fonts/opensans/light/opensans-300.woff2"/>
+        <remove src="fonts/opensans/regular/opensans-400.woff2"/>
+        <remove src="fonts/opensans/semibold/opensans-600.woff2"/>
+        <remove src="fonts/opensans/bold/opensans-700.woff2"/>
+    </head>
+</page>

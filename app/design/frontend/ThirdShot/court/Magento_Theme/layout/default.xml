@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!--
+  Third Shot Court - site-wide layout.
+  Demo notice bar, SVG logo, footer rebuilt from a CMS block, compare/wishlist clutter removed.
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="after.body.start">
+            <block class="Magento\Framework\View\Element\Template" name="ts.demo.notice" before="-"
+                   template="Magento_Theme::html/demo-notice.phtml"/>
+        </referenceContainer>
+
+        <referenceBlock name="logo">
+            <arguments>
+                <argument name="logo_file" xsi:type="string">images/logo.svg</argument>
+                <argument name="logo_width" xsi:type="number">214</argument>
+                <argument name="logo_height" xsi:type="number">60</argument>
+                <argument name="logo_alt" xsi:type="string">Third Shot Supply Co.</argument>
+            </arguments>
+        </referenceBlock>
+
+        <!-- footer: newsletter band + CMS link columns + legal line -->
+        <referenceContainer name="footer">
+            <block class="Magento\Cms\Block\Block" name="ts.footer.columns">
+                <arguments>
+                    <argument name="block_id" xsi:type="string">ts-footer-columns</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+        <referenceBlock name="form.subscribe" remove="true"/>
+        <referenceBlock name="footer_links" remove="true"/>
+        <referenceBlock name="report.bugs" remove="true"/>
+        <referenceBlock name="store_switcher" remove="true"/>
+        <referenceBlock name="copyright">
+            <arguments>
+                <argument name="template" xsi:type="string">Magento_Theme::html/copyright.phtml</argument>
+            </arguments>
+        </referenceBlock>
+
+        <!-- less clutter -->
+        <referenceBlock name="catalog.compare.link" remove="true"/>
+        <referenceBlock name="catalog.compare.sidebar" remove="true"/>
+        <referenceBlock name="related-product-compare" remove="true"/>
+        <referenceBlock name="wishlist_sidebar" remove="true"/>
+        <referenceBlock name="sale.reorder.sidebar" remove="true"/>
+    </body>
+</page>

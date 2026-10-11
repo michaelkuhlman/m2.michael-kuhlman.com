@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="content">
+            <block class="Magento\Framework\View\Element\Text" name="ts.checkout.note" before="-">
+                <arguments>
+                    <argument name="text" xsi:type="string"><![CDATA[<p class="ts-demo-checkout-note"><strong>Demo checkout.</strong> Use any address; pay with Check / Money order. Nothing is charged or shipped.</p>]]></argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

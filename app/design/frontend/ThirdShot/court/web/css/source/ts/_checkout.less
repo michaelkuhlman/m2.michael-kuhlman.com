@@ -1,0 +1,148 @@
+// Cart, checkout and order success.
+
+& when (@media-common = true) {
+    // ---- cart --------------------------------------------------------------
+    .checkout-cart-index {
+        .page-title-wrapper .page-title { font-size: 44px; margin-bottom: 26px; }
+        .cart-container {
+            .cart.table-wrapper {
+                .cart.item { border-color: @ts-line; }
+                .col { padding-top: 22px; }
+                th.col { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: @ts-muted; border-color: @ts-line; }
+                .product-item-photo { border-radius: 10px; overflow: hidden; background: @ts-sand; }
+                .product-item-name a { color: @ts-ink; font-weight: 600; font-size: 16px; }
+                .price, .subtotal .price { font-weight: 600; }
+                .input-text.qty { border-radius: 999px; height: 42px; width: 64px; }
+                .actions-toolbar > .action { color: @ts-muted; }
+            }
+            .cart-summary {
+                background: @ts-paper;
+                border: 1px solid @ts-line;
+                border-radius: @ts-radius;
+                padding: 26px 24px;
+                > .title { font-family: @ts-serif; font-size: 26px; font-weight: 500; }
+                .block > .title { border-color: @ts-line; strong { font-size: 14px; font-weight: 600; } }
+                .totals .mark, .totals .amount { padding: 8px 0; font-size: 14.5px; }
+                .grand.totals .mark strong, .grand.totals .amount strong { font-family: @ts-sans; font-size: 19px; }
+                .checkout-methods-items .action.primary.checkout { width: 100%; font-size: 17px; padding: 16px; }
+            }
+            .cart.actions .action {
+                border-radius: 999px;
+                font-size: 13.5px;
+            }
+        }
+        .cart-empty { font-size: 16px; }
+        .block.crosssell { margin-top: 60px; .block-title strong { font-size: 30px; } }
+    }
+
+    // ---- checkout -----------------------------------------------------------
+    .checkout-index-index {
+        .page-title-wrapper { display: none; }
+        .opc-progress-bar {
+            margin: 28px 0 34px;
+            .opc-progress-bar-item {
+                &::before { background: @ts-line; height: 4px; }
+                > span {
+                    color: @ts-muted;
+                    font-size: 13px;
+                    letter-spacing: .06em;
+                    text-transform: uppercase;
+                    font-weight: 600;
+                    &::before { background: @ts-line; }
+                    &::after { background: @ts-chalk; color: @ts-muted; }
+                }
+                &._active {
+                    &::before { background: @ts-kitchen; }
+                    > span {
+                        color: @ts-kitchen;
+                        &::before { background: @ts-kitchen; }
+                        &::after { border-color: @ts-kitchen; color: @ts-kitchen; }
+                    }
+                }
+            }
+        }
+        .step-title {
+            font-family: @ts-serif;
+            font-size: 28px;
+            font-weight: 500;
+            border-color: @ts-line;
+            padding-bottom: 14px;
+        }
+        .opc-wrapper {
+            .form-login, .form-shipping-address { max-width: 620px; }
+            .shipping-address-item { border-radius: @ts-radius-s; border-color: @ts-line; }
+            .table-checkout-shipping-method {
+                tbody td { border-color: @ts-line; padding: 16px 10px; }
+                .price { font-weight: 600; }
+            }
+            .action.continue, .action.primary.checkout {
+                font-size: 16px;
+                padding: 14px 34px;
+            }
+            .payment-method-title { border-color: @ts-line; padding: 18px 0; .label { font-weight: 600; } }
+            .payment-method-content { padding-left: 30px; }
+            .checkout-billing-address { margin-bottom: 16px; }
+        }
+        .opc-block-summary {
+            background: @ts-paper;
+            border: 1px solid @ts-line;
+            border-radius: @ts-radius;
+            padding: 24px;
+            > .title { font-family: @ts-serif; font-size: 24px; font-weight: 500; border-color: @ts-line; }
+            .grand.totals .mark strong, .grand.totals .amount strong { font-size: 18px; }
+            .product-item-name { font-weight: 600; }
+            .product-image-container { border-radius: 8px; overflow: hidden; background: @ts-sand; }
+            .items-in-cart > .title { border-color: @ts-line; strong { font-size: 15px; font-weight: 600; } }
+        }
+        .opc-sidebar .opc-block-shipping-information {
+            padding: 0 24px;
+            .shipping-information-title {
+                font-family: @ts-serif;
+                font-size: 21px;
+                font-weight: 500;
+                border-color: @ts-line;
+                .action-edit::before { color: @ts-muted; font-size: 22px; }
+            }
+            .shipping-information-content { font-size: 14.5px; line-height: 1.6; }
+        }
+        .ts-demo-checkout-note {
+            background: #FFF7D6;
+            border: 1px dashed #D7B54A;
+            border-radius: @ts-radius-s;
+            padding: 12px 16px;
+            font-size: 13.5px;
+            margin: 0 0 22px;
+            max-width: calc(100% - 150px);
+        }
+    }
+
+    // minimal checkout header
+    .checkout-index-index .page-header {
+        .header.content { justify-content: space-between; }
+        .block-search, .minicart-wrapper { display: none; }
+    }
+
+    // ---- success -------------------------------------------------------------
+    .checkout-onepage-success {
+        .page-title-wrapper .page-title { font-size: 46px; }
+        .checkout-success {
+            background: @ts-paper;
+            border: 1px solid @ts-line;
+            border-radius: @ts-radius;
+            padding: 30px;
+            max-width: 720px;
+            font-size: 16px;
+            .order-number strong { color: @ts-kitchen; }
+        }
+    }
+
+    @media (max-width: 767px) {
+        .checkout-cart-index .page-title-wrapper .page-title { font-size: 32px; }
+        .checkout-index-index {
+            .opc-progress-bar { margin: 16px 0 24px; }
+            .ts-demo-checkout-note { max-width: none; margin-top: 40px; }
+            .step-title { font-size: 24px; }
+            .opc-estimated-wrapper { background: @ts-sand; border-radius: @ts-radius-s; border: 0; padding: 14px 16px; }
+        }
+    }
+}

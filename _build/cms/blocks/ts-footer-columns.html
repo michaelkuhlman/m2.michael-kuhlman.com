@@ -1,0 +1,52 @@
+<!-- {"identifier":"ts-footer-columns","title":"Footer: newsletter band and link columns"} -->
+<div class="ts-footer">
+    <div class="ts-footer__news">
+        <div class="ts-footer__news-copy">
+            <span class="ts-eyebrow">The Rally Report</span>
+            <h2>Drills, gear drops and court notes. Twice a month, never more.</h2>
+        </div>
+        <div class="ts-footer__news-form">
+            {{block class="Magento\Newsletter\Block\Subscribe" name="ts.footer.subscribe" template="Magento_Newsletter::subscribe.phtml"}}
+            <p class="ts-footer__fine">Demo store: the form works, but no emails are ever sent.</p>
+        </div>
+    </div>
+    <div class="ts-footer__grid">
+        <div class="ts-footer__brand">
+            <img src="{{view url='images/logo-light.svg'}}" alt="Third Shot Supply Co." width="214" height="60" loading="lazy">
+            <p>Gear for the patient player. Paddles, balls and court kit, tested in real rec and league play before it reaches the shop.</p>
+        </div>
+        <nav class="ts-footer__col" aria-label="Shop">
+            <h4>Shop</h4>
+            <ul>
+                <li><a href="{{store url='paddles.html'}}">Paddles</a></li>
+                <li><a href="{{store url='balls.html'}}">Balls</a></li>
+                <li><a href="{{store url='bags-covers.html'}}">Bags &amp; Covers</a></li>
+                <li><a href="{{store url='apparel-headwear.html'}}">Apparel &amp; Headwear</a></li>
+                <li><a href="{{store url='court-training.html'}}">Court &amp; Training</a></li>
+                <li><a href="{{store url='accessories.html'}}">Accessories</a></li>
+            </ul>
+        </nav>
+        <nav class="ts-footer__col" aria-label="Help">
+            <h4>Help</h4>
+            <ul>
+                <li><a href="{{store url='shipping-returns'}}">Shipping &amp; Returns</a></li>
+                <li><a href="{{store url='faq'}}">FAQ</a></li>
+                <li><a href="{{store url='contact'}}">Contact</a></li>
+                <li><a href="{{store url='sales/guest/form'}}">Order Status</a></li>
+            </ul>
+        </nav>
+        <nav class="ts-footer__col" aria-label="Company">
+            <h4>Company</h4>
+            <ul>
+                <li><a href="{{store url='about'}}">Our Story</a></li>
+                <li><a href="{{store url='customer/account'}}">My Account</a></li>
+                <li><a href="{{store url='privacy-policy-cookie-restriction-mode'}}">Privacy</a></li>
+                <li><a href="{{store url='search/term/popular'}}">Popular Searches</a></li>
+            </ul>
+        </nav>
+        <div class="ts-footer__col ts-footer__demo">
+            <h4>About this demo</h4>
+            <p>A portfolio build by <a href="https://www.michael-kuhlman.com/">Michael Kuhlman</a>, Magento 2 / Adobe Commerce developer. Mage-OS 2.4 core, custom Luma child theme, catalogue seeded by a custom module.</p>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,164 @@
+// Base: page, type scale, buttons, forms, messages, demo notice.
+
+& when (@media-common = true) {
+    html { scroll-behavior: smooth; }
+
+    [class^='ts-'], [class*=' ts-'],
+    [class^='ts-'] *, [class*=' ts-'] * { box-sizing: border-box; }
+
+    body {
+        background: @ts-chalk;
+        color: @ts-ink;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        font-feature-settings: 'ss01', 'cv11';
+    }
+
+    h1, h2, h3, .page-title, .block-title strong {
+        font-family: @ts-serif;
+        font-optical-sizing: auto;
+        letter-spacing: -0.015em;
+        color: @ts-ink;
+    }
+
+    .page-title-wrapper .page-title {
+        font-weight: 500;
+        line-height: 1.08;
+    }
+
+    a { text-underline-offset: 3px; }
+
+    ::selection { background: @ts-optic; color: @ts-ink; }
+
+    .page-main {
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+
+    // eyebrow / kicker text used across CMS sections
+    .ts-eyebrow {
+        display: inline-block;
+        font: 600 ~"12px/1" @ts-sans;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        color: @ts-court;
+        margin-bottom: 14px;
+    }
+
+    // Buttons
+    .action.primary,
+    button.action.primary,
+    .ts-btn {
+        border-radius: 999px;
+        font-weight: 600;
+        letter-spacing: .01em;
+        padding: 12px 26px;
+        transition: background-color .2s @ts-ease, color .2s @ts-ease, transform .2s @ts-ease, box-shadow .2s @ts-ease;
+        &:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(23, 58, 46, .18); }
+        &:active { transform: none; box-shadow: none; }
+    }
+
+    .ts-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        font-family: @ts-sans;
+        font-size: 15px;
+        line-height: 1.2;
+        background: @ts-kitchen;
+        color: @ts-chalk;
+        border: 1.5px solid @ts-kitchen;
+        &:visited { color: @ts-chalk; }
+        &:hover { background: @ts-court; border-color: @ts-court; color: #fff; text-decoration: none; }
+        &--optic {
+            background: @ts-optic; border-color: @ts-optic; color: @ts-ink;
+            &:visited { color: @ts-ink; }
+            &:hover { background: #E6FA70; border-color: #E6FA70; color: @ts-ink; }
+        }
+        &--ghost {
+            background: transparent; color: @ts-kitchen;
+            &:visited { color: @ts-kitchen; }
+            &:hover { background: @ts-kitchen; color: @ts-chalk; }
+        }
+        &--ghost-light {
+            background: transparent; color: @ts-chalk; border-color: rgba(244, 240, 230, .55);
+            &:visited { color: @ts-chalk; }
+            &:hover { background: @ts-chalk; border-color: @ts-chalk; color: @ts-kitchen; }
+        }
+        &::after { content: '\2192'; font-weight: 500; transition: transform .2s @ts-ease; }
+        &:hover::after { transform: translateX(3px); }
+    }
+
+    // Forms
+    input[type='text'], input[type='email'], input[type='password'], input[type='tel'], input[type='number'],
+    input[type='search'], select, textarea {
+        border-radius: @ts-radius-s;
+        border-color: @ts-line;
+        background-color: @ts-paper;
+        transition: border-color .15s, box-shadow .15s;
+        &:focus { border-color: @ts-court; box-shadow: 0 0 0 3px rgba(46, 94, 74, .15); }
+    }
+
+    .fieldset > .field > .label, .fieldset > .fields > .field > .label {
+        font-weight: 600;
+        font-size: 13px;
+        letter-spacing: .02em;
+    }
+
+    // Messages
+    .message {
+        border-radius: @ts-radius-s;
+        &.success { background: #E6F2D0; color: @ts-kitchen; }
+        &.info, &.notice { background: @ts-sand; color: @ts-ink; }
+        &.error { background: #F8E1D8; color: #7A2E16; }
+    }
+
+    // Breadcrumbs
+    .breadcrumbs {
+        margin-top: 18px;
+        margin-bottom: 8px;
+        .items { font-size: 12.5px; color: @ts-muted; }
+        a { color: @ts-muted; &:hover { color: @ts-kitchen; } }
+    }
+
+    // Ratings in brand colour
+    .rating-summary .rating-result > span::before,
+    .review-control-vote label::before {
+        color: @ts-clay;
+    }
+
+    // Demo notice bar
+    .ts-demo-notice {
+        background: @ts-ink;
+        color: rgba(244, 240, 230, .86);
+        font: 500 ~"12.5px/1.4" @ts-sans;
+        letter-spacing: .01em;
+        &__inner {
+            max-width: @layout__max-width;
+            margin: 0 auto;
+            padding: 9px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-align: center;
+        }
+        &__badge {
+            flex: none;
+            background: @ts-optic;
+            color: @ts-ink;
+            font-weight: 700;
+            font-size: 10.5px;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            border-radius: 999px;
+            padding: 4px 9px 3px;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .page-main { padding-left: 16px; padding-right: 16px; }
+        .ts-demo-notice__inner { padding: 8px 14px; font-size: 11.5px; justify-content: flex-start; text-align: left; }
+    }
+}

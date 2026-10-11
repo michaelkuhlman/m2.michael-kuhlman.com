@@ -1,0 +1,36 @@
+# Magento 2 demo store (Mage-OS). Whitelist: only our own code, config and build sources are tracked.
+# Everything composer installs (vendor/, the files magento2-base copies into the root, lib/, setup/ ...)
+# is rebuilt with `composer install`. Secrets never: app/etc/env.php, auth.json.
+/*
+!/.gitignore
+!/CLAUDE.md
+!/composer.json
+!/composer.lock
+
+!/app/
+/app/*
+!/app/code/
+!/app/design/
+!/app/etc/
+/app/etc/*
+!/app/etc/config.php
+
+!/_build/
+/_build/renders/*.png
+/_build/renders/preview/
+/_build/renders/render.log
+/_build/renders/scenes.log
+/_build/textures/out/
+/_build/brand/out/
+__pycache__/
+*.pyc
+*.blend1
+
+# never, anywhere
+env.php
+auth.json
+*.sql
+*.sql.gz
+*.bak
+*.old
+*.orig

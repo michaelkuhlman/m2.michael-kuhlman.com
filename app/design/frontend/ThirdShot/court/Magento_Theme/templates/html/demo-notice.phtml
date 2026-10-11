@@ -1,0 +1,16 @@
+<?php
+/**
+ * Site-wide demo notice. Static markup, safe for full page cache.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+?>
+<div class="ts-demo-notice" role="note">
+    <div class="ts-demo-notice__inner">
+        <span class="ts-demo-notice__badge"><?= $escaper->escapeHtml(__('Demo store')) ?></span>
+        <span class="ts-demo-notice__text">
+            <?= $escaper->escapeHtml(__('No real orders, payments or shipping. A Magento Open Source portfolio build by Michael Kuhlman.')) ?>
+        </span>
+    </div>
+</div>
