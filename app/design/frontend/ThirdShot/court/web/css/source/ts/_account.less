@@ -1,0 +1,76 @@
+// Customer account entry pages: sign in, create account, forgot password.
+
+& when (@media-common = true) {
+    .customer-account-login, .customer-account-create, .customer-account-forgotpassword, .customer-account-createpassword {
+        .page-title-wrapper { text-align: center; margin: 40px 0 34px; .page-title { margin: 0; } }
+        .column.main { padding-bottom: 20px; }
+        .fieldset { margin-bottom: 24px; }
+        .fieldset > .field { margin-bottom: 18px; }
+        .fieldset::after { color: @ts-clay; font-size: 12.5px; margin-top: 16px; }
+        .field.note { font-size: 14.5px; color: @ts-body; margin-bottom: 20px; }
+        .action.primary { min-width: 180px; padding: 15px 30px; font-size: 15.5px; }
+        .actions-toolbar .secondary .action { font-weight: 600; font-size: 14px; color: @ts-kitchen; text-decoration: underline; text-underline-offset: 3px; }
+    }
+    .ts-account-card() {
+        background: @ts-paper;
+        border: 1px solid @ts-line;
+        border-radius: 22px;
+        padding: 36px 38px 38px;
+        .block-title {
+            border: 0;
+            padding: 0;
+            margin-bottom: 18px;
+            strong { font-family: @ts-serif; font-size: 26px; font-weight: 450; }
+        }
+    }
+    .login-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        max-width: 1040px;
+        margin: 0 auto;
+        &::before, &::after { display: none; }
+        .block { width: auto !important; float: none !important; margin: 0 !important; .ts-account-card(); }
+        .block-new-customer { background: @ts-oat; border-color: transparent; .block-content p { font-size: 15.5px; line-height: 1.65; color: @ts-body; } .actions-toolbar { margin-top: 26px; } }
+        .fieldset > .field > .control, .fieldset > .field .input-text { width: 100%; }
+        .actions-toolbar { margin-left: 0 !important; }
+        .block-customer-login .actions-toolbar { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; .primary, .secondary { float: none; margin: 0; } }
+    }
+    .form-create-account, .form.password.forget, .form.password.reset {
+        max-width: 720px;
+        margin: 0 auto;
+        width: 100%;
+        .fieldset { .ts-account-card(); > .legend { font-family: @ts-serif; font-size: 24px; font-weight: 450; margin: 0 0 20px; padding: 0; border: 0; } > .legend + br { display: none; } }
+        .actions-toolbar { display: flex; align-items: center; gap: 20px; flex-wrap: wrap-reverse; justify-content: space-between; .primary, .secondary { float: none; margin: 0; } }
+        #password-strength-meter-container { border-radius: 8px; margin-top: 8px; }
+    }
+
+
+}
+
+// Phone rules (emitted after Luma's own mobile rules)
+.media-width(@extremum, @break) when (@extremum = 'max') and (@break = @screen__m) {
+        .customer-account-login, .customer-account-create, .customer-account-forgotpassword, .customer-account-createpassword {
+            .page-title-wrapper { margin: 22px 0 22px; }
+            .action.primary { width: 100%; }
+        }
+        .login-container { grid-template-columns: 1fr; gap: 16px; .block { padding: 26px 20px; border-radius: 18px; } }
+        .form-create-account, .form.password.forget, .form.password.reset { .fieldset { padding: 26px 20px; border-radius: 18px; } .actions-toolbar { flex-direction: column-reverse; align-items: stretch; text-align: center; } }
+    }
+
+.media-width(@extremum, @break) when (@extremum = 'min') and (@break = @screen__m) {
+    body .login-container {
+        .block-customer-login { grid-column: 1; grid-row: 1; }
+        .block-new-customer { grid-column: 2; grid-row: 1; }
+    }
+}
+.media-width(@extremum, @break) when (@extremum = 'min') and (@break = @screen__m) {
+    body .login-container, body .form-create-account, body .form.password.forget, body .form.password.reset {
+        .fieldset > .field:not(.choice) > .label { width: auto; float: none; text-align: left; padding: 0 0 8px; margin: 0; display: block; }
+        .fieldset > .field.choice > .label { display: inline; padding: 0 0 0 6px; float: none; width: auto; }
+        .fieldset > .field > .control { width: 100%; float: none; }
+        .fieldset > .field.choice::before, .fieldset > .field.no-label::before { display: none; }
+        .actions-toolbar { margin-left: 0; .primary, .primary .action { margin: 0 !important; padding-left: 0; } .primary .action { padding-left: 30px; } }
+        .fieldset::after { margin-left: 0; }
+    }
+}
