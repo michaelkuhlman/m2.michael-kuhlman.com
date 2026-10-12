@@ -29,36 +29,111 @@ COURT = ("Lifestyle product photograph on a real outdoor pickleball court: deep 
          "long soft shadows, shallow depth of field, editorial sports catalogue style, true-to-life colors, "
          "no people, no extra text, no watermark.")
 
-PADDLE_REF = ("Use the attached 3D render only as the design reference: reproduce the same face artwork, "
-              "colors, the small 'Third Shot' logo mark (a dotted arc over a short net post and a ball) and the "
-              "printed lettering exactly, but as a real photographed product with true pickleball paddle "
-              "proportions: {shape}, a slim round 5 inch handle with a wrapped grip, a thin edge guard, "
-              "realistic {face} texture and subtle surface reflections.")
+RAW = os.path.expanduser('~/m2-gemini-raw')
+
+
+def raw(name):
+    """A finished Gemini photo used as the reference for follow-up shots of the same product."""
+    return os.path.join(RAW, name + '.jpeg')
+
+
+# 2026-10-12 paddle redesign (Michael: the Blender-derived face designs looked bad). Each paddle's studio shot is
+# designed from scratch with only the logo as reference; its court shot and colourways use that photo as reference.
+PADDLE_REF = ("Use the attached photo as the exact design reference: the same paddle with the same face graphic, "
+              "colors, lettering, logo mark, edge guard and grip, completely unchanged.")
+
+PRO = ("Photorealistic premium e-commerce studio product photograph of a {tier} pickleball paddle, with the "
+       "design quality of the best performance paddle brands (Selkirk, CRBN, Six Zero, JOOLA pro models). ")
+
+MARK = ("The small brand mark from the attached logo (a dotted arc over a short net post with a lime ball, no "
+        "words) printed in {mark} near the top center. ")
+
+POSE = ("The paddle stands upright, rotated slightly three-quarters to show the edge thickness, one lime-yellow "
+        "outdoor pickleball resting at its base. Seamless warm chalk-cream paper backdrop (#EFE8DA), large soft key "
+        "light from upper left, soft contact shadow, product centered with generous margin, fully in frame, crisp "
+        "focus, realistic materials and reflections, no people, no other text, no watermark.")
 
 SHAPE = {
-    'standard': 'a classic standard shape about 16 in long and 7.5 in wide with gently rounded corners',
-    'elongated': 'an elongated shape about 16.5 in long and only 7.4 in wide, noticeably slimmer than standard',
-    'widebody': 'a wide-body shape about 15.75 in long and 8 in wide with softly rounded top corners',
-    'hybrid': 'a hybrid shape about 16.3 in long and 7.6 in wide',
-    'junior': 'a smaller youth size about 15.5 in long and 7.5 in wide with a short handle',
+    'standard': 'classic standard shape (16 in long, 7.5 in wide, gently rounded corners)',
+    'elongated': 'elongated shape (16.5 in long, only 7.4 in wide, noticeably slimmer than standard)',
+    'widebody': 'wide-body shape (15.75 in long, 8 in wide, softly rounded top corners)',
+    'hybrid': 'elongated hybrid shape (16.5 in long, 7.6 in wide, softly rounded top corners)',
+    'junior': 'smaller youth size (15.5 in long, 7.5 in wide) with a short handle',
 }
 
 PADDLES = [
-    # sku, shape, face texture, short visual description, render
-    ('TS-KLC16-VOLT', 'standard', 'woven Toray carbon fiber', 'charcoal carbon face with thin volt-yellow court lines, "KITCHEN LINE / CARBON 16"', 'TS-KLC16-VOLT_1'),
-    ('TS-KLC16-CORAL', 'standard', 'woven Toray carbon fiber', 'charcoal carbon face with thin coral court lines, "KITCHEN LINE / CARBON 16"', 'TS-KLC16-CORAL_1'),
-    ('TS-KLC16-GLACIER', 'standard', 'woven Toray carbon fiber', 'charcoal carbon face with thin glacier-blue court lines, "KITCHEN LINE / CARBON 16"', 'TS-KLC16-GLACIER_1'),
-    ('TS-APX14', 'elongated', 'matte raw T700 carbon', 'near-black raw carbon face with a diagonal clay-orange band, clay grip, "APEX / ELONGATED 14"', 'TS-APX14_1'),
-    ('TS-DZC16', 'widebody', 'satin carbon-fiberglass', 'deep forest-green face with lime chevrons, cream grip, "DROP ZONE / CONTROL 16"', 'TS-DZC16_1'),
-    ('TS-SIG-RAW', 'hybrid', 'matte raw T700 carbon', 'black raw carbon face with a fine optic-yellow signature line, "SIGNATURE / RAW CARBON 16"', 'TS-SIG-RAW_1'),
-    ('TS-HYB13', 'hybrid', 'satin carbon-fiberglass', 'navy face with a pale glacier-blue diagonal split, glacier grip, "ERNE HYBRID 13"', 'TS-HYB13_1'),
-    ('TS-BLP14', 'elongated', 'satin Toray carbon', 'brick-red face with a charcoal band, charcoal grip, "BASELINE / POWER 14"', 'TS-BLP14_1'),
-    ('TS-DCF', 'standard', 'smooth fiberglass', 'chalk-white face with forest-green court lines and forest edge and grip, "DINK CLUB / FIBERGLASS"', 'TS-DCF_1'),
-    ('TS-ROOK', 'widebody', 'glossy polymer composite', 'bright blue face with a pattern of small optic-yellow dots, "ROOKIE / REC COMPOSITE"', 'TS-ROOK_1'),
-    ('TS-JR', 'junior', 'smooth polymer composite', 'optic-yellow face with a forest-green band, forest edge and grip, "JUNIOR / SPARK"', 'TS-JR_1'),
-    ('TS-WOOD', 'standard', 'laminated natural ash wood grain (no edge guard, solid wood, a leather-brown grip)', 'pale ash wood face with a printed kitchen-green logo, "CLASSIC / ASH TRAINER"', 'TS-WOOD_1'),
-    ('TS-WTR', 'standard', 'matte raw T700 carbon', 'black raw carbon face with a clay-orange diagonal split and two slim removable metal weight bars along the edges, clay grip, "COACH / WEIGHTED TRAINER"', 'TS-WTR_1'),
+    # sku, tier, shape, design (face, graphic, wordmark), mark colour, edge + grip, court-shot scene
+    ('TS-KLC16-VOLT', '$200 flagship carbon', 'standard',
+     "a charcoal woven Toray carbon face with a crisp visible twill weave; the graphic is a minimalist top-down "
+     "pickleball court drawn in thin volt-yellow (#DDF542) lines over the lower half, the kitchen zone filled with a "
+     "translucent volt-yellow gradient that fades upward into the carbon; bold condensed sans-serif wordmark "
+     "'KITCHEN LINE' printed horizontally in volt yellow just above the court drawing, with a small '16' beside it",
+     'white', "Matte black edge guard with a fine volt-yellow line, sculpted black throat, black perforated "
+     "cushion grip with a volt-yellow end cap.", 'flat'),
+    ('TS-APX14', '$230 power carbon', 'elongated',
+     "a matte raw black T700 carbon face with a fine twill weave; the graphic is a bold faceted clay-orange (#C9603A) "
+     "angular slash that cuts from the upper right edge down to the middle left, broken into sharp geometric shards "
+     "with a subtle orange-to-ember gradient; large clean sans-serif wordmark 'APEX' running vertically up the right "
+     "side of the face in white", 'white', "Black edge guard with a clay-orange line, black throat, clay-orange "
+     "perforated grip with a black end cap.", 'net'),
+    ('TS-DZC16', '$190 control', 'widebody',
+     "a deep forest-green (#173A2E) satin carbon-fiberglass face covered with fine lime topographic contour lines "
+     "that tighten into a small glowing lime target circle in the lower third (the 'drop zone'); elegant wide-spaced "
+     "sans-serif wordmark 'DROP ZONE' printed horizontally in cream below the target", 'cream', "Forest-green edge "
+     "guard, forest throat, cream perforated grip with a forest end cap.", 'flat'),
+    ('TS-SIG-RAW', '$250 signature raw carbon', 'hybrid', None, None, None, 'net'),
+    ('TS-HYB13', '$180 all-court', 'hybrid',
+     "a navy (#1D2B4A) satin face split diagonally by a glacier-blue (#9CC9E0) panel in the upper right, the seam "
+     "dissolving into a fine halftone dot gradient; clean sans-serif wordmark 'HYBRID' printed vertically along the "
+     "left side in white with a small '13' below it", 'white', "Navy edge guard with a glacier line, navy throat, "
+     "glacier-blue perforated grip with a navy end cap.", 'flat'),
+    ('TS-BLP14', '$190 power', 'elongated',
+     "a satin Toray carbon face in a rich brick-red (#A63A2B) to deep crimson vertical gradient, with bold black "
+     "horizontal speed stripes of varying thickness across the lower third; heavy italic sans-serif wordmark "
+     "'BASELINE' printed horizontally in black above the stripes", 'black', "Black edge guard, black throat, "
+     "charcoal perforated grip with a brick-red end cap.", 'net'),
+    ('TS-DCF', '$110 fiberglass club', 'standard',
+     "a glossy chalk-white (#F4F0E6) fiberglass face with refined forest-green (#173A2E) line art of a pickleball "
+     "court in perspective in the lower half and a single small lime ball dot on the kitchen line, a thin forest-green "
+     "pinstripe border inset around the face; classic serif wordmark 'Dink Club' printed in forest green above the "
+     "court, country-club elegance", 'forest green', "Forest-green edge guard, forest throat, forest-green grip with "
+     "a cream end cap.", 'flat'),
+    ('TS-ROOK', '$70 recreational', 'widebody',
+     "a glossy cobalt-blue (#1F5FD1) composite face with a dynamic burst of optic-yellow halftone dots that radiates "
+     "from the lower left corner and fades out toward the top; chunky rounded sans-serif wordmark 'ROOKIE' printed "
+     "horizontally in white across the middle", 'white', "Black edge guard, black throat, black cushion grip with a "
+     "cobalt end cap.", 'flat'),
+    ('TS-JR', '$50 junior', 'junior',
+     "a bright optic-yellow (#D9F24F) smooth composite face crossed by a playful forest-green zig-zag lightning band "
+     "through the middle with a few small forest sparks around it; rounded bold sans-serif wordmark 'SPARK' printed "
+     "in forest green under the band", 'forest green', "Forest-green edge guard, forest throat, short forest-green "
+     "grip with a yellow end cap.", 'net'),
+    ('TS-WOOD', '$45 heritage wood', 'standard',
+     "a solid laminated pale ash wood face with clearly visible natural grain and a satin lacquer, no edge guard, the "
+     "wood edge showing its fine layered plies; a thin kitchen-green pinstripe border screen-printed around the face "
+     "and a vintage serif wordmark 'Classic' printed in kitchen green in the lower third", 'kitchen green',
+     "No edge guard (bare sanded wood edge), wooden throat, tan stitched leather grip with a wooden end cap.", 'flat'),
+    ('TS-WTR', '$150 weighted training', 'standard',
+     "a matte raw black T700 carbon face split diagonally with a clay-orange (#C9603A) lower panel, and two slim "
+     "brushed-steel weight bars screwed along the left and right edges of the face; bold stencil sans-serif wordmark "
+     "'COACH' printed horizontally in white across the orange panel", 'white', "Black edge guard, black throat, "
+     "clay-orange perforated grip with a black end cap.", 'net'),
 ]
+
+SIG_PROMPT = ("Photorealistic premium e-commerce studio product photograph of a high-end carbon fiber pickleball paddle, the kind sold for $250 by a top performance brand (think the design quality of Selkirk, CRBN, Six Zero or JOOLA pro paddles). Paddle design 'SIGNATURE': elongated hybrid shape (16.5 in long, 7.6 in wide, softly rounded top corners), a raw matte black T700 carbon face with a visible fine twill weave that catches the light, a bold modern graphic: a sweeping optic-yellow (#D9F24F) gradient brush stroke that rises diagonally from the lower left throat and fades into the carbon, thin parallel pin-stripes following its curve. Large clean sans-serif wordmark 'SIGNATURE' running vertically up the left side of the face in optic yellow. The small brand mark from the attached logo (dotted arc over a short net post with a lime ball, no words) printed in white near the top center. Glossy black edge guard with a fine yellow line, a sculpted black throat, a black perforated cushion grip with a yellow end-cap. " + POSE)
+
+KLC_VARIANT = ("Photorealistic studio product photo of exactly the same paddle as in the attached photo: identical "
+               "shape, carbon face, court drawing, 'KITCHEN LINE' wordmark, logo mark, pose, ball, lighting and "
+               "backdrop, with one change only: every volt-yellow accent (court lines, kitchen gradient, wordmark, "
+               "'16', edge line and grip end cap) is recoloured to {colour}. " + POSE)
+
+SCENE = {
+    'flat': ("It lies flat on the court at a diagonal next to the white kitchen line with two lime-yellow balls "
+             "beside it, seen from above at about 50 degrees, the whole paddle in frame. "),
+    'net': ("It leans upright against the base of a black pickleball net post on the court, two lime-yellow balls "
+            "at its foot, seen from a low three-quarter angle, the whole paddle in frame, the net softly out of "
+            "focus behind. "),
+}
 
 
 def shots():
@@ -68,31 +143,36 @@ def shots():
         s.append(dict(id=id, prompt=prompt, ref=ref, aspect=aspect, crop=crop, extra=extra or []))
 
     # ---------------------------------------------------------------- paddles
-    for sku, shape, face, desc, rnd in PADDLES:
-        base = PADDLE_REF.format(shape=SHAPE[shape], face=face)
-        add(sku + '_1', f"Photorealistic studio product photo of this pickleball paddle ({desc}). {base} "
-            f"The paddle stands upright, turned very slightly toward the camera, with one lime-yellow 40-hole "
-            f"outdoor pickleball resting at the base of the handle. {STUDIO}", render(rnd))
-        add(sku + '_2', f"Photorealistic photo of this pickleball paddle ({desc}). {base} The paddle lies "
-            f"flat on the court at a diagonal next to the white kitchen line with two lime-yellow 40-hole "
-            f"balls beside it, seen from above at about 50 degrees, the whole paddle in frame. {COURT}", render(rnd))
-    # parent of the colourways: all three together (its own image comes after the Volt photos)
-    add('TS-KLC16_1', "Photorealistic studio product photo of three identical pickleball paddles in three "
-        "colourways, standing upright side by side and slightly overlapping, left to right: volt-yellow lines, "
-        "coral lines, glacier-blue lines, each a charcoal woven carbon face with 'KITCHEN LINE / CARBON 16'. "
-        + PADDLE_REF.format(shape=SHAPE['standard'], face='woven Toray carbon fiber') + ' ' + STUDIO,
-        os.path.join(REF, 'ref_klc16_trio.jpg'))
+    for sku, tier, shape, design, mark, trim, scene in PADDLES:
+        if sku == 'TS-SIG-RAW':
+            add(sku + '_1', SIG_PROMPT, LOGO)
+        else:
+            add(sku + '_1', PRO.format(tier=tier) + f"Paddle design: {SHAPE[shape]}, {design}. "
+                + MARK.format(mark=mark) + trim + ' ' + POSE, LOGO)
+        add(sku + '_2', "Photorealistic photo of exactly this pickleball paddle. " + PADDLE_REF + ' '
+            + SCENE[scene] + COURT, raw(sku + '_1'))
+        if sku == 'TS-KLC16-VOLT':
+            for v, colour in (('CORAL', 'warm coral (#E8735A)'), ('GLACIER', 'pale glacier blue (#9CC9E0)')):
+                add(f'TS-KLC16-{v}_1', KLC_VARIANT.format(colour=colour), raw('TS-KLC16-VOLT_1'))
+                add(f'TS-KLC16-{v}_2', "Photorealistic photo of exactly this pickleball paddle. " + PADDLE_REF
+                    + ' ' + SCENE['flat'] + COURT, raw(f'TS-KLC16-{v}_1'))
+    # parent of the colourways: all three together (ref = the three new studio photos side by side)
+    add('TS-KLC16_1', "Photorealistic studio product photo of the three paddles in the attached reference "
+        "(volt-yellow, coral and glacier-blue colourways of the 'KITCHEN LINE' carbon paddle), standing upright "
+        "side by side and slightly overlapping, left to right volt, coral, glacier, each reproduced exactly. "
+        "Seamless warm chalk-cream paper backdrop (#EFE8DA), soft key light from upper left, soft contact shadows, "
+        "all three fully in frame with generous margin, no other text, no watermark.",
+        os.path.join(REF, 'ref_klc16_trio_v2.jpg'))
     add('TS-SET-START_1', "Photorealistic overhead flat-lay studio photo of a starter kit laid out neatly on "
-        "the backdrop: a bright blue wide-body paddle with small optic-yellow dots (like the left paddle in the "
-        "reference), a forest-green zipped neoprene paddle cover, a clear tube of three lime-yellow 40-hole "
+        "the backdrop: the cobalt-blue 'ROOKIE' wide-body paddle with the optic-yellow halftone burst "
+        "(the left paddle in the reference, reproduced exactly), a forest-green zipped neoprene paddle cover, a clear tube of three lime-yellow 40-hole "
         "outdoor balls with a kitchen-green label, two rolled tacky overgrips, and an open kraft-and-forest-green "
         "shipping box with the 'Third Shot' logo printed on the lid. Keep the brand mark from the reference. "
-        + STUDIO, render('TS-SET-START_1'))
+        + STUDIO, os.path.join(REF, 'ref_set_v2.jpg'))
     add('TS-SET-START_2', "Photorealistic studio product photo of two pickleball paddles standing side by side: "
-        "a bright blue wide-body paddle with small optic-yellow dots ('ROOKIE / REC COMPOSITE') and a "
-        "chalk-white fiberglass paddle with forest-green lines ('DINK CLUB / FIBERGLASS'), with a tube of "
-        "three lime-yellow balls in front. Reproduce the face designs and 'Third Shot' logo from the reference "
-        "with true paddle proportions and slim wrapped handles. " + STUDIO, render('TS-SET-START_1'))
+        "the cobalt-blue 'ROOKIE' paddle and the "
+        "chalk-white 'Dink Club' fiberglass paddle from the reference, with a tube of "
+        "three lime-yellow balls in front. Reproduce both paddles exactly as in the reference. " + STUDIO, os.path.join(REF, 'ref_set_v2.jpg'))
 
     # ---------------------------------------------------------------- balls
     BALL = "lime-yellow (optic) seamless 40-hole outdoor pickleballs with crisp round holes and a fine matte texture"
@@ -269,18 +349,19 @@ def shots():
     # ---------------------------------------------------------------- editorial / banners
     add('hero', "Wide cinematic photorealistic banner photo for a premium pickleball gear brand. Low angle on a "
         "deep kitchen-green outdoor pickleball court at golden hour. On the right half: three premium pickleball "
-        "paddles standing upright and fanned (from the reference: black Signature raw carbon with optic line, "
-        "charcoal Kitchen Line with volt lines, black Apex with a clay-orange band), with lime-yellow 40-hole "
+        "paddles standing upright and fanned (the three paddles in the reference, reproduced exactly: "
+        "black 'SIGNATURE' raw carbon with the optic-yellow sweep, charcoal 'KITCHEN LINE' with the volt court drawing, "
+        "black 'APEX' with the clay-orange faceted slash), with lime-yellow 40-hole "
         "balls scattered on the court in front, the net softly out of focus behind. The left 45 percent of the "
         "frame is calm, dark, softly lit green court and background with nothing in it (space for a headline). "
         "Warm rim light, rich deep greens, editorial sports photography, no people, no text, no watermark.",
-        os.path.join(B, '..', '..', 'pub', 'media', 'wysiwyg', 'thirdshot', 'hero.jpg'), '16:9', (1920, 960))
+        os.path.join(REF, 'ref_hero_v2.jpg'), '16:9', (1920, 960))
     CAT = ("Photorealistic wide editorial category banner, the subject grouped in the central third of the "
            "frame with calm breathing room on all sides (it is cropped to both 4:3 and a very wide strip), warm natural light, palette of deep kitchen green, chalk cream, "
            "optic yellow and clay orange, no people, no text, no watermark. ")
-    add('cat_paddles', "A fan of four premium pickleball paddles (forest green with lime chevrons, black raw "
-        "carbon, navy with glacier-blue split, brick red) standing in a wooden rack on a chalk-cream workshop "
-        "bench, a lime ball in front, matching the designs in the reference. " + CAT, render('TS-DZC16_1'), '16:9', (1200, 900), [('catbanner_paddles', (1600, 700))])
+    add('cat_paddles', "A fan of the four premium pickleball paddles in the reference ('DROP ZONE' forest "
+        "green, 'SIGNATURE' black raw carbon, 'HYBRID' navy with glacier split, 'BASELINE' brick red) standing in a wooden rack on a chalk-cream workshop "
+        "bench, a lime ball in front, matching the designs in the reference. " + CAT, os.path.join(REF, 'ref_catpaddles_v2.jpg'), '16:9', (1200, 900), [('catbanner_paddles', (1600, 700))])
     add('cat_balls', "A kitchen-green practice bucket overflowing with lime-yellow 40-hole pickleballs on a "
         "green outdoor court, balls rolling out in front, low angle golden-hour light. " + CAT, render('TS-T40-48_1'), '16:9', (1200, 900), [('catbanner_balls', (1600, 700))])
     add('cat_bags', "A forest-green court backpack and a charcoal duffel sitting on a courtside bench with a "
@@ -295,17 +376,15 @@ def shots():
     add('cat_accessories', "Neat overhead knolling flat lay on a chalk-cream surface: tacky overgrips, a roll "
         "of edge guard tape, lead tape, a crepe rubber eraser block, a forest-green insulated bottle and a folded "
         "sand microfiber towel, branded with the small Third Shot logo (use the attached logo). " + CAT, LOGO, '16:9', (1200, 900), [('catbanner_accessories', (1600, 700))])
-    add('spotlight', "Photorealistic hero product photo of this flagship pickleball paddle (black raw carbon "
-        "face with a fine optic-yellow signature line, 'SIGNATURE / RAW CARBON 16'). "
-        + PADDLE_REF.format(shape=SHAPE['hybrid'], face='matte raw T700 carbon') + " Standing upright against a "
+    add('spotlight', "Photorealistic hero product photo of this flagship pickleball paddle ('SIGNATURE', black raw "
+        "carbon with an optic-yellow sweep). " + PADDLE_REF + " Standing upright against a "
         "warm chalk-cream backdrop with one lime ball at its base, dramatic but soft side light that rakes across "
         "the raw carbon weave, centered, generous margins, square composition, no text added.",
-        render('TS-SIG-RAW_1'), '1:1', (1200, 1200))
+        raw('TS-SIG-RAW_1'), '1:1', (1200, 1200))
     add('story', "Photorealistic overhead flat lay on a deep kitchen-green textured pickleball court surface "
-        "with a white painted line crossing the frame: a black raw-carbon paddle with an optic-yellow line, three "
+        "with a white painted line crossing the frame: the black 'SIGNATURE' raw-carbon paddle from the reference (reproduced exactly), three "
         "lime-yellow balls, a forest-green insulated bottle, a folded sand towel and a rolled overgrip, warm "
-        "morning sun with soft long shadows, small Third Shot logo on the paddle (use the attached logo), "
-        "editorial, no people, no extra text.", LOGO, '3:4', (1200, 1400))
+        "morning sun with soft long shadows, editorial, no people, no extra text.", raw('TS-SIG-RAW_1'), '3:4', (1200, 1400))
     add('workshop', "Photorealistic interior photo of a small converted paddle workshop: a long wooden "
         "workbench under warm window light with pickleball paddles in progress (raw carbon faces, edge guard "
         "tape, grips being wrapped), a wall rack of finished paddles in green, black and clay-orange, a bucket of "
