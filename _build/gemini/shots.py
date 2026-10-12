@@ -100,12 +100,12 @@ def shots():
         "kitchen-green cap and base and a kitchen-green wrap label reading 'TOUR 40' with the small Third Shot "
         "logo (as in the reference), standing upright, with one loose ball beside it. " + STUDIO, render('TS-T40-3_1'))
     add('TS-T40-3_2', "Photorealistic close-up studio photo of three " + BALL + " in a loose triangle, "
-        "showing the seamless shell and 40 precise holes, macro detail. " + STUDIO, render('TS-T40-3_2'))
+        "showing the seamless shell and 40 precise holes, macro detail. " + STUDIO, render('TS-T40-3_1'))
     add('TS-T40-12_1', "Photorealistic studio product photo of an open warm-apricot retail box holding twelve "
         + BALL + " in a 4x3 grid, the lid printed 'TOUR 40' with the Third Shot logo, as in the reference. "
         + STUDIO, render('TS-T40-12_1'))
     add('TS-T40-12_2', "Photorealistic photo of a handful of " + BALL + " scattered on the court near the "
-        "white baseline. " + COURT, render('TS-T40-3_2'))
+        "white baseline. " + COURT, render('TS-T40-3_1'))
     add('TS-T40-48_1', "Photorealistic studio product photo of a kitchen-green plastic practice bucket with a "
         "wire handle and lid propped beside it, filled to the top with " + BALL + ", a few balls on the floor "
         "next to it, small Third Shot logo on the bucket as in the reference. " + STUDIO, render('TS-T40-48_1'))
@@ -124,7 +124,7 @@ def shots():
         "pickleballs beside a clear tube with a deep berry 'TOUR 40 PINK' label and the Third Shot logo, as in "
         "the reference. " + STUDIO, render('TS-T40-PINK_1'))
     add('TS-T40-PINK_2', "Photorealistic photo of three pink seamless 40-hole pickleballs resting on the court "
-        "beside the white kitchen line. " + COURT, render('TS-T40-PINK_2'))
+        "beside the white kitchen line. " + COURT, render('TS-T40-PINK_1'))
     add('TS-T40-BULK_1', "Photorealistic studio product photo of the Tour 40 range together: a kitchen-green "
         "practice bucket full of " + BALL + ", an open apricot 12-ball box and a clear 3-ball tube with a "
         "kitchen-green label, arranged as a group, Third Shot branding as in the reference. " + STUDIO,
