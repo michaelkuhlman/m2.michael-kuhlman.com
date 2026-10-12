@@ -6,7 +6,9 @@
  * <body>, still parser-blocking. Here those scripts are taken out and replaced by one small loader that waits until
  * the page's high-priority image(s) (the LCP candidate: hero, category banner, product photo, all marked
  * fetchpriority="high") have loaded and a frame has been painted (capped at 2.5 s), then runs the original scripts
- * in their original order: external files are inserted with async=false (downloaded in parallel, executed in
+ * in their original order. The full stylesheets (made async by Magento's critical CSS path) are attached at the same
+ * moment, so they do not take bandwidth from the LCP image either (<noscript> keeps them for no-JS clients). Scripts:
+ * external files are inserted with async=false (downloaded in parallel, executed in
  * order) and inline code runs through indirect eval, i.e. as sloppy-mode global code exactly like a classic inline
  * script. The inline `var require = {...}` bootstrap stays a classic script. Nothing waits for user input: JS
  * starts as soon as the first screen is on the glass, instead of competing with it.
@@ -78,13 +80,32 @@ class DeferScripts
         if ($pos === false || !$queue) {
             return null;
         }
+        // Async stylesheets from Magento's AsyncCssPlugin: <link rel="stylesheet" media="print" onload="...media='X'">
+        $css = [];
+        $out = (string)preg_replace_callback(
+            '~<link rel="stylesheet" media="print" onload="([^"]*)" href="([^"]+)">~',
+            function (array $m) use (&$css) {
+                $onload = html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5);
+                if (!preg_match("~this\\.media='([^']+)'~", $onload, $media) || $media[1] === 'print') {
+                    return $m[0];
+                }
+                $href = html_entity_decode($m[2], ENT_QUOTES | ENT_HTML5);
+                $css[] = ['h' => $href, 'm' => $media[1]];
+                return '<noscript><link rel="stylesheet" media="' . htmlspecialchars($media[1]) . '" href="'
+                    . htmlspecialchars($href) . '"></noscript>';
+            },
+            $out
+        );
+        $queue = array_merge(array_map(fn ($c) => ['l' => $c['h'], 'm' => $c['m']], $css), $queue);
+        $pos = strrpos($out, '</body');
         $json = json_encode($queue, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG
             | JSON_INVALID_UTF8_SUBSTITUTE);
         return substr_replace($out, '<script>' . str_replace('__QUEUE__', (string)$json, self::LOADER) . "</script>\n", $pos, 0);
     }
 
     private const LOADER = <<<'JS'
-(function(q,d,w){var i=0,go=0;function next(){var last=null;while(i<q.length&&q[i].s){var e=d.createElement('script');
+(function(q,d,w){var i=0,go=0;function next(){var last=null;while(i<q.length&&q[i].l){var c=d.createElement('link');
+c.rel='stylesheet';c.media=q[i].m;c.href=q[i++].l;d.head.appendChild(c);}while(i<q.length&&q[i].s){var e=d.createElement('script');
 e.src=q[i++].s;e.async=false;d.body.appendChild(e);last=e;}if(last){last.onload=last.onerror=next;return;}
 while(i<q.length&&!q[i].s){try{(0,eval)(q[i].c);}catch(x){setTimeout(function(){throw x;});}i++;}if(i<q.length){next();}}
 function start(){if(!go){go=1;next();}}

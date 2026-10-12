@@ -120,6 +120,10 @@ function collect({foldPx, keepKeys: kk}) {
                 .replace(/<link rel="stylesheet" media="print" onload="[^"]*?media&#x3D;&#x27;([^"]*?)&#x27;"/g,
                     (m, media) => '<link rel="stylesheet" media="' + (mode === 'crit' ? 'not all' : media
                         .replace(/&#x20;/g, ' ').replace(/&#x28;/g, '(').replace(/&#x29;/g, ')').replace(/&#x3A;/g, ':')) + '"');
+            // ThirdShot_Performance's loader attaches the full stylesheets itself ({"l": href, "m": media} entries)
+            if (mode === 'crit') {
+                html = html.replace(/("l":"[^"]+","m":")[^"]*(")/g, '$1not all$2');
+            }
             return route.fulfill({response: resp, body: html});
         });
         await page.goto(url, {waitUntil: js ? 'networkidle' : 'load', timeout: 60000});
