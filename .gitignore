@@ -23,10 +23,6 @@
 /app/etc/*
 !/app/etc/config.php
 
-# Generated from the LIVE store after every theme deploy by _build/perf/critical-css.sh (in the background), so it
-# would leave the tree dirty after each deploy. Regenerate it on a fresh install: _build/perf/critical-css.sh
-/app/design/frontend/ThirdShot/court/web/css/critical.css
-
 !/_build/
 /_build/renders/*.png
 /_build/renders/preview/

@@ -46,7 +46,9 @@ GitHub within seconds.
 - **`.gitignore` is a whitelist**: tracked are `composer.json/.lock`, `app/code/`, `app/design/`, `app/i18n/`,
   `app/etc/config.php` (the module list), `_build/` (minus render PNGs, previews, texture/brand outputs), `.githooks/`,
   this file and `README.md`. To track something new outside those, add a `!` line there (the comments show how).
-  `css/critical.css` in the theme is generated from the live store after every theme deploy and stays untracked.
+  The theme's `web/css/critical.css` is TRACKED although it is generated: `_build/perf/critical-css.sh` rewrites it
+  from the live store in the background after every theme deploy, and a fresh checkout needs it. When it shows as
+  modified, that is the regenerated output: commit it by name (with the theme change that caused it, or on its own).
 - **Not in git, back it up another way if it matters**: the database `m2_store` (catalogue, CMS, orders: rebuildable
   with `thirdshot:demo:seed`), `pub/media/` (seeder output + editorial images), `app/etc/env.php` (DB creds,
   crypt key), nginx/php-fpm live config (mirrors in `_build/server/`), the docker containers, cron.

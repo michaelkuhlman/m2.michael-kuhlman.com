@@ -119,7 +119,9 @@ for n in "${notes[@]}"; do say "NOTE $n"; done
 if [ "$DRY" = 1 ]; then say "dry run: nothing changed"; exit 0; fi
 if [ "${#plan[@]}" -eq 0 ]; then rm -f "$PENDING"; say "live at $($G rev-parse --short HEAD)"; exit 0; fi
 
-dirty=$($G status --porcelain | cut -c4- | sed 's/.* -> //' | grep -E '^(app/|_build/cms/)' || true)
+# critical.css does not count: the background job regenerates it after every theme deploy, and the steps below redo it
+dirty=$($G status --porcelain | cut -c4- | sed 's/.* -> //' | grep -E '^(app/|_build/cms/)' |
+        grep -v -x 'app/design/frontend/ThirdShot/court/web/css/critical.css' || true)
 if [ -n "$dirty" ] && [ "${M2_DEPLOY_ANYWAY:-}" != 1 ]; then
   say "Magento steps NOT run: these files have uncommitted changes (another session's work in progress?), and a"
   say "compile / static deploy would publish them:"
