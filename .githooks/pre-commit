@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+# m2.michael-kuhlman.com pre-commit guard. Tracked in .githooks/ and active through core.hooksPath on the server
+# (m2git) and in every laptop clone, so every commit gets it, whoever makes it.
+# It checks the STAGED version of each added or changed file and blocks the commit on:
+#   - secrets: token-shaped strings, and (on the server) the real values from ~/.config/m2 and the Cloudflare env
+#   - credential / database / dump files (app/etc/env.php, auth.json, *.sql ...) and editor or backup leftovers
+#   - things composer or Magento generate (vendor/, generated/, pub/static/, var/ ...): never tracked
+#   - files over 5 MB
+#   - PHP / PHTML syntax errors (php -l), invalid XML (layout, di.xml, module.xml ...) / SVG / JSON,
+#     Python syntax errors, shell syntax errors, JavaScript syntax errors (node --check, when node exists)
+# Fix what it reports, re-stage, commit again. Never bypass it with --no-verify.
+# Audit every tracked file instead of the staged ones:  M2_PRECOMMIT_ALL=1 m2git hook run pre-commit
+set -u
+export LC_ALL=C
+fail=0
+err()  { printf 'pre-commit: %s\n' "$*" >&2; fail=1; }
+warn() { printf 'pre-commit: WARNING %s\n' "$*" >&2; }
+
+py=
+for c in python3 python; do
+  if command -v "$c" >/dev/null 2>&1 && "$c" -c 'import sys' >/dev/null 2>&1; then py=$c; break; fi
+done
+php=
+command -v php >/dev/null 2>&1 && php -r 'exit(0);' >/dev/null 2>&1 && php=php
+php_old=0   # the laptop's XAMPP PHP is older than the server's 8.3: its lint findings are warnings there
+[ -n "$php" ] && [ "$(php -r 'echo PHP_VERSION_ID;' 2>/dev/null || echo 0)" -lt 80300 ] && php_old=1
+node=
+command -v node >/dev/null 2>&1 && node=node
+
+secret_re='sk-ant-[A-Za-z0-9_-]{20,}|gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----|[sr]k_live_[A-Za-z0-9]{16,}|sk_test_[A-Za-z0-9]{16,}|whsec_[A-Za-z0-9]{16,}|xox[baprs]-[A-Za-z0-9-]{16,}|[0-9]{8,10}:AA[A-Za-z0-9_-]{33}|AIza[0-9A-Za-z_-]{35}|cfat_[A-Za-z0-9_-]{20,}'
+
+# Real secret values (server only; the files are absent elsewhere): DB password, admin password and the admin
+# path, the Cloudflare API token. Only line numbers are ever printed.
+vals=$(mktemp) || exit 1
+trap 'rm -f "$vals"' EXIT
+chmod 600 "$vals"
+{
+  for f in "$HOME/.config/m2/db.env" "$HOME/.config/cloudflare/kuhlmanpickleball.env"; do
+    [ -r "$f" ] && sed -nE \
+      's/^[[:space:]]*(export[[:space:]]+)?[A-Za-z0-9_]*(PASS|SECRET|TOKEN|KEY)[A-Za-z0-9_]*[[:space:]]*=[[:space:]]*//p' "$f" |
+      awk 'length($0) >= 12'
+  done
+  if [ -r "$HOME/.config/m2/admin.txt" ]; then
+    sed -nE 's/^[[:space:]]*PASSWORD[[:space:]]*[:=][[:space:]]*//p' "$HOME/.config/m2/admin.txt" | awk 'length($0) >= 8'
+    # the non-default admin path (first path segment of URL=)
+    sed -nE 's#^[[:space:]]*URL[[:space:]]*[:=][[:space:]]*https?://[^/]+/([^/?]+).*#\1#p' "$HOME/.config/m2/admin.txt" |
+      awk 'length($0) >= 6 && $0 != "admin"'
+  fi
+} 2>/dev/null | sed -E "s/^[\"']//; s/[\"'][[:space:]]*\$//" | grep -v '^$' > "$vals"
+
+if [ "${M2_PRECOMMIT_ALL:-}" = 1 ]; then list() { git ls-files -z; }
+else list() { git diff --cached --name-only --diff-filter=ACMR -z; }
+fi
+
+n=0
+while IFS= read -r -d '' p; do
+  n=$((n + 1))
+  cred="$p: looks like a credential or database file. Keep it out of git (DB creds live in app/etc/env.php, which is never tracked)."
+  case "$p" in
+    *.example|*.example.*|*.sample) ;;
+    */env.php|env.php|*/auth.json|auth.json|.env|*/.env|.env.*|*/.env.*|*.pem|*.key|*.p12|*.pfx|*id_rsa*|*id_ed25519*|*_github) err "$cred" ;;
+    *.sql|*.sql.gz|*.dump|*.sqlite|*.sqlite3|*.db|*.db-wal|*.db-shm) err "$cred" ;;
+  esac
+  case "$p" in
+    *.bak|*.old|*.orig|*.rej|*.production|*.save|*.swp|*.tmp|*~|*.pre-*)
+      err "$p: editor or backup leftover. Delete it; git history is the backup." ;;
+  esac
+  case "$p" in
+    vendor/*|generated/*|pub/static/*|pub/media/*|var/*|setup/*|lib/*|dev/*|*/node_modules/*|node_modules/*|*/__pycache__/*)
+      err "$p: generated, uploaded or installed by composer/Magento. Rebuild it, never commit it (git add -f bypasses .gitignore)." ;;
+  esac
+
+  size=$(git cat-file -s ":$p" 2>/dev/null || echo 0)
+  if [ "$size" -gt 5242880 ]; then
+    err "$p: $((size / 1024)) KB, over the 5 MB limit. Compress it (product photos are ~200-500 KB JPGs) or keep it out of git."
+  fi
+
+  lines=$(git show ":$p" 2>/dev/null | grep -I -n -o -E "$secret_re" | cut -d: -f1 | sort -un | paste -sd, -)
+  [ -n "$lines" ] && err "$p: token-shaped secret on line(s) $lines. Secrets live outside the repo (app/etc/env.php, ~/.config/...), never in git."
+  if [ -s "$vals" ]; then
+    lines=$(git show ":$p" 2>/dev/null | grep -I -n -F -f "$vals" | cut -d: -f1 | sort -un | paste -sd, -)
+    [ -n "$lines" ] && err "$p: contains a real secret value (DB/admin password, admin path or Cloudflare token) on line(s) $lines."
+  fi
+
+  case "$p" in
+    *.php|*.phtml)
+      if [ -n "$php" ]; then
+        out=$(git show ":$p" | php -d display_errors=1 -d error_reporting=-1 -l 2>&1) || {
+          msg="$p: PHP syntax error: $(printf '%s\n' "$out" | grep -v -E '^(Errors parsing|$)' | head -n 1 | sed 's/ in Standard input code//')"
+          if [ "$php_old" = 1 ]; then warn "$msg (local PHP $(php -r 'echo PHP_VERSION;') is older than the server's 8.3; m2-deploy lints again before anything goes live)"
+          else err "$msg"; fi
+        }
+      fi ;;
+    *.xml|*.svg|*.xsd)
+      if [ -n "$py" ]; then
+        out=$(git show ":$p" | "$py" -c 'import sys,xml.dom.minidom as m; m.parseString(sys.stdin.buffer.read())' 2>&1) || err "$p: invalid XML: $(printf '%s\n' "$out" | tail -n 1)"
+      fi ;;
+    *.json)
+      if [ -n "$py" ]; then
+        out=$(git show ":$p" | "$py" -c 'import json,sys; json.loads(sys.stdin.buffer.read().decode("utf-8-sig"))' 2>&1) || err "$p: invalid JSON: $(printf '%s\n' "$out" | tail -n 1)"
+      fi ;;
+    *.py)
+      if [ -n "$py" ]; then
+        out=$(git show ":$p" | "$py" -c 'import ast,sys; ast.parse(sys.stdin.buffer.read(), sys.argv[1])' "$p" 2>&1) || err "$p: Python syntax error: $(printf '%s\n' "$out" | tail -n 1)"
+      fi ;;
+    *.sh|.githooks/*|_build/scripts/m2-deploy)
+      out=$(git show ":$p" | bash -n 2>&1) || err "$p: shell syntax error: $(printf '%s\n' "$out" | head -n 1)" ;;
+    *.js|*.mjs|*.cjs)
+      if [ -n "$node" ]; then
+        tmp=$(mktemp -d) && ext=${p##*.} && git show ":$p" > "$tmp/check.$ext" &&
+          { out=$(node --check "$tmp/check.$ext" 2>&1) || err "$p: JavaScript syntax error: $(printf '%s\n' "$out" | grep -m1 -E 'Error' )"; }
+        rm -rf "$tmp"
+      fi ;;
+  esac
+done < <(list)
+
+if [ "$fail" -ne 0 ]; then
+  echo "pre-commit: commit blocked (see above). Fix the files, re-stage them and commit again. Do not use --no-verify." >&2
+  exit 1
+fi
+[ "${M2_PRECOMMIT_ALL:-}" = 1 ] && echo "pre-commit: $n tracked files checked, all clean."
+exit 0

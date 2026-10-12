@@ -1,9 +1,16 @@
-# Magento 2 demo store (Mage-OS). Whitelist: only our own code, config and build sources are tracked.
-# Everything composer installs (vendor/, the files magento2-base copies into the root, lib/, setup/ ...)
-# is rebuilt with `composer install`. Secrets never: app/etc/env.php, auth.json.
+# Magento 2 demo store (Mage-OS). WHITELIST: `/*` ignores everything in the Magento root, then the `!` lines bring
+# back only what is ours: our modules and theme, the module list, the build sources, the repo's own tooling.
+# Everything composer installs (vendor/, lib/, setup/, bin/, dev/, pub/ entry points, the app/etc/*.xml files that
+# magento2-base copies in) is rebuilt with `composer install`; generated/, pub/static/, var/ are rebuilt by Magento;
+# pub/media/ is uploads and seeder output (rebuilt from _build/ by thirdshot:demo:seed).
+# To track something new at the root or under app/, add a `!` line here in the same style, e.g. for one file
+# under pub/:   !/pub/   then   /pub/*   then   !/pub/the-file.txt
 /*
 !/.gitignore
+!/.gitattributes
+!/.githooks/
 !/CLAUDE.md
+!/README.md
 !/composer.json
 !/composer.lock
 
@@ -11,9 +18,14 @@
 /app/*
 !/app/code/
 !/app/design/
+!/app/i18n/
 !/app/etc/
 /app/etc/*
 !/app/etc/config.php
+
+# Generated from the LIVE store after every theme deploy by _build/perf/critical-css.sh (in the background), so it
+# would leave the tree dirty after each deploy. Regenerate it on a fresh install: _build/perf/critical-css.sh
+/app/design/frontend/ThirdShot/court/web/css/critical.css
 
 !/_build/
 /_build/renders/*.png
@@ -25,12 +37,35 @@
 __pycache__/
 *.pyc
 *.blend1
+node_modules/
 
-# never, anywhere
+# never, anywhere: secrets, database dumps, archives, leftovers (git history is the backup)
 env.php
 auth.json
+.env
+.env.*
+*.pem
+*.key
 *.sql
 *.sql.gz
+*.dump
+*.zip
+*.tar
+*.tar.gz
+*.tgz
 *.bak
 *.old
 *.orig
+*.rej
+*.save
+*.swp
+*.tmp
+*~
+*.log
+
+# OS / editor clutter (the laptop clone is on Windows)
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/

@@ -1,0 +1,164 @@
+#!/usr/bin/env bash
+# m2-deploy: make the live m2.michael-kuhlman.com match GitHub main, then run only the Magento steps the new
+# commits need.
+#   ~/bin/m2-deploy              (on the server; ~/bin/m2-deploy is a symlink to this tracked file)
+#   ssh atlas bin/m2-deploy      (from a laptop clone, right after pushing)
+#   m2-deploy --dry-run          (fetch and print what would happen; changes nothing)
+# 1. git: fetch GitHub; fast-forward to it (after php -l of the incoming PHP), push the server's own commits, or
+#    merge when both moved (the merge commit pushes itself through .githooks/post-merge). A conflict, or an incoming
+#    change to a file somebody is editing here, aborts cleanly and changes nothing.
+# 2. Magento, chosen from the files that changed:
+#      module list / module.xml / db_schema / Setup patches -> maintenance on, setup:upgrade --keep-generated,
+#                                                             setup:di:compile, maintenance off, static deploy (all)
+#      other PHP or di/etc XML in app/code                 -> setup:di:compile
+#      app/design, app/code/*/view, app/i18n               -> _build/scripts/deploy_theme.sh (--all for admin assets)
+#      _build/cms                                          -> thirdshot:demo:seed --step=cms
+#      then cache:flush and a check that the main pages answer 200.
+#    composer.json/lock, product data/photos and the nginx/php mirrors in _build/server are only REPORTED: they need
+#    a person-sized decision (composer install, a --fresh re-seed + Cloudflare purge, a vhost reload).
+# Pending steps survive a failure (in $GIT_DIR/m2-deploy.pending), so rerunning finishes the job.
+# Refuses the Magento steps while other sessions have uncommitted changes under app/ or _build/cms (a static deploy
+# or compile would publish their unfinished work); M2_DEPLOY_ANYWAY=1 overrides.
+# One deploy at a time: holds /tmp/m2-deploy.lock, the same lock every session uses around deploy_theme.sh.
+set -euo pipefail
+DOC=/var/www/m2.michael-kuhlman.com
+G=/home/kai/bin/m2git
+LOCK=/tmp/m2-deploy.lock
+SITE=https://m2.michael-kuhlman.com
+DRY=0
+[ "${1:-}" = --dry-run ] && DRY=1
+cd "$DOC"
+GD=$($G rev-parse --absolute-git-dir)
+PENDING=$GD/m2-deploy.pending
+say() { printf 'm2-deploy: %s\n' "$*"; }
+die() { printf 'm2-deploy: %s\n' "$*" >&2; exit 1; }
+mage() { sudo -n -u m2 bash -c "umask 002; cd $DOC && php bin/magento $*"; }
+
+if [ "$DRY" = 0 ]; then
+  exec 9>>"$LOCK"
+  flock -w 900 9 || die "another deploy has held $LOCK for 15 minutes; nothing done."
+fi
+
+# ---- 1. git
+$G fetch --quiet origin main
+before=$($G rev-parse HEAD)
+there=$($G rev-parse origin/main)
+
+lint_incoming() {   # php -l the PHP that is about to go live, before it does
+  local bad=0 f
+  while IFS= read -r f; do
+    case "$f" in
+      *.php|*.phtml) $G show "origin/main:$f" | php -l >/dev/null 2>&1 || { printf 'm2-deploy: PHP syntax error in %s\n' "$f" >&2; bad=1; } ;;
+    esac
+  done < <($G diff --name-only --diff-filter=ACMR HEAD...origin/main)
+  [ "$bad" = 0 ] || die "nothing merged: fix the PHP above on GitHub first (a new commit), then rerun."
+}
+
+if [ "$before" = "$there" ]; then
+  say "git: up to date with GitHub at ${before:0:7}"
+elif $G merge-base --is-ancestor origin/main HEAD; then
+  if [ "$DRY" = 1 ]; then say "git: the server is ahead of GitHub; would push"; else
+    say "git: the server is ahead of GitHub; pushing"
+    $G push --quiet origin main
+  fi
+elif $G merge-base --is-ancestor HEAD origin/main; then
+  lint_incoming
+  if [ "$DRY" = 1 ]; then say "git: would fast-forward ${before:0:7} -> ${there:0:7}"; else
+    $G merge --ff-only --quiet origin/main || die "fast-forward refused (an uncommitted edit here would be overwritten?). Nothing changed."
+    say "git: fast-forwarded ${before:0:7} -> $($G rev-parse --short HEAD)"
+  fi
+else
+  lint_incoming
+  if [ "$DRY" = 1 ]; then say "git: the server and GitHub both moved; would merge origin/main"; else
+    if ! $G merge --no-ff --no-edit --quiet origin/main; then
+      $G merge --abort 2>/dev/null || true
+      die "the server and GitHub changed the same lines; merge aborted, nothing changed. Merge by hand: m2git merge origin/main, fix, commit."
+    fi
+    say "git: merged GitHub into the server's commits ($($G rev-parse --short HEAD))"
+  fi
+fi
+
+# ---- 2. what the new commits need
+if [ "$DRY" = 1 ]; then changed=$($G diff --name-only HEAD...origin/main)
+else
+  $G diff --name-only "$before" HEAD >> "$PENDING"
+  sort -u -o "$PENDING" "$PENDING"
+  changed=$(grep -v '^$' "$PENDING" || true)
+fi
+[ -n "$changed" ] || { rm -f "$PENDING"; say "nothing new to deploy; live at $($G rev-parse --short HEAD)"; exit 0; }
+
+has() { printf '%s\n' "$changed" | grep -q -E "$1"; }
+upgrade=0; compile=0; theme=0; theme_all=0; cms=0; flush=0
+has '^app/etc/config\.php$|^app/code/[^/]+/[^/]+/(registration\.php|etc/module\.xml|etc/db_schema(_whitelist)?\.(xml|json)|Setup/)' && upgrade=1
+has '^app/code/.*\.php$|^app/code/[^/]+/[^/]+/etc/.*\.xml$' && compile=1
+has '^app/design/|^app/i18n/|^app/code/[^/]+/[^/]+/(view|i18n)/' && theme=1
+has '^app/design/adminhtml/|^app/code/[^/]+/[^/]+/view/(adminhtml|base)/' && theme_all=1
+[ "$upgrade" = 1 ] && { compile=1; theme=1; theme_all=1; }
+has '^_build/cms/' && cms=1
+has '^app/' && flush=1
+
+notes=()
+has '^composer\.(json|lock)$' && notes+=("composer.json/lock changed: dependencies are NOT installed automatically. When nobody is mid-task: sudo -u m2 composer install (as the m2 user, umask 002), then setup:upgrade, setup:di:compile and _build/scripts/deploy_theme.sh --all.")
+has '^_build/catalog/|^_build/renders/jpg/' && notes+=("product data or photos changed: re-seed by hand (see CLAUDE.md: thirdshot:demo:seed --step=products,composite, rm -rf pub/media/catalog/product/cache, Cloudflare purge).")
+has '^_build/server/' && notes+=("_build/server/ (nginx / php-fpm mirrors) changed: install by hand, then sudo nginx -t && sudo systemctl reload nginx (or reload php8.3-fpm).")
+has '^_build/scripts/deploy_theme\.sh$|^_build/perf/' && notes+=("build scripts changed; they take effect the next time they run.")
+
+plan=()
+[ "$upgrade" = 1 ] && plan+=("setup:upgrade --keep-generated (maintenance mode on)")
+[ "$compile" = 1 ] && plan+=("setup:di:compile")
+[ "$theme" = 1 ] && { if [ "$theme_all" = 1 ]; then plan+=("deploy_theme.sh --all"); else plan+=("deploy_theme.sh (ThirdShot/court)"); fi; }
+[ "$cms" = 1 ] && plan+=("thirdshot:demo:seed --step=cms")
+{ [ "$flush" = 1 ] || [ "$cms" = 1 ]; } && plan+=("cache:flush")
+
+if [ "${#plan[@]}" -eq 0 ]; then
+  say "no Magento steps needed (docs, build sources or hooks only)"
+else
+  say "steps: $(IFS=';'; echo "${plan[*]}" | sed 's/;/, /g')"
+fi
+for n in "${notes[@]}"; do say "NOTE $n"; done
+if [ "$DRY" = 1 ]; then say "dry run: nothing changed"; exit 0; fi
+if [ "${#plan[@]}" -eq 0 ]; then rm -f "$PENDING"; say "live at $($G rev-parse --short HEAD)"; exit 0; fi
+
+dirty=$($G status --porcelain | cut -c4- | sed 's/.* -> //' | grep -E '^(app/|_build/cms/)' || true)
+if [ -n "$dirty" ] && [ "${M2_DEPLOY_ANYWAY:-}" != 1 ]; then
+  say "Magento steps NOT run: these files have uncommitted changes (another session's work in progress?), and a"
+  say "compile / static deploy would publish them:"
+  printf '%s\n' "$dirty" | head -n 20 | sed 's/^/  | /'
+  die "the code is merged; the steps stay pending. Rerun m2-deploy once that work is committed, or with M2_DEPLOY_ANYWAY=1."
+fi
+
+# ---- 3. run them
+maint=0
+trap '[ "$maint" = 1 ] && mage maintenance:disable >/dev/null 2>&1 || true' EXIT
+if [ "$upgrade" = 1 ]; then
+  mage maintenance:enable >/dev/null; maint=1
+  say "setup:upgrade --keep-generated"
+  mage setup:upgrade --keep-generated --no-interaction | tail -n 3
+fi
+if [ "$compile" = 1 ]; then
+  say "setup:di:compile (a few minutes)"
+  mage setup:di:compile >/tmp/m2-deploy-compile.log 2>&1 || { tail -n 25 /tmp/m2-deploy-compile.log >&2; die "COMPILE FAILED (log /tmp/m2-deploy-compile.log): fix forward or m2git revert <sha>, push, rerun m2-deploy."; }
+fi
+if [ "$maint" = 1 ]; then mage maintenance:disable >/dev/null; maint=0; fi
+if [ "$theme" = 1 ]; then   # 9>&-: background jobs it starts must not inherit (and keep holding) the deploy lock
+  if [ "$theme_all" = 1 ]; then "$DOC/_build/scripts/deploy_theme.sh" --all 9>&-; else "$DOC/_build/scripts/deploy_theme.sh" 9>&-; fi
+fi
+if [ "$cms" = 1 ]; then
+  say "thirdshot:demo:seed --step=cms"
+  mage thirdshot:demo:seed --step=cms | tail -n 3
+fi
+mage cache:flush >/dev/null
+
+ok=1
+for p in / /paddles.html /checkout/cart/ /customer/account/login/; do
+  code=000
+  for _ in 1 2 3 4 5; do
+    code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 --resolve m2.michael-kuhlman.com:443:127.0.0.1 "$SITE$p" || true)
+    [ "$code" = 200 ] && break
+    sleep 3
+  done
+  [ "$code" = 200 ] || { ok=0; printf 'm2-deploy: %s answered %s\n' "$p" "$code" >&2; }
+done
+[ "$ok" = 1 ] || die "SITE CHECK FAILED after the deploy (steps stay pending): check var/log/exception.log, fix forward or revert, rerun."
+rm -f "$PENDING"
+say "live at $($G rev-parse --short HEAD): $(IFS=';'; echo "${plan[*]}" | sed 's/;/, /g') done, main pages answer 200"

@@ -1,0 +1,24 @@
+# Edited from Linux (the live server) and Windows (the laptop clone): LF in the repository and LF on checkout
+# everywhere, so a Windows commit never rewrites whole files as CRLF and the shell hooks/scripts keep running.
+* text=auto eol=lf
+
+# Never touch these: a line-ending conversion would corrupt them.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.avif  binary
+*.ico   binary
+*.pdf   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
+*.blend binary
+*.zip   binary
+*.gz    binary
+
+# Generated or third-party: collapse in diffs, keep out of GitHub's language stats.
+/composer.lock            linguist-generated
+/_build/fonts/**          linguist-vendored

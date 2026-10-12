@@ -8,17 +8,63 @@ Deep context: `/home/kai/vault/kai-brain/projects/m2-demo-store.md`. Working sta
 **It is a demo: no real orders, payments or shipping.** Email sending is disabled (`system/smtp/disable=1`),
 the only payment method is Check / Money order, and a site-wide notice says so. Keep it that way.
 
-## Git
-- Repo: `~/bin/m2git` (`GIT_DIR=/home/kai/backups/m2/site.git`, this directory as work tree). Plain `git` here
-  says "not a git repository": expected, never `git init`. **Local only: no GitHub remote yet** (needs Michael to
-  create `michaelkuhlman/m2-demo-store` (or similar) and a deploy key, as for the other sites).
-- `.gitignore` is a whitelist: only `composer.json/.lock`, `app/code/`, `app/design/`, `app/etc/config.php`,
-  `_build/` (minus renders PNG/previews/texture outputs) and this file are tracked. Everything composer installs
-  is rebuilt with `composer install`.
-- Commit the files you touched **by name** (no `add -A`), subject = what changed and why, with the trailer your
-  harness gives you. Never `--force`, never rewrite history, never `stash` / `reset --hard` / `clean` here.
+## Git and GitHub
+The store is written entirely by AI (Claude Code sessions on this server and on Michael's laptop); no human edits
+files or runs git. So git is the only record of what changed and why: every change is a commit, every commit is on
+GitHub within seconds.
+
+- **GitHub**: private `michaelkuhlman/m2.michael-kuhlman.com` (https://github.com/michaelkuhlman/m2.michael-kuhlman.com),
+  one branch `main`, no PRs, no CI (the hooks below run the checks). It is the off-site copy and the channel to the
+  laptop clone.
+- **On this server git is `m2git`** (`~/bin/m2git`): `GIT_DIR=/home/kai/backups/m2/site.git`, this directory as the
+  work tree, so nothing under `/var/www` can serve repository internals. Plain `git` here says "not a git
+  repository": expected, never `git init`. Push/pull use the repo-only deploy key `~/.ssh/id_m2_github` via the ssh
+  alias `github.com-m2` (`ssh -T git@github.com-m2` answers "Hi michaelkuhlman/m2.michael-kuhlman.com!").
+- **The work tree IS the live store's source.** A change is live only after its Magento step (see Common tasks) and
+  done only when it is committed.
+- **Every change, in order:**
+  1. `m2git pull --ff-only` before you start (if the laptop pushed, run `~/bin/m2-deploy` instead: it merges AND runs
+     the Magento steps the new commits need).
+  2. Edit, run the Magento step for what you touched, check it in a browser (Quality gates below).
+  3. `m2git add <the files you touched>` **by name**, then `m2git commit -m "<what changed and why>"` with the trailer
+     your harness gives you. Never `add -A` / `add .` / `commit -a`: other sessions keep live, uncommitted work in
+     this same tree, and it is theirs to commit.
+  4. The post-commit hook pushes to GitHub by itself and prints `pushed to GitHub`. If it prints `AUTO-PUSH FAILED`
+     (the laptop pushed first), run `~/bin/m2-deploy`: it merges GitHub's commits, pushes, and deploys them.
+- **Hooks** live in `.githooks/` (tracked; active through `core.hooksPath` here and in every clone):
+  - `pre-commit` checks the STAGED files and blocks: token-shaped secrets and the real values from `~/.config/m2/*`
+    and the Cloudflare env (DB/admin password, admin path, API token); `env.php` / `auth.json` / keys / `*.sql` dumps;
+    leftovers (`.bak .old .orig .rej .save .swp .tmp .pre-*`); anything under `vendor/ generated/ pub/static/
+    pub/media/ var/ setup/ lib/ dev/`; files over 5 MB; PHP/PHTML syntax errors (`php -l`); invalid XML (layout,
+    di.xml, module.xml, SVG) or JSON; Python, shell and JavaScript syntax errors. Fix, re-stage, commit again.
+    Never `--no-verify`. Whole-tree audit: `M2_PRECOMMIT_ALL=1 m2git hook run pre-commit`.
+  - `post-commit` / `post-merge` / `post-rewrite` push `main`; `M2_NO_AUTOPUSH=1` skips once.
+  - `pre-push` refuses force-pushes and branch deletions. GitHub's free plan has no branch protection for private
+    repos, so this hook is the protection.
+- **Never** `--force`, never amend or rebase a pushed commit, never `stash` / `reset --hard` / `checkout -- <file>` /
+  `restore` / `clean` in this tree. Undo with `m2git revert <sha>` (then its Magento step).
+- **`.gitignore` is a whitelist**: tracked are `composer.json/.lock`, `app/code/`, `app/design/`, `app/i18n/`,
+  `app/etc/config.php` (the module list), `_build/` (minus render PNGs, previews, texture/brand outputs), `.githooks/`,
+  this file and `README.md`. To track something new outside those, add a `!` line there (the comments show how).
+  `css/critical.css` in the theme is generated from the live store after every theme deploy and stays untracked.
+- **Not in git, back it up another way if it matters**: the database `m2_store` (catalogue, CMS, orders: rebuildable
+  with `thirdshot:demo:seed`), `pub/media/` (seeder output + editorial images), `app/etc/env.php` (DB creds,
+  crypt key), nginx/php-fpm live config (mirrors in `_build/server/`), the docker containers, cron.
 - **Never commit a credential.** DB credentials live only in `app/etc/env.php` (ignored, mode 600, owner m2) and
   `~/.config/m2/db.env`; admin login in `~/.config/m2/admin.txt` (600). Neither belongs in git or the vault.
+- **`~/bin/m2-deploy`** (symlink to the tracked `_build/scripts/m2-deploy`) brings the live store up to GitHub main:
+  fetch, `php -l` the incoming PHP, fast-forward (or push the server's own commits, or merge when both moved), then
+  ONLY the Magento steps the new files need: `setup:upgrade` (module list / schema / patches, in maintenance mode),
+  `setup:di:compile` (PHP, di.xml), `deploy_theme.sh` (theme, view/, i18n), `thirdshot:demo:seed --step=cms`
+  (`_build/cms`), `cache:flush`, then checks the main pages answer 200. composer changes, product data/photos and
+  `_build/server/` are reported, never run. It holds `/tmp/m2-deploy.lock`, refuses the Magento steps while app/ or
+  `_build/cms/` has someone's uncommitted edits (`M2_DEPLOY_ANYWAY=1` overrides), and keeps unfinished steps pending
+  in `$GIT_DIR/m2-deploy.pending` so a rerun finishes them. `m2-deploy --dry-run` shows the plan and changes nothing.
+- **Laptop clone** (Windows): `C:\xampp\htdocs\m2.michael-kuhlman.com`, origin `git@github.com:michaelkuhlman/m2.michael-kuhlman.com.git`,
+  `core.hooksPath .githooks`. It has no vendor/ or database, so Magento does not run there: it is for reading, editing
+  and committing source. Workflow: `git pull --rebase origin main`, edit, commit by name (the hooks check and push;
+  the laptop's PHP 8.2 lint findings are warnings only), then `ssh atlas bin/m2-deploy` to bring it live. If the
+  laptop's Bash tool has no network, run git and ssh from PowerShell.
 
 ## Runtime layout
 | Piece | Where |
