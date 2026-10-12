@@ -334,6 +334,19 @@ return [
         'MageOS_ThemeAdminhtmlSwitcher' => 1,
         'MageOS_ThemeOptimization' => 1,
         'Swissup_Ignition' => 0,
-        'ThirdShot_DemoData' => 1
+        'ThirdShot_DemoData' => 1,
+        'ThirdShot_Performance' => 1
+    ],
+    'system' => [
+        'default' => [
+            'dev' => [
+                'js' => [
+                    'move_script_to_bottom' => '1'
+                ],
+                'css' => [
+                    'use_css_critical_path' => '1'
+                ]
+            ]
+        ]
     ]
 ];

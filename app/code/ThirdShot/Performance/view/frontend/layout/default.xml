@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Head clean-up for speed: drop two render-blocking stylesheets this store never uses (jQuery UI datepicker,
+ * Uppy file upload), and emit the SVG favicon as a real icon link. Declared through <link src> Magento treats
+ * .svg as a font and renders it as <link rel="preload" as="font">, a wasted high-priority request.
+ * With critical CSS on (dev/css/use_css_critical_path) Magento also adds main_css_preloader, a full-screen spinner
+ * shown until the async stylesheet arrives: it hides the critically-styled first screen, so it goes.
+ * The checkout sign-in popup (with captcha / reCAPTCHA UI components) is only ever opened when guest checkout is
+ * disabled; this demo requires guest checkout, so its ~20 JS modules and templates are not loaded on every page.
+ * If guest checkout is ever turned off, delete that line.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <remove src="mage/calendar.css"/>
+        <remove src="jquery/uppy/dist/uppy-custom.css"/>
+        <remove src="images/favicon.svg"/>
+    </head>
+    <body>
+        <referenceBlock name="main_css_preloader" remove="true"/>
+        <referenceBlock name="css_rel_preload_script" remove="true"/>
+        <referenceBlock name="authentication-popup" remove="true"/>
+        <referenceBlock name="head.additional">
+            <block class="Magento\Framework\View\Element\Template" name="thirdshot.favicon.svg"
+                   template="ThirdShot_Performance::favicon.phtml"/>
+        </referenceBlock>
+    </body>
+</page>

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Runs once per page generation (before the full page cache stores the HTML), storefront only. -->
+    <type name="Magento\Framework\View\Layout">
+        <plugin name="thirdshot_performance_image_markup" type="ThirdShot\Performance\Plugin\OptimizeLayoutImages"/>
+    </type>
+    <!-- After Magento_Theme's deferJsToFooter (-10): defer the RequireJS chain on browsing pages. -->
+    <type name="Magento\Framework\View\Result\Layout">
+        <plugin name="thirdshot_performance_defer_scripts" type="ThirdShot\Performance\Plugin\DeferScripts" sortOrder="-5"/>
+    </type>
+    <type name="Magento\Theme\Block\Html\Header\CriticalCss">
+        <plugin name="thirdshot_performance_critical_css_urls" type="ThirdShot\Performance\Plugin\AbsoluteCriticalCssUrls"/>
+    </type>
+</config>

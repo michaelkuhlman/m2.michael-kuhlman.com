@@ -20,3 +20,14 @@ Containers (both `--restart unless-stopped`, docker is enabled at boot):
 
 Host prerequisites: `vm.max_map_count=262144` in /etc/sysctl.d/90-opensearch.conf; php8.3-soap; composer.
 Reload only: `sudo nginx -t && sudo systemctl reload nginx`, `sudo systemctl reload php8.3-fpm`.
+
+## Performance pieces (2026-10-12)
+- `nginx-snippet-m2_magento.conf` has three Third Shot additions, all marked in comments:
+  - `/media/...(jpg|png)[.wNNN].webp` served from disk, misses go to `@m2_webp` ->
+    `app/code/ThirdShot/Performance/endpoint/webp.php` (converts from the source file, no Magento bootstrap);
+  - `/static/frontend/ThirdShot/court/en_US/...` falls back to `en_US.prev` (`@m2_static_prev`, `no-store`) while
+    `_build/scripts/deploy_theme.sh` rebuilds the theme: deploys have no downtime.
+- Critical CSS: `_build/perf/critical-css.sh` (Playwright from /opt/playwright, clean-css from
+  `/home/kai/m2perf-tools/node_modules`: `cd /home/kai/m2perf-tools && npm i clean-css`). Run automatically in the
+  background by every theme deploy; log `var/log/thirdshot-critical-css.log`.
+- Locked in `app/etc/config.php`: `dev/js/move_script_to_bottom=1`, `dev/css/use_css_critical_path=1`.

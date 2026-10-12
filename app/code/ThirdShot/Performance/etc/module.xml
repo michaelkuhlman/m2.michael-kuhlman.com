@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Third Shot Supply Co. storefront performance: WebP delivery with responsive srcset for media images,
+ * LCP hints, and a cron that warms up / sweeps the generated WebP files.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+    <module name="ThirdShot_Performance">
+        <sequence>
+            <module name="Magento_Catalog"/>
+            <module name="Magento_Cms"/>
+            <module name="Magento_PageCache"/>
+        </sequence>
+    </module>
+</config>
