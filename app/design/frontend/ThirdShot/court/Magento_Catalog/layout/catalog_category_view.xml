@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+  Category hero: title + description share a copy column next to the category banner.
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="category.view.container">
+            <container name="ts.category.copy" htmlTag="div" htmlClass="ts-cat-hero__copy" before="-"/>
+        </referenceContainer>
+        <move element="page.main.title" destination="ts.category.copy" before="-"/>
+        <move element="category.description" destination="ts.category.copy" after="page.main.title"/>
+    </body>
+</page>
