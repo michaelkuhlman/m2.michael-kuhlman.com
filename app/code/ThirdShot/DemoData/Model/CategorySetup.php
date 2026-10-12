@@ -47,7 +47,11 @@ class CategorySetup
                 : $this->categoryFactory->create();
 
             $image = null;
-            $banner = $this->data->buildDir('renders/jpg/cat_' . $row['code'] . '.jpg');
+            // a dedicated wide crop for the category page header (16:7) wins over the 4:3 home tile image
+            $banner = $this->data->buildDir('renders/jpg/catbanner_' . $row['code'] . '.jpg');
+            if (!is_readable($banner)) {
+                $banner = $this->data->buildDir('renders/jpg/cat_' . $row['code'] . '.jpg');
+            }
             if (is_readable($banner)) {
                 $image = 'ts-' . $row['code'] . '.jpg';
                 $media->writeFile('catalog/category/' . $image, (string) file_get_contents($banner));
