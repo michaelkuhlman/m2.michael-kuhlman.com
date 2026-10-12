@@ -1,0 +1,7 @@
+/* Hand-written additions to the generated critical CSS (appended by critical-css.js; they stay on the page).
+   Keep this tiny: only rules that make the pre-JS first screen match the post-JS state, to avoid layout shifts. */
+
+/* Layered navigation: Magento's collapsible widget closes every filter group that is not .active when JS boots.
+   Mirror that before JS so the sidebar does not collapse under the reader (desktop CLS). An opened group gets an
+   inline display:block from the widget, which still wins. */
+.filter-options-item:not(.active) > .filter-options-content{display:none}
