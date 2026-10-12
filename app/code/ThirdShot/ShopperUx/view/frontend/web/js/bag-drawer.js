@@ -11,7 +11,7 @@ define([
 ], function ($, util, freeShipping, customerData) {
     'use strict';
 
-    var el = null, lastFocus = null, pending = null, recsFor = null;
+    var el = null, lastFocus = null, pending = null, recsFor = null, hideTimer = null, seen = [];
 
     function build() {
         var cfg = util.config();
@@ -35,6 +35,8 @@ define([
         el.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
                 close();
+            } else {
+                util.trapTab(e, el.querySelector('.ts-ux-drawer__panel'));
             }
         });
     }
@@ -43,9 +45,13 @@ define([
         if (!el) {
             build();
         }
-        if (el.hidden) {
-            lastFocus = document.activeElement;
+        clearTimeout(hideTimer); // an add to bag right after closing: cancel the pending hide
+        if (el.hidden || !el.classList.contains('is-open')) {
+            if (el.hidden) {
+                lastFocus = document.activeElement;
+            }
             el.hidden = false;
+            util.modal(el, true);
             document.documentElement.classList.add('ts-ux-lock');
             requestAnimationFrame(function () {
                 el.classList.add('is-open');
@@ -55,12 +61,13 @@ define([
     }
 
     function close() {
-        if (!el || el.hidden) {
+        if (!el || el.hidden || !el.classList.contains('is-open')) {
             return;
         }
         el.classList.remove('is-open');
+        util.modal(el, false);
         document.documentElement.classList.remove('ts-ux-lock');
-        setTimeout(function () { el.hidden = true; }, util.reducedMotion() ? 0 : 260);
+        hideTimer = setTimeout(function () { el.hidden = true; }, util.reducedMotion() ? 0 : 260);
         if (lastFocus && lastFocus.focus && document.contains(lastFocus)) {
             lastFocus.focus({preventScroll: true});
         }
@@ -75,7 +82,7 @@ define([
                 ? '<img src="' + util.escape(item.product_image.src) + '" alt="" width="72" height="90">' : '') +
             '<div><p class="ts-ux-drawer__name"><a href="' + util.escape(item.product_url || '#') + '">' + util.escape(item.product_name) + '</a></p>' +
             (opts ? '<p class="ts-ux-drawer__opts">' + opts + '</p>' : '') +
-            '<p class="ts-ux-drawer__qty">Qty ' + Number(item.qty) + ' · ' + (item.product_price || '') + '</p></div></div>';
+            '<p class="ts-ux-drawer__qty"><span>Qty ' + Number(item.qty) + '</span>' + (item.product_price || '') + '</p></div></div>';
     }
 
     function paint(productIds) {
@@ -102,11 +109,14 @@ define([
         recsFor = pid;
         var box = el.querySelector('.ts-ux-drawer__recs'), list = box.querySelector('ol');
         box.hidden = true;
-        $.getJSON(util.config().cardsUrl, {related_to: pid, exclude: exclude.join(','), limit: 2}).done(function (res) {
-            if (recsFor !== pid || !res.cards || !res.cards.length) {
+        $.getJSON(util.config().cardsUrl, {related_to: pid, exclude: exclude.join(','), limit: 4}).done(function (res) {
+            // the bag may have changed while this was on its way: never suggest what is already in it
+            var inBag = ((customerData.get('cart')() || {}).items || []).map(function (i) { return Number(i.product_id); }),
+                cards = (res.cards || []).filter(function (c) { return inBag.indexOf(Number(c.id)) === -1; }).slice(0, 2);
+            if (recsFor !== pid || !cards.length) {
                 return;
             }
-            list.innerHTML = res.cards.map(function (c) { return c.html; }).join('');
+            list.innerHTML = cards.map(function (c) { return c.html; }).join('');
             util.fixFormKeys(list);
             box.hidden = false;
             util.applyWidgets();
@@ -144,7 +154,12 @@ define([
                 if (data && data.response && data.response.backUrl) {
                     return;
                 }
-                added((data && data.productIds) || []);
+                // core reuses one productInfo array for the whole page, so productIds keeps every earlier add
+                // too: keep only what is new since the last event (or the last id when the same item is re-added)
+                var ids = ((data && data.productIds) || []).map(String),
+                    fresh = ids.filter(function (id) { return seen.indexOf(id) === -1; });
+                seen = ids;
+                added(fresh.length ? fresh : ids.slice(-1));
             });
             $(document).on('ts-ux:added', function (e, data) {
                 added((data && data.productIds) || []);

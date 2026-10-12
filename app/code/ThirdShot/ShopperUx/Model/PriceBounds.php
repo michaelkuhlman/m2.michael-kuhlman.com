@@ -1,7 +1,9 @@
 <?php
 /**
  * Lowest and highest price a price slider should span. Category pages: every visible product in the category,
- * so the slider keeps its full width while a price range is applied. Search pages: the current results.
+ * so the slider keeps its full width while a price range is applied. Search pages: the current results, or the
+ * whole searchable catalogue once a price range is applied (the results are already narrowed by it then, and
+ * bounds taken from them would stop the shopper widening the range again).
  */
 declare(strict_types=1);
 
@@ -33,6 +35,12 @@ class PriceBounds
                     ->addPriceData();
                 $min = (float)$collection->getMinPrice();
                 $max = (float)$collection->getMaxPrice();
+            } elseif ($this->priceApplied($layer)) {
+                $collection = $this->collectionFactory->create();
+                $collection->setVisibility($this->visibility->getVisibleInSearchIds())
+                    ->addPriceData();
+                $min = (float)$collection->getMinPrice();
+                $max = (float)$collection->getMaxPrice();
             } else {
                 $collection = $layer->getProductCollection();
                 $min = (float)$collection->getMinPrice();
@@ -45,5 +53,15 @@ class PriceBounds
             return null;
         }
         return [floor($min), ceil($max)];
+    }
+
+    private function priceApplied(Layer $layer): bool
+    {
+        foreach ($layer->getState()->getFilters() as $item) {
+            if ($item->getFilter()->getRequestVar() === 'price') {
+                return true;
+            }
+        }
+        return false;
     }
 }

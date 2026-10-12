@@ -106,6 +106,46 @@ define(['jquery', 'mage/cookies'], function ($) {
             return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         },
 
+        /**
+         * Modal mode for a dialog appended to <body>: everything else in <body> becomes inert (no focus, no
+         * clicks, hidden from screen readers) while it is open.
+         */
+        modal: function (dialog, on) {
+            Array.prototype.forEach.call(document.body.children, function (n) {
+                if (n === dialog || n.tagName === 'SCRIPT') {
+                    return;
+                }
+                if (on && !n.inert) {
+                    n.inert = true;
+                    n.setAttribute('data-ts-ux-inert', '');
+                } else if (!on && n.hasAttribute('data-ts-ux-inert')) {
+                    n.inert = false;
+                    n.removeAttribute('data-ts-ux-inert');
+                }
+            });
+        },
+
+        /** Tab / Shift+Tab wrap around inside box (for browsers without inert, and so Tab never leaves it). */
+        trapTab: function (e, box) {
+            if (e.key !== 'Tab') {
+                return;
+            }
+            var f = Array.prototype.filter.call(box.querySelectorAll(
+                'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select, textarea, iframe, [tabindex]:not([tabindex="-1"])'
+            ), function (n) { return n.offsetWidth || n.offsetHeight || n.getClientRects().length; });
+            if (!f.length) {
+                return;
+            }
+            var first = f[0], last = f[f.length - 1], a = document.activeElement;
+            if (e.shiftKey && (a === first || a === box)) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && a === last) {
+                e.preventDefault();
+                first.focus();
+            }
+        },
+
         escape: function (s) {
             return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
                 return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;'}[c];

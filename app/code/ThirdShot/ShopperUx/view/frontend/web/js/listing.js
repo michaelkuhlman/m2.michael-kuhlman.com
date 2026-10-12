@@ -18,12 +18,19 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
         AUTO_PAGES = 3,
         RESTORE_KEY = 'ts-ux-list:',
         cache = {},
+        CACHE_MAX = 12,
+        navSeq = 0,
+        shownUrl = '',
         controller = null,
         autoLoaded = 0,
         observer = null,
         loadingMore = false,
         prevPage = null,
         api;
+
+    function noHash(url) {
+        return String(url).split('#')[0];
+    }
 
     function sameListing(url) {
         try {
@@ -34,21 +41,29 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
         }
     }
 
+    // small LRU of page HTML (strings, not parsed documents, so memory stays flat on long visits)
     function fetchPage(url, signal) {
-        if (cache[url]) {
-            return cache[url];
-        }
-        var p = fetch(url, {credentials: 'same-origin', signal: signal}).then(function (r) {
-            if (!r.ok) {
-                throw new Error('HTTP ' + r.status);
+        var hit = cache[url];
+        if (hit) {
+            delete cache[url];
+            cache[url] = hit; // most recent last
+        } else {
+            hit = fetch(url, {credentials: 'same-origin', signal: signal}).then(function (r) {
+                if (!r.ok) {
+                    throw new Error('HTTP ' + r.status);
+                }
+                return r.text();
+            });
+            cache[url] = hit;
+            hit.catch(function () { delete cache[url]; });
+            var keys = Object.keys(cache);
+            if (keys.length > CACHE_MAX) {
+                delete cache[keys[0]];
             }
-            return r.text();
-        }).then(function (html) {
+        }
+        return hit.then(function (html) {
             return new DOMParser().parseFromString(html, 'text/html');
         });
-        cache[url] = p;
-        p.catch(function () { delete cache[url]; });
-        return p;
     }
 
     function prefetch(url) {
@@ -67,7 +82,52 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
                 open.push($.trim($(this).find('.filter-options-title').first().text()));
             }
         });
-        return {drawer: $(SIDE).find('.block.filter').hasClass('active'), open: open};
+        return {drawer: $(SIDE).find('.block.filter').hasClass('active'), open: open, focus: focusHint()};
+    }
+
+    /** Where keyboard focus was (the element itself is about to be replaced), so it can be put back. */
+    function focusHint() {
+        var a = document.activeElement;
+        if (!a || a === document.body || !$(a).closest(SIDE + ', ' + MAIN).length) {
+            return null;
+        }
+        var role = a.getAttribute('data-role');
+        if (role && $(a).closest('.ts-ux-price').length) {
+            return {sel: '.ts-ux-price [data-role="' + role + '"]'};
+        }
+        if ($(a).closest('.ts-ux-fchips').length) {
+            return {sel: MAIN + ' .ts-ux-fchips a', fallback: '.block.filter .filter-title strong'};
+        }
+        var item = $(a).closest('.filter-options-item');
+        if (item.length) {
+            return {title: $.trim(item.find('.filter-options-title').first().text())};
+        }
+        if ($(a).closest('.toolbar-products').length && a.id) {
+            return {sel: MAIN + ' #' + a.id};
+        }
+        return {sel: SIDE + ' .filter-options-title, ' + MAIN + ' .toolbar-products select'};
+    }
+
+    function restoreFocus(hint) {
+        if (!hint) {
+            return;
+        }
+        var el = null;
+        if (hint.title) {
+            $(SIDE).find('.filter-options-title').each(function () {
+                if (!el && $.trim($(this).text()) === hint.title) {
+                    el = this;
+                }
+            });
+        } else {
+            el = document.querySelector(hint.sel) || (hint.fallback && document.querySelector(hint.fallback));
+        }
+        if (el) {
+            if (!el.hasAttribute('tabindex') && !/^(A|BUTTON|INPUT|SELECT|TEXTAREA)$/.test(el.tagName)) {
+                el.setAttribute('tabindex', '-1');
+            }
+            el.focus({preventScroll: true});
+        }
     }
 
     function restoreUi(state) {
@@ -86,6 +146,8 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
                 });
             }
             decorateSidebar();
+            buildChips();
+            restoreFocus(state.focus);
         }, 60);
     }
 
@@ -97,10 +159,14 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
             controller.abort();
         }
         controller = window.AbortController ? new AbortController() : null;
-        var state = uiState();
+        var state = uiState(), seq = ++navSeq;
         $('.swatch-option-tooltip').hide(); // its swatch is about to be replaced while hovered
         $('body').addClass('ts-ux-loading').attr('aria-busy', 'true');
         return fetchPage(url, controller ? controller.signal : undefined).then(function (doc) {
+            if (seq !== navSeq) {
+                return; // a newer filter click won; never let an older response overwrite it
+            }
+            shownUrl = noHash(new URL(url, location.href).href);
             var newMain = doc.querySelector(MAIN), main = document.querySelector(MAIN);
             if (!newMain || !main) {
                 throw new Error('no listing');
@@ -129,12 +195,14 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
             }
             announce();
         }).catch(function (e) {
-            if (e && e.name === 'AbortError') {
+            if ((e && e.name === 'AbortError') || seq !== navSeq) {
                 return;
             }
             location.href = url; // anything odd: fall back to a normal page load
         }).then(function () {
-            $('body').removeClass('ts-ux-loading').removeAttr('aria-busy');
+            if (seq === navSeq) {
+                $('body').removeClass('ts-ux-loading').removeAttr('aria-busy');
+            }
         });
     }
 
@@ -223,11 +291,21 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
         }
         if ('IntersectionObserver' in window) {
             observer = new IntersectionObserver(function (entries) {
-                if (entries[0].isIntersecting && autoLoaded < AUTO_PAGES && nextUrl()) {
-                    loadMore(false);
+                if (entries[0].isIntersecting) {
+                    nearEnd();
                 }
             }, {rootMargin: '0px 0px 700px 0px'});
             observer.observe(more.querySelector('.ts-ux-more__sentinel'));
+        }
+    }
+
+    // also checked on scroll: a big jump (End key, a strip below the grid) can carry the sentinel from below the
+    // viewport to above it without the observer ever seeing it intersect
+    function nearEnd() {
+        var s = document.querySelector('.ts-ux-more__sentinel');
+        if (s && !loadingMore && autoLoaded < AUTO_PAGES && nextUrl() &&
+            s.getBoundingClientRect().top < window.innerHeight + 700) {
+            loadMore(false);
         }
     }
 
@@ -324,7 +402,18 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
         if (!prevPage) {
             return;
         }
-        fetchPage(prevPage).then(function (doc) {
+        var url = prevPage;
+        fetchPage(url).then(function (doc) {
+            // the list now starts one page earlier: the address follows, so refresh / share / Back land right
+            var st = readRestore() || {pages: 1};
+            clearRestore();
+            history.replaceState({tsUx: 1}, '', url);
+            shownUrl = noHash(new URL(url, location.href).href);
+            st.pages = (st.pages || 1) + 1;
+            st.t = Date.now();
+            try {
+                sessionStorage.setItem(RESTORE_KEY + location.href, JSON.stringify(st));
+            } catch (e) { /* ignore */ }
             var before = document.documentElement.scrollHeight;
             var items = appendFrom(doc, 'start');
             window.scrollBy(0, document.documentElement.scrollHeight - before);
@@ -405,19 +494,11 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
         $filter.find('.filter-title strong').attr('data-ts-count', count || null);
     }
 
-    // phones: Luma hides "Now shopping by", so mirror the active filters as removable chips under the toolbar
-    function buildChips() {
-        var main = document.querySelector(MAIN), old = main && main.querySelector('.ts-ux-chips');
-        if (old) {
-            old.parentNode.removeChild(old);
-        }
-        var items = document.querySelectorAll(SIDE + ' .filter-current .item'),
-            toolbar = main && main.querySelector('.toolbar-products');
-        if (!items.length || !toolbar) {
-            return;
-        }
+    // phones: Luma hides "Now shopping by", so mirror the active filters as removable chips, under the toolbar and
+    // at the top of the open filter drawer
+    function chipBox(items) {
         var box = document.createElement('div');
-        box.className = 'ts-ux-chips';
+        box.className = 'ts-ux-fchips';
         box.setAttribute('aria-label', 'Active filters');
         Array.prototype.forEach.call(items, function (li) {
             var remove = li.querySelector('a.remove, a.action.remove');
@@ -428,7 +509,7 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
                 value = $.trim($(li).find('.filter-value').text()),
                 a = document.createElement('a');
             a.href = remove.href;
-            a.className = 'ts-ux-chip';
+            a.className = 'ts-ux-fchip';
             a.setAttribute('aria-label', 'Remove filter ' + label + ' ' + value);
             a.innerHTML = '<span>' + util.escape(label) + ':</span> ' + util.escape(value);
             box.appendChild(a);
@@ -437,16 +518,34 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
         if (clear && items.length > 1) {
             var c = document.createElement('a');
             c.href = clear.href;
-            c.className = 'ts-ux-chip ts-ux-chip--clear';
+            c.className = 'ts-ux-fchip ts-ux-fchip--clear';
             c.textContent = 'Clear all';
             box.appendChild(c);
         }
-        toolbar.parentNode.insertBefore(box, toolbar.nextSibling);
+        return box;
+    }
+
+    function buildChips() {
+        $('.ts-ux-fchips').remove();
+        var main = document.querySelector(MAIN),
+            items = document.querySelectorAll(SIDE + ' .filter-current .item'),
+            toolbar = main && main.querySelector('.toolbar-products'),
+            options = document.querySelector(SIDE + ' .filter-options');
+        if (!items.length) {
+            return;
+        }
+        if (toolbar) {
+            toolbar.parentNode.insertBefore(chipBox(items), toolbar.nextSibling);
+        }
+        if (options) {
+            var inDrawer = chipBox(items);
+            inDrawer.classList.add('ts-ux-fchips--drawer');
+            options.insertBefore(inDrawer, options.firstChild);
+        }
     }
 
     function afterSwap() {
         $('body').addClass('ts-ux-listing');
-        buildChips();
         buildMore();
         $(document).trigger('ts-ux:listing-updated');
     }
@@ -459,7 +558,7 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
     }
 
     function bind() {
-        $(document).on('click', SIDE + ' .block.filter a, ' + MAIN + ' .block.filter a, ' + MAIN + ' .ts-ux-chips a', function (e) {
+        $(document).on('click', SIDE + ' .block.filter a, ' + MAIN + ' .block.filter a, ' + MAIN + ' .ts-ux-fchips a', function (e) {
             if (e.ctrlKey || e.metaKey || e.shiftKey || e.button || !isListingLink(this)) {
                 return;
             }
@@ -487,10 +586,27 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
                 loadedPages(0);
             }
         });
-        window.addEventListener('popstate', function () {
-            if (sameListing(location.href)) {
-                navigate(location.href, {push: false, scroll: false});
+        var ticking = false;
+        window.addEventListener('scroll', function () {
+            if (!ticking) {
+                ticking = true;
+                requestAnimationFrame(function () { ticking = false; nearEnd(); });
             }
+        }, {passive: true});
+        // phones: Escape closes the open filter drawer
+        document.addEventListener('keydown', function (e) {
+            var $f = $(SIDE).find('#layered-filter-block');
+            if (e.key === 'Escape' && $f.hasClass('active') && $f.data('mageCollapsible')) {
+                $f.collapsible('deactivate');
+                $f.find('.filter-title strong').trigger('focus');
+            }
+        });
+        window.addEventListener('popstate', function (e) {
+            // only our own entries; fragment jumps (skip link, #anchors) must not refetch the listing
+            if (!e.state || !e.state.tsUx || !sameListing(location.href) || noHash(location.href) === shownUrl) {
+                return;
+            }
+            navigate(location.href, {push: false, scroll: false});
         });
     }
 
@@ -503,6 +619,7 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
             }
             window.tsUxListing = api;
             history.replaceState({tsUx: 1}, '', location.href);
+            shownUrl = noHash(location.href);
             bind();
             afterSwap();
             restoreUi({drawer: false, open: []});

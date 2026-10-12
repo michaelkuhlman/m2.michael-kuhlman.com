@@ -68,7 +68,30 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
             }
             paint();
         });
-        $(from).add(to).on('change', apply);
+        // pointer: apply on release. Keyboard: arrow keys fire change per step, so wait for a pause (or blur),
+        // otherwise every step would rebuild the sidebar under the user's focus.
+        var kbd = false, timer = null;
+        function later() {
+            clearTimeout(timer);
+            timer = setTimeout(apply, 700);
+        }
+        $(from).add(to)
+            .on('keydown', function () { kbd = true; })
+            .on('pointerdown', function () { kbd = false; })
+            .on('change', function () {
+                if (kbd) {
+                    later();
+                } else {
+                    apply();
+                }
+            })
+            .on('blur', function () {
+                if (timer) {
+                    clearTimeout(timer);
+                    timer = null;
+                    apply();
+                }
+            });
         $(fromIn).on('change', function () {
             from.value = clamp(fromIn.value, min, Number(to.value));
             paint();

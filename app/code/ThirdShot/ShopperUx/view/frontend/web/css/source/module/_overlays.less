@@ -75,6 +75,21 @@
             &::after { .ux-icon(@ux-i-arrow, 17px); }
         }
         .ts-ux-top, .ts-ux-toast { display: none !important; }
+        // guests have the Saved hearts; the account wish list / compare links only lead to a login
+        .product-social-links .action.towishlist, .product-social-links .action.tocompare { display: none !important; }
+        // photo | details side by side whenever the frame is wide enough (a 768 px tablet gives a ~720 px frame,
+        // which Luma would stack as a phone page with a full-width photo)
+        @media (min-width: 560px) {
+            .column.main {
+                display: grid !important;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                column-gap: 32px;
+                align-items: start;
+                > * { grid-column: 1 / -1; }
+                > .product.media { grid-column: 1; grid-row: 1; width: auto !important; float: none !important; margin: 0 !important; }
+                > .product-info-main { grid-column: 2; grid-row: 1; width: auto !important; float: none !important; margin: 0 !important; }
+            }
+        }
     }
     // ---------- 6. added-to-bag drawer ----------
     .ts-ux-drawer {
@@ -147,7 +162,7 @@
         }
         &__name { font-weight: 600; font-size: 15px; line-height: 1.3; a { color: @ts-ink; } }
         &__opts { font-size: 13px; color: @ts-muted; margin-top: 3px !important; }
-        &__qty { font-size: 13.5px; color: @ts-body-fallback; margin-top: 6px !important; .price { font-weight: 600; } }
+        &__qty { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; font-size: 13.5px; color: @ts-body-fallback; margin-top: 6px !important; > * { display: inline; margin: 0; } .price { font-weight: 600; } }
         &__ship { margin: 22px 0 0; }
         &__totals {
             display: flex;

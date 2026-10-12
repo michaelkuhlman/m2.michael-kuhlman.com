@@ -6,7 +6,7 @@
 define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
     'use strict';
 
-    var dialog = null, frame = null, lastFocus = null;
+    var dialog = null, frame = null, lastFocus = null, hideTimer = null;
 
     function build() {
         dialog = document.createElement('div');
@@ -28,12 +28,8 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
         dialog.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
                 close();
-            } else if (e.key === 'Tab') { // keep focus inside: close button <-> frame
-                var btn = dialog.querySelector('.ts-ux-qv__close');
-                if (e.shiftKey && document.activeElement === btn) {
-                    e.preventDefault();
-                    frame.focus();
-                }
+            } else {
+                util.trapTab(e, dialog.querySelector('.ts-ux-qv__panel')); // close button <-> frame
             }
         });
         window.addEventListener('message', function (e) {
@@ -62,10 +58,14 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
         if (!dialog) {
             build();
         }
-        lastFocus = document.activeElement;
+        clearTimeout(hideTimer); // reopened while the last close was still animating
+        if (dialog.hidden) {
+            lastFocus = document.activeElement;
+        }
         dialog.classList.remove('is-ready');
         frame.setAttribute('src', frameUrl(url));
         dialog.hidden = false;
+        util.modal(dialog, true);
         document.documentElement.classList.add('ts-ux-lock');
         requestAnimationFrame(function () {
             dialog.classList.add('is-open');
@@ -74,12 +74,13 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
     }
 
     function close() {
-        if (!dialog || dialog.hidden) {
+        if (!dialog || dialog.hidden || !dialog.classList.contains('is-open')) {
             return;
         }
         dialog.classList.remove('is-open');
+        util.modal(dialog, false);
         document.documentElement.classList.remove('ts-ux-lock');
-        setTimeout(function () {
+        hideTimer = setTimeout(function () {
             dialog.hidden = true;
             frame.setAttribute('src', 'about:blank');
             frame.removeAttribute('src');

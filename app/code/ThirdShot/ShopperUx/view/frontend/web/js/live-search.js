@@ -29,7 +29,17 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
         panel.hidden = true;
         panel.setAttribute('role', 'listbox');
         panel.setAttribute('aria-label', 'Search suggestions');
-        form.appendChild(panel);
+        // inside .control: on phones that is the field that drops down under the header, so the panel follows it
+        (form.querySelector('.control') || form).appendChild(panel);
+        // the pill is narrower at 1280-1439 (room for the Saved heart): keep the placeholder whole
+        var fullPh = input.getAttribute('placeholder') || '', narrow = window.matchMedia('(min-width: 1280px) and (max-width: 1439px)');
+        function fitPlaceholder() {
+            input.setAttribute('placeholder', narrow.matches ? 'Search' : fullPh);
+        }
+        fitPlaceholder();
+        if (narrow.addEventListener) {
+            narrow.addEventListener('change', fitPlaceholder);
+        }
         input.setAttribute('aria-controls', 'ts-ux-search');
         input.setAttribute('aria-autocomplete', 'list');
 
@@ -55,11 +65,14 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
 
         function highlight(text, q) {
             var safe = util.escape(text), words = q.trim().split(/\s+/).filter(function (w) { return w.length > 1; });
-            words.forEach(function (w) {
-                var re = new RegExp('(' + util.escape(w).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig');
-                safe = safe.replace(re, '<mark>$1</mark>');
-            });
-            return safe;
+            if (!words.length) {
+                return safe;
+            }
+            // one pass with all words, so a later word can never match inside an earlier <mark>
+            var re = new RegExp('(' + words.map(function (w) {
+                return util.escape(w).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            }).sort(function (a, b) { return b.length - a.length; }).join('|') + ')', 'ig');
+            return safe.replace(re, '<mark>$1</mark>');
         }
 
         function open(html) {
@@ -134,7 +147,7 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
                 html += '<div class="ts-ux-search__group"><p class="ts-ux-search__label">Categories</p><div class="ts-ux-search__chips">' +
                     data.categories.map(function (c, i) {
                         return '<a role="option" id="ts-ux-s-k' + i + '" class="ts-ux-chip" href="' + util.escape(c.url) + '">' +
-                            highlight(c.name, q) + '</a>';
+                            '<span>' + highlight(c.name, q) + '</span></a>';
                     }).join('') + '</div></div>';
             }
             if (data.products && data.products.length) {
@@ -202,14 +215,16 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
         });
         input.addEventListener('keydown', function (e) {
             if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-                if (panel.hidden) {
-                    onInput();
-                }
                 e.preventDefault();
+                if (panel.hidden) {
+                    lastQuery = null; // reopen the panel (e.g. after Escape); arrows select once it is showing
+                    onInput();
+                    return;
+                }
                 move(e.key === 'ArrowDown' ? 1 : -1);
             } else if (e.key === 'Enter') {
                 var opts = options();
-                if (active >= 0 && opts[active]) {
+                if (!panel.hidden && active >= 0 && opts[active]) {
                     e.preventDefault();
                     remember(input.value);
                     location.href = opts[active].href;

@@ -16,7 +16,7 @@ use Magento\Store\Model\StoreManagerInterface;
 
 class ProductLoader
 {
-    public const MAX_IDS = 24;
+    public const MAX_IDS = 48; // = the Saved list's cap in js/cards.js
 
     public function __construct(
         private readonly CollectionFactory $collectionFactory,

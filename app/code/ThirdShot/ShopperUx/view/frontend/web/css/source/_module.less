@@ -76,11 +76,25 @@
 // Desktop / tablet (styles-l)
 .media-width(@extremum, @break) when (@extremum = 'min') and (@break = @screen__m) {
     body .header.content .ts-ux-saved-link { order: 4; }
+    // the Saved heart costs the one-row header ~52px: give it back from the search pill and the nav padding
+    // (html-prefixed: the theme's _extend.less compiles after module styles)
+    @media (min-width: 1280px) and (max-width: 1439px) {
+        html body .header.content .block-search { width: 156px; flex: none; }
+        html body .header.content .nav-sections { margin-right: 14px; }
+        html body .navigation .level0 > .level-top { padding-left: 9px; padding-right: 9px; &::after { left: 9px; right: 9px; } }
+    }
+    @media (min-width: 1440px) {
+        html body .header.content .block-search { width: 176px; flex: none; }
+        html body .header.content .nav-sections { margin-right: 16px; }
+        html body .navigation .level0 > .level-top { padding-left: 12px; padding-right: 12px; &::after { left: 12px; right: 12px; } }
+    }
 }
 
 // Phones (after Luma's and the theme's mobile rules)
 .media-width(@extremum, @break) when (@extremum = 'max') and (@break = @screen__m) {
     body .header.content .ts-ux-saved-link { order: 4; width: 40px; }
+    // 97% opaque sticky header let page text ghost through behind the logo on phones
+    html body .page-header { background: @ts-chalk; }
     .ts-ux-qv {
         align-items: flex-end;
         &__panel { width: 100vw; height: 92vh; height: ~"92dvh"; border-radius: 20px 20px 0 0; transform: translateY(40px); }
@@ -114,13 +128,14 @@
         line-height: 20px;
         text-align: center;
     }
-    .ts-ux-chips {
+    .ts-ux-fchips {
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
         margin: -6px 0 20px;
     }
-    .ts-ux-chip {
+    .ts-ux-fchips--drawer { margin: 14px 0 6px; }
+    .ts-ux-fchip {
         display: inline-flex;
         align-items: center;
         gap: 4px;
@@ -140,13 +155,11 @@
     body .ts-ux-strip .products-grid .product-items.ts-ux-strip__row { grid-auto-columns: 44%; gap: 12px; }
     .ts-ux-strip { margin-top: 40px; }
     .ts-ux-search {
-        position: fixed;
-        top: auto;
-        left: 12px;
-        right: 12px;
+        position: static;
         width: auto;
-        margin-top: 8px;
-        max-height: 66vh;
+        margin-top: 10px;
+        max-height: ~"calc(100vh - 220px)";
+        max-height: ~"calc(100dvh - 220px)";
     }
     .ts-ux-drawer__body { padding: 18px 18px 28px; }
     .ts-ux-drawer__head { padding-left: 18px; }

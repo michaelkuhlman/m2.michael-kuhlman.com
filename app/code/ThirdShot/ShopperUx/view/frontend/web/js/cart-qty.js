@@ -6,7 +6,7 @@
 define(['jquery', 'ThirdShot_ShopperUx/js/util', 'Magento_Customer/js/customer-data'], function ($, util, customerData) {
     'use strict';
 
-    var timers = {}, pend = {}, busy = 0;
+    var timers = {}, pend = {}, inflight = {}, again = {}, busy = 0;
 
     function stepper(input) {
         if (input.closest('.ts-ux-qty')) {
@@ -41,6 +41,15 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util', 'Magento_Customer/js/customer-d
         });
         input.addEventListener('change', function () { sync(); queue(input); });
         $(input).on('ts-ux:qty-synced', sync);
+        // the row's own trash link removes in place too (core would post and reload the whole bag)
+        $(input).closest('tbody').find('.action-delete[data-post]').on('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            input.value = 0;
+            sync();
+            clearTimeout(timers[input.name]);
+            save(input);
+        });
         input.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -61,35 +70,63 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util', 'Magento_Customer/js/customer-d
     function save(input) {
         var qty = Math.max(0, Math.round(parseFloat(input.value) || 0)),
             row = $(input).closest('tbody'),
-            data = {form_key: util.formKey()};
-        delete pend[input.name];
+            data = {form_key: util.formKey()},
+            id = input.name;
+        if (inflight[id]) {
+            again[id] = true; // one request per row at a time; the latest value goes when this one returns
+            return;
+        }
+        delete pend[id];
         if (String(qty) === String(input.getAttribute('data-item-qty'))) {
             row.removeClass('ts-ux-pending');
             return;
         }
+        var post = null;
         if (qty === 0) {
             var del = row.find('.action-delete[data-post]');
-            if (del.length) {
-                row.addClass('ts-ux-removing');
-                del.trigger('click'); // Magento's own remove (posts and reloads the bag)
+            try {
+                post = del.length ? JSON.parse(del.attr('data-post')) : null;
+            } catch (e) {
+                post = null;
+            }
+            if (!post || !post.action) {
+                if (del.length) {
+                    del.trigger('click'); // Magento's own remove (posts and reloads the bag)
+                }
                 return;
             }
+            row.addClass('ts-ux-removing');
         }
-        data[input.name] = qty;
-        data.update_cart_action = 'update_qty';
+        if (post) {
+            // remove in place: core's delete action answers with a redirect to the bag page, which ajax follows
+            data = $.extend({}, post.data || {}, {form_key: util.formKey()});
+        } else {
+            data[input.name] = qty;
+            data.update_cart_action = 'update_qty';
+        }
         busy++;
+        inflight[id] = true;
         $('body').addClass('ts-ux-cart-busy');
         watchCart();
         $.ajax({
-            url: util.config().updateCartUrl,
+            url: post ? post.action : util.config().updateCartUrl,
             type: 'POST',
             dataType: 'html',
             data: data
         }).done(function (html) {
+            inflight[id] = false;
+            if (again[id] || pend[id]) {
+                pend[id] = true; // keep the shopper's newer value in the box while it is sent
+            }
             refresh(html);
         }).fail(function () {
             location.reload();
         }).always(function () {
+            inflight[id] = false;
+            if (again[id]) {
+                delete again[id];
+                save(input);
+            }
             busy--;
             if (!busy) {
                 $('body').removeClass('ts-ux-cart-busy');
@@ -170,6 +207,14 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util', 'Magento_Customer/js/customer-d
             }
             document.body.classList.add('ts-ux-cart-live');
             Array.prototype.forEach.call(table.querySelectorAll('input.qty'), stepper);
+            // core's cart/ensure-subtotal-sync replaces the whole #form-validate when the row subtotals and the
+            // summary briefly disagree (they do, mid-update): give the new rows their steppers too
+            $(document).on('contentUpdated', function (e) {
+                var t = document.getElementById('shopping-cart-table');
+                if (t && e.target && e.target.id === 'form-validate') {
+                    Array.prototype.forEach.call(t.querySelectorAll('input.qty'), stepper);
+                }
+            });
         }
     };
 });

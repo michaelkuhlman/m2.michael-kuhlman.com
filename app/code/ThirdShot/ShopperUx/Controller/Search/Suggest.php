@@ -39,7 +39,8 @@ class Suggest implements HttpGetActionInterface
     public function execute(): Json
     {
         $result = $this->jsonFactory->create();
-        $query = trim(preg_replace('/\s+/u', ' ', (string)$this->request->getParam('q', '')) ?? '');
+        $raw = $this->request->getParam('q', '');
+        $query = trim(preg_replace('/\s+/u', ' ', is_string($raw) ? $raw : '') ?? '');
         $query = mb_substr($query, 0, self::MAX);
         if (mb_strlen($query) < self::MIN) {
             return $result->setData(['query' => $query, 'total' => 0, 'products' => [], 'categories' => []]);
@@ -47,6 +48,7 @@ class Suggest implements HttpGetActionInterface
         $key = 'ts_ux_suggest_' . sha1(implode('|', [
             mb_strtolower($query),
             $this->storeManager->getStore()->getId(),
+            $this->storeManager->getStore()->getCurrentCurrencyCode(),
             $this->customerSession->getCustomerGroupId(),
         ]));
         $cached = $this->cache->load($key);

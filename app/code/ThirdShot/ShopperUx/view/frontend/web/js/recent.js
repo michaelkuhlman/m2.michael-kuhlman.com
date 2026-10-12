@@ -33,7 +33,9 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
             skip = currentProductId(),
             ids = util.list(key).filter(function (x) { return x !== skip; }).slice(0, limit),
             list = box.querySelector('.product-items'),
-            empty = box.querySelector('[data-role="empty"]');
+            empty = box.querySelector('[data-role="empty"]'),
+            seq = (box.tsUxSeq = (box.tsUxSeq || 0) + 1);
+        box.setAttribute('data-ts-ux-rendered', '');
         if (!ids.length) {
             box.classList.remove('is-filled');
             if (list) {
@@ -46,6 +48,9 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
             return;
         }
         $.getJSON(util.config().cardsUrl, {ids: ids.join(',')}).done(function (res) {
+            if (seq !== box.tsUxSeq) {
+                return; // a newer render of this strip (e.g. another unsave) is on its way
+            }
             var cards = (res && res.cards) || [];
             if (!cards.length) {
                 box.hidden = !empty;
@@ -74,6 +79,10 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
         init: function () {
             track();
             $('[data-ts-ux-strip]').each(function () { render(this); });
+            // instant filtering swaps the main column (search results carry a strip): fill the new one
+            $(document).on('ts-ux:listing-updated', function () {
+                $('.column.main [data-ts-ux-strip]').not('[data-ts-ux-rendered]').each(function () { render(this); });
+            });
             $(document).on('ts-ux:list-changed', function (e, key) {
                 if (key === 'ts-ux-saved') {
                     $('[data-ts-ux-strip="saved"]').each(function () {

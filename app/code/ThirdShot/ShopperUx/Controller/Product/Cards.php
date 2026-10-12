@@ -50,7 +50,10 @@ class Cards implements HttpGetActionInterface
      */
     private function idList(string $param): array
     {
-        $raw = (string)$this->request->getParam($param, '');
+        $raw = $this->request->getParam($param, '');
+        if (!is_string($raw)) {
+            return []; // ?ids[]=... would otherwise raise an array-to-string warning (a 500 in production mode)
+        }
         return array_slice(array_filter(array_map('intval', explode(',', $raw))), 0, ProductLoader::MAX_IDS);
     }
 }

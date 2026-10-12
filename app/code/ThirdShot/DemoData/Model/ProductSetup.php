@@ -125,7 +125,12 @@ class ProductSetup
         if ($row['price'] !== null) {
             $product->setPrice((float) $row['price']);
         }
-        $product->setSpecialPrice(isset($row['special_price']) ? (float) $row['special_price'] : null);
+        // A configurable sells at its children's prices (they carry the sale price). A special price on the
+        // parent itself skews the price index: min_price = parent special - parent price + cheapest child, which
+        // put the $189 Apex into a $100-169 price filter. So parents never keep one.
+        $product->setSpecialPrice(
+            isset($row['special_price']) && $type !== 'configurable' ? (float) $row['special_price'] : null
+        );
         $product->setData('description', $row['description'] ?? '');
         $product->setData('short_description', $row['short_description'] ?? '');
         $product->setData('meta_title', $row['meta_title'] ?? $row['name']);

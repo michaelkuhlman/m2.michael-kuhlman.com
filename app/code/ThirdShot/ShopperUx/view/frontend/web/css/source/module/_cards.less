@@ -2,6 +2,15 @@
 
 & when (@media-common = true) {
     // ---------- 3. card tools: save (heart) + quick view ----------
+    // bag page "Pairs well with" (core crosssell template): it has no .product-item-inner photo box, so the theme's
+    // hover overlay button would pin to the foot of the whole card, over the name and price. Put it under them.
+    body .block.crosssell .products-grid .product-item .product-item-info > .product-item-details .product-item-actions,
+    body .block.crosssell .products-grid .product-item .product-item-actions {
+        position: static;
+        margin: 12px 0 0;
+    }
+    // the tools sit on the card's own box, whatever grid the card is in (listing, strips, drawer picks)
+    .ts-ux-has-tools .product-item-info { position: relative; }
     .ts-ux-card-tools {
         position: absolute;
         z-index: 4;

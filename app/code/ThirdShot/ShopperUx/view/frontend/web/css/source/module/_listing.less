@@ -30,7 +30,9 @@
     // phones: "Show N items" at the foot of the open filter drawer
     .ts-ux-apply { display: none; }
     // phones: active filters as removable chips under the toolbar (desktop has them in the sidebar)
-    .ts-ux-chips { display: none; }
+    .ts-ux-fchips { display: none; }
+    // Luma sets break-all on filter titles, which splits "Core Thick / ness" in the narrow 768 sidebar
+    .block.filter .filter-options-title { word-break: normal; overflow-wrap: break-word; hyphens: auto; }
     // ---------- 2. infinite scroll ----------
     .ts-ux-more {
         display: flex;

@@ -96,6 +96,15 @@ Reload, never restart, shared services: `sudo nginx -t && sudo systemctl reload 
   **Never delete and re-create products with the same SKUs**: MSI queues a source-item cleanup by SKU on delete, and the
   cron consumer then wipes the stock of the re-created products ("There are no source items with the in stock status").
   The seeder writes MSI source items explicitly. The CMS step never overwrites an existing `pub/media/wysiwyg/thirdshot/*.jpg`.
+- `app/code/ThirdShot/ShopperUx/` - guest UX layer, all frontend: instant AJAX filtering/sorting + infinite scroll
+  (`js/listing.js`, toolbar mixin; swaps `.column.main` + sidebar, then re-runs the x-magento-init scripts the PERF
+  module moved to the end of body via `util.adoptInitScripts` + `mage/apply/main`), live search (`shopux/search/suggest`,
+  form-mini mixin), quick view (`?ts_qv=1` adds handle `shopux_quickview`), added-to-bag drawer + recommendations
+  (`shopux/product/cards`), free-shipping meter (reads `carriers/freeshipping/free_shipping_subtotal`), cart qty
+  steppers (post to `checkout/cart/updatePost`), guest Saved list in localStorage + `/saved`, recently viewed strips,
+  price slider (plugin on FilterRenderer; Magento's price `to` is exclusive, so the slider sends `to + 0.01`), back-to-top.
+  Own LESS in `view/frontend/web/css/source/` (theme deploy picks it up). Store config: grid 9 per page (9/18/36).
+  nginx rate-limits `/shopux/` (zone `m2_ux`, 8 r/s, burst 40; mirrors in `_build/server/`).
 - `app/code/ThirdShot/Performance/` - storefront speed (2026-10-12): media images served as WebP siblings
   (`file.jpg.webp`, responsive `file.jpg.w480|w800|w1200.webp`) by rewriting the page HTML (Layout output plugin);
   nginx serves them from disk, a miss is converted by `endpoint/webp.php`, cron `thirdshot_performance_webp_warmup`
