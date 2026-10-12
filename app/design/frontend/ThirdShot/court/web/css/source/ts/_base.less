@@ -1,7 +1,64 @@
-// Base: page, type scale, buttons, forms, messages, demo notice.
+// Base: tokens, page, type scale, buttons, forms, focus, messages, demo notice, motion.
+
+//  Tokens (brand colours live in _theme.less)
+@ts-body: #34433C;              // long-form text on chalk (AA: 9.6:1)
+@ts-oat: #EBE4D6;               // panels / hero cards (a step darker than chalk)
+@ts-container: 1320px;
+@ts-gutter: 24px;
+@ts-gutter-m: 16px;
+@ts-section: ~"clamp(64px, 7vw, 112px)";
+@ts-h1: ~"clamp(34px, 2.6vw + 22px, 60px)";
+@ts-h2: ~"clamp(28px, 1.7vw + 20px, 46px)";
+@ts-h3: ~"clamp(21px, .6vw + 17px, 26px)";
+@ts-shadow-lg: 0 2px 6px rgba(19, 32, 27, .05), 0 24px 48px -12px rgba(19, 32, 27, .18);
+
+//  Line icons (24px grid, 1.7 stroke) used as CSS masks so they take currentColor
+@ts-svg: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E";
+@ts-i-menu: "@{ts-svg}%3Cpath d='M3.5 7h17M3.5 12h17M3.5 17h11'/%3E%3C/svg%3E";
+@ts-i-search: "@{ts-svg}%3Ccircle cx='10.8' cy='10.8' r='6.3'/%3E%3Cpath d='M15.6 15.6l4.6 4.6'/%3E%3C/svg%3E";
+@ts-i-bag: "@{ts-svg}%3Cpath d='M5.2 8.2h13.6l-1 11.6a1.4 1.4 0 0 1-1.4 1.2H7.6a1.4 1.4 0 0 1-1.4-1.2z'/%3E%3Cpath d='M8.8 8.2V7a3.2 3.2 0 0 1 6.4 0v1.2'/%3E%3C/svg%3E";
+@ts-i-user: "@{ts-svg}%3Ccircle cx='12' cy='8.3' r='3.9'/%3E%3Cpath d='M4.6 20.2c1.2-3.7 4-5.6 7.4-5.6s6.2 1.9 7.4 5.6'/%3E%3C/svg%3E";
+@ts-i-close: "@{ts-svg}%3Cpath d='M6 6l12 12M18 6L6 18'/%3E%3C/svg%3E";
+@ts-i-chev-r: "@{ts-svg}%3Cpath d='M9.5 5.5L16 12l-6.5 6.5'/%3E%3C/svg%3E";
+@ts-i-chev-d: "@{ts-svg}%3Cpath d='M6 9.5l6 6 6-6'/%3E%3C/svg%3E";
+@ts-i-filter: "@{ts-svg}%3Cpath d='M4 7h10M18 7h2M4 17h2M10 17h10'/%3E%3Ccircle cx='16' cy='7' r='2'/%3E%3Ccircle cx='8' cy='17' r='2'/%3E%3C/svg%3E";
+@ts-i-trash: "@{ts-svg}%3Cpath d='M4.5 7h15M9.5 7V5h5v2M6.5 7l.8 12.2a1 1 0 0 0 1 .8h7.4a1 1 0 0 0 1-.8L17.5 7'/%3E%3C/svg%3E";
+@ts-i-edit: "@{ts-svg}%3Cpath d='M4.5 19.5l1-4L15.8 5.2a2 2 0 0 1 2.9 0l.1.1a2 2 0 0 1 0 2.9L8.5 18.5z'/%3E%3C/svg%3E";
+@ts-i-check: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M5 9.4l2.6 2.5L13 6.4' fill='none' stroke='%23173A2E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E";
+
+.ts-icon(@url; @size: 22px) {
+    content: '';
+    display: inline-block;
+    width: @size;
+    height: @size;
+    font-size: 0;
+    line-height: 0;
+    vertical-align: middle;
+    background-color: currentColor;
+    -webkit-mask-image: url(@url);
+    mask-image: url(@url);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+}
+
+.ts-sr-only() {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
 
 & when (@media-common = true) {
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 
     [class^='ts-'], [class*=' ts-'],
     [class^='ts-'] *, [class*=' ts-'] * { box-sizing: border-box; }
@@ -12,56 +69,98 @@
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         font-feature-settings: 'ss01', 'cv11';
+        text-rendering: optimizeLegibility;
     }
 
     h1, h2, h3, .page-title, .block-title strong {
         font-family: @ts-serif;
         font-optical-sizing: auto;
-        letter-spacing: -0.015em;
+        letter-spacing: -0.018em;
         color: @ts-ink;
+        text-wrap: balance;
     }
+    p { text-wrap: pretty; }
 
     .page-title-wrapper .page-title {
-        font-weight: 500;
-        line-height: 1.08;
+        font-size: @ts-h1;
+        font-weight: 450;
+        line-height: 1.04;
+        margin-bottom: 18px;
     }
 
     a { text-underline-offset: 3px; }
+    a, button { -webkit-tap-highlight-color: transparent; }
 
     ::selection { background: @ts-optic; color: @ts-ink; }
 
-    .page-main {
-        padding-left: 24px;
-        padding-right: 24px;
+    // one container rule for header, main and footer
+    .page-main,
+    .header.content,
+    .page-header .panel.header,
+    .footer.content,
+    .breadcrumbs,
+    .top-container {
+        width: 100%;
+        min-width: 0;
+        max-width: @ts-container;
+        box-sizing: border-box;
+        padding-left: @ts-gutter;
+        padding-right: @ts-gutter;
+        margin-left: auto;
+        margin-right: auto;
     }
+
+    // focus: a clear ring for keyboard users only
+    a:focus-visible, button:focus-visible, [tabindex]:focus-visible, summary:focus-visible,
+    .swatch-option:focus-visible, input[type='checkbox']:focus-visible, input[type='radio']:focus-visible {
+        outline: 2px solid @ts-court;
+        outline-offset: 3px;
+        border-radius: 6px;
+        box-shadow: none;
+    }
+    a:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: 0; box-shadow: none; }
 
     // eyebrow / kicker text used across CMS sections
     .ts-eyebrow {
         display: inline-block;
         font: 600 ~"12px/1" @ts-sans;
-        letter-spacing: .14em;
+        letter-spacing: .16em;
         text-transform: uppercase;
         color: @ts-court;
-        margin-bottom: 14px;
+        margin-bottom: 16px;
     }
 
-    // Buttons
+    // ---- buttons ------------------------------------------------------------
     .action.primary,
     button.action.primary,
+    .action-primary,
     .ts-btn {
         border-radius: 999px;
         font-weight: 600;
-        letter-spacing: .01em;
-        padding: 12px 26px;
-        transition: background-color .2s @ts-ease, color .2s @ts-ease, transform .2s @ts-ease, box-shadow .2s @ts-ease;
-        &:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(23, 58, 46, .18); }
-        &:active { transform: none; box-shadow: none; }
+        letter-spacing: .005em;
+        transition: background-color .2s @ts-ease, color .2s @ts-ease, border-color .2s @ts-ease,
+            transform .2s @ts-ease, box-shadow .2s @ts-ease;
+    }
+    .action.primary, button.action.primary, .action-primary {
+        padding: 13px 28px;
+        font-size: 15px;
+        line-height: 1.2;
+        &:hover { box-shadow: 0 8px 20px -6px rgba(23, 58, 46, .45); }
+        &:active { transform: translateY(1px); box-shadow: none; }
+        &[disabled], &.disabled { opacity: .55; box-shadow: none; }
+    }
+    // secondary (Luma "action" buttons: update cart, apply coupon...)
+    button.action:not(.primary):not(.tocart):not(.search):not(.close):not(.action-close):not(.delete):not(.edit):not(.nav-toggle) {
+        border-radius: 999px;
     }
 
     .ts-btn {
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 10px;
+        min-height: 50px;
+        padding: 0 28px;
         text-decoration: none;
         font-family: @ts-sans;
         font-size: 15px;
@@ -71,10 +170,11 @@
         border: 1.5px solid @ts-kitchen;
         &:visited { color: @ts-chalk; }
         &:hover { background: @ts-court; border-color: @ts-court; color: #fff; text-decoration: none; }
+        &:active { transform: translateY(1px); }
         &--optic {
             background: @ts-optic; border-color: @ts-optic; color: @ts-ink;
             &:visited { color: @ts-ink; }
-            &:hover { background: #E6FA70; border-color: #E6FA70; color: @ts-ink; }
+            &:hover { background: #E6FA70; border-color: #E6FA70; color: @ts-ink; box-shadow: 0 10px 28px -8px rgba(217, 242, 79, .55); }
         }
         &--ghost {
             background: transparent; color: @ts-kitchen;
@@ -86,58 +186,90 @@
             &:visited { color: @ts-chalk; }
             &:hover { background: @ts-chalk; border-color: @ts-chalk; color: @ts-kitchen; }
         }
-        &::after { content: '\2192'; font-weight: 500; transition: transform .2s @ts-ease; }
-        &:hover::after { transform: translateX(3px); }
+        &::after { content: '\2192'; font-weight: 500; transition: transform .25s @ts-ease; }
+        &:hover::after { transform: translateX(4px); }
     }
 
-    // Forms
+    // ---- forms --------------------------------------------------------------
     input[type='text'], input[type='email'], input[type='password'], input[type='tel'], input[type='number'],
-    input[type='search'], select, textarea {
-        border-radius: @ts-radius-s;
-        border-color: @ts-line;
+    input[type='search'], input[type='url'], select, textarea {
+        border-radius: 10px;
+        border: 1px solid @ts-line;
         background-color: @ts-paper;
+        color: @ts-ink;
+        font-size: 15px;
         transition: border-color .15s, box-shadow .15s;
-        &:focus { border-color: @ts-court; box-shadow: 0 0 0 3px rgba(46, 94, 74, .15); }
+        &:hover { border-color: #C6BCA8; }
+        &:focus { border-color: @ts-court; box-shadow: 0 0 0 3px rgba(46, 94, 74, .16); outline: 0; }
+        &::placeholder { color: #7D877F; }
     }
+    input[type='text'], input[type='email'], input[type='password'], input[type='tel'], input[type='number'],
+    input[type='search'], input[type='url'], select { min-height: 48px; }
+    select {
+        -webkit-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2313201B' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9.5l6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        background-size: 16px;
+        padding-right: 40px;
+    }
+    textarea { padding: 12px 14px; }
+    input[type='checkbox'], input[type='radio'] { accent-color: @ts-kitchen; width: 18px; height: 18px; vertical-align: -3px; }
 
-    .fieldset > .field > .label, .fieldset > .fields > .field > .label {
+    .fieldset > .field > .label, .fieldset > .fields > .field > .label,
+    .fieldset > .field:not(.choice) > .label {
         font-weight: 600;
         font-size: 13px;
-        letter-spacing: .02em;
+        letter-spacing: .01em;
+        color: @ts-ink;
     }
+    .fieldset > .field.required > .label::after,
+    .fieldset > .fields > .field.required > .label::after,
+    .fieldset > .field._required > .label::after { color: @ts-clay; }
+    div.mage-error, div.field-error { color: #A8401C; font-size: 13px; margin-top: 6px; }
+    input.mage-error, select.mage-error, textarea.mage-error { border-color: #C9603A; }
+    .field-tooltip .field-tooltip-action::before { color: @ts-muted; }
+    .fieldset > .legend, .fieldset > .legend span { font-family: @ts-serif; font-weight: 450; }
 
-    // Messages
-    .message {
-        border-radius: @ts-radius-s;
-        &.success { background: #E6F2D0; color: @ts-kitchen; }
-        &.info, &.notice { background: @ts-sand; color: @ts-ink; }
-        &.error { background: #F8E1D8; color: #7A2E16; }
+    // ---- messages -----------------------------------------------------------
+    .message, .page.messages .message {
+        border-radius: 12px;
+        font-size: 14.5px;
+        padding: 14px 18px 14px 52px;
+        > *:first-child::before { left: 16px !important; width: 24px; top: 50% !important; margin-top: -12px !important; }
+        &.success { background: #E6F2D0; color: @ts-kitchen; > *:first-child::before { color: @ts-kitchen; } a { color: @ts-kitchen; text-decoration: underline; } }
+        &.info, &.notice { background: @ts-oat; color: @ts-ink; > *:first-child::before { color: @ts-court; } }
+        &.error { background: #F8E1D8; color: #7A2E16; > *:first-child::before { color: #A8401C; } }
+        &.warning { background: #FFF2C9; color: #5E4A0A; }
     }
+    .page.messages { max-width: @ts-container; margin: 0 auto; }
 
-    // Breadcrumbs
+    // ---- breadcrumbs ----------------------------------------------------------
     .breadcrumbs {
-        margin-top: 18px;
-        margin-bottom: 8px;
+        margin-top: 20px;
+        margin-bottom: 14px;
         .items { font-size: 12.5px; color: @ts-muted; }
+        .item:not(:last-child)::after { color: #A9A08F; }
         a { color: @ts-muted; &:hover { color: @ts-kitchen; } }
+        strong { font-weight: 500; color: @ts-ink; }
     }
 
-    // Ratings in brand colour
+    // ratings in brand colour
     .rating-summary .rating-result > span::before,
-    .review-control-vote label::before {
-        color: @ts-clay;
-    }
+    .review-control-vote label::before { color: @ts-clay; }
+    .rating-summary .rating-result::before { color: #D9CFBE; }
 
-    // Demo notice bar
+    // ---- demo notice bar ------------------------------------------------------
     .ts-demo-notice {
         background: @ts-ink;
         color: rgba(244, 240, 230, .86);
         font: 500 ~"12.5px/1.4" @ts-sans;
         letter-spacing: .01em;
         &__inner {
-            max-width: @layout__max-width;
+            max-width: @ts-container;
             margin: 0 auto;
-            padding: 9px 24px;
+            padding: 9px @ts-gutter;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -155,10 +287,46 @@
             border-radius: 999px;
             padding: 4px 9px 3px;
         }
+        a { color: @ts-optic; }
     }
 
-    @media (max-width: 767px) {
-        .page-main { padding-left: 16px; padding-right: 16px; }
-        .ts-demo-notice__inner { padding: 8px 14px; font-size: 11.5px; justify-content: flex-start; text-align: left; }
+    // ---- subtle reveal motion (only armed by JS, and never with reduced motion) ----
+    .ts-motion .ts-reveal {
+        opacity: 0;
+        transform: translateY(18px);
+        transition: opacity .8s @ts-ease, transform .8s @ts-ease;
+        &.is-in { opacity: 1; transform: none; }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        *, *::before, *::after {
+            animation-duration: .01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: .01ms !important;
+        }
+        .ts-motion .ts-reveal { opacity: 1; transform: none; }
+    }
+
+
 }
+
+// Phone rules (emitted after Luma's own mobile rules)
+.media-width(@extremum, @break) when (@extremum = 'max') and (@break = @screen__m) {
+        .page-main,
+        .header.content,
+        .page-header .panel.header,
+        .footer.content,
+        .breadcrumbs,
+        .top-container { padding-left: @ts-gutter-m; padding-right: @ts-gutter-m; }
+        .page-title-wrapper .page-title { margin-bottom: 12px; }
+        .ts-demo-notice {
+            font-size: 11.5px;
+            &__inner { padding: 7px @ts-gutter-m; gap: 10px; }
+            &__badge { font-size: 9.5px; padding: 3px 7px 2px; }
+            &__more { display: none; }
+        }
+        // iOS zooms inputs under 16px
+        input[type='text'], input[type='email'], input[type='password'], input[type='tel'], input[type='number'],
+        input[type='search'], select, textarea { font-size: 16px; }
+    }

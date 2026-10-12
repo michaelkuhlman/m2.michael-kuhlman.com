@@ -1,0 +1,109 @@
+<?php
+/**
+ * Small progressive enhancements, no dependencies (static, FPC-safe):
+ *  - html.ts-scrolled once the page scrolls (compact sticky header)
+ *  - a close button + Escape for the mobile navigation drawer
+ *  - fade-up reveal of CMS sections (skipped with prefers-reduced-motion)
+ *  - sticky add-to-cart bar on product pages (shown on phones by CSS once the real button scrolls away)
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer
+ */
+$closeLabel = $escaper->escapeJs(__('Close menu'));
+$script = <<<JS
+(function () {
+    var d = document, html = d.documentElement, ticking = false;
+    function onScroll() {
+        if (ticking) { return; }
+        ticking = true;
+        requestAnimationFrame(function () {
+            html.classList.toggle('ts-scrolled', window.pageYOffset > 24);
+            ticking = false;
+        });
+    }
+    window.addEventListener('scroll', onScroll, {passive: true});
+    onScroll();
+
+    function ready(fn) {
+        if (d.readyState !== 'loading') { fn(); } else { d.addEventListener('DOMContentLoaded', fn); }
+    }
+    function toggleNav() {
+        var t = d.querySelector('.nav-toggle');
+        if (t) { t.click(); }
+    }
+
+    ready(function () {
+        var nav = d.querySelector('.nav-sections');
+        if (nav && !nav.querySelector('.ts-nav-close')) {
+            var b = d.createElement('button');
+            b.type = 'button';
+            b.className = 'ts-nav-close';
+            b.innerHTML = '<span>{$closeLabel}</span>';
+            b.addEventListener('click', toggleNav);
+            nav.insertBefore(b, nav.firstChild);
+        }
+        d.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && html.classList.contains('nav-open')) { toggleNav(); }
+        });
+
+        stickyAddToCart();
+
+        if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            return;
+        }
+        var els = d.querySelectorAll('.ts-section, .ts-spotlight, .ts-story, .ts-usp-strip, .ts-stats, .ts-callout, .ts-wide-figure');
+        if (!els.length) { return; }
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (en) {
+                if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); }
+            });
+        }, {rootMargin: '0px 0px -6% 0px', threshold: 0.04});
+        html.classList.add('ts-motion');
+        Array.prototype.forEach.call(els, function (el) { el.classList.add('ts-reveal'); io.observe(el); });
+    });
+
+    function stickyAddToCart() {
+        if (!d.body.classList.contains('catalog-product-view') || !('IntersectionObserver' in window)) { return; }
+        var target = d.getElementById('bundle-slide') || d.getElementById('product-addtocart-button');
+        var titleEl = d.querySelector('.product-info-main .page-title');
+        if (!target || !titleEl) { return; }
+        var bar = d.createElement('div');
+        bar.className = 'ts-sticky-atc';
+        bar.setAttribute('aria-hidden', 'true');
+        bar.innerHTML = '<div class="ts-sticky-atc__info"><span class="ts-sticky-atc__name"></span>' +
+            '<span class="ts-sticky-atc__price"></span></div>' +
+            '<button type="button" class="action primary ts-sticky-atc__btn" tabindex="-1"></button>';
+        bar.querySelector('.ts-sticky-atc__name').textContent = titleEl.textContent.trim();
+        var btn = bar.querySelector('.ts-sticky-atc__btn');
+        btn.textContent = (target.textContent || '').trim();
+        btn.addEventListener('click', function () {
+            target.click();
+            setTimeout(function () {
+                var err = d.querySelector('.product-add-form .mage-error:not(input), .product-add-form div.mage-error');
+                var form = d.querySelector('.product-add-form');
+                if (err && err.offsetParent) {
+                    err.scrollIntoView({behavior: 'smooth', block: 'center'});
+                } else if (d.getElementById('bundle-slide') && form) {
+                    form.scrollIntoView({behavior: 'smooth', block: 'start'});
+                }
+            }, 250);
+        });
+        d.body.appendChild(bar);
+        function syncPrice() {
+            if (d.querySelector('.table-wrapper.grouped')) { return; }
+            var p = d.querySelector('.product-info-main .price-box .price-final_price .price, .product-info-main .price-box .price');
+            bar.querySelector('.ts-sticky-atc__price').textContent = p ? p.textContent.trim() : '';
+        }
+        new IntersectionObserver(function (entries) {
+            var en = entries[0];
+            var show = !en.isIntersecting && en.boundingClientRect.top < 0;
+            if (show) { syncPrice(); }
+            bar.classList.toggle('is-visible', show);
+            d.body.classList.toggle('ts-has-sticky-atc', show);
+        }).observe(target);
+    }
+})();
+JS;
+?>
+<?= /* @noEscape */ $secureRenderer->renderTag('script', [], $script, false) ?>

@@ -1,13 +1,24 @@
 <?xml version="1.0"?>
 <!--
   Third Shot Court - site-wide layout.
-  Demo notice bar, SVG logo, footer rebuilt from a CMS block, compare/wishlist clutter removed.
+  Demo notice bar, sticky one-row header, SVG logo, footer rebuilt from a CMS block, compare/wishlist clutter removed.
 -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
         <referenceContainer name="after.body.start">
             <block class="Magento\Framework\View\Element\Template" name="ts.demo.notice" before="-"
                    template="Magento_Theme::html/demo-notice.phtml"/>
+        </referenceContainer>
+
+        <!-- header: one flex row (nav moved into it, account icon added), small UI script -->
+        <move element="navigation.sections" destination="header-wrapper" after="-"/>
+        <referenceContainer name="header-wrapper">
+            <block class="Magento\Framework\View\Element\Template" name="ts.header.account" after="logo"
+                   template="Magento_Theme::html/header-account.phtml"/>
+        </referenceContainer>
+        <referenceContainer name="before.body.end">
+            <block class="Magento\Framework\View\Element\Template" name="ts.ui.script"
+                   template="Magento_Theme::html/ui-script.phtml"/>
         </referenceContainer>
 
         <referenceBlock name="logo">

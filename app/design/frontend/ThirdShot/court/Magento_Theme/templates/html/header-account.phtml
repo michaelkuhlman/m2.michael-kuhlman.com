@@ -1,0 +1,10 @@
+<?php
+/**
+ * Header account icon. Static link (customer/account redirects guests to sign in), so it is FPC-safe.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+?>
+<a class="ts-account" href="<?= $escaper->escapeUrl($block->getUrl('customer/account')) ?>"
+   title="<?= $escaper->escapeHtmlAttr(__('My Account')) ?>"><span><?= $escaper->escapeHtml(__('My Account')) ?></span></a>
