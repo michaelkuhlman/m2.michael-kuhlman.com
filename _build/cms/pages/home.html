@@ -1,6 +1,9 @@
 <!-- {"identifier":"home","title":"Third Shot Supply Co. | Premium pickleball paddles, balls and court gear","layout":"1column","meta_title":"Third Shot Supply Co. | Gear for the patient player","meta_description":"Premium pickleball paddles, tour-grade balls, bags and court gear. A Magento Open Source demo store."} -->
 <section class="ts-hero">
-    <img class="ts-hero__img" src="{{media url='wysiwyg/thirdshot/hero.jpg'}}" alt="Signature Raw Carbon, Kitchen Line Carbon and Apex paddles with Tour 40 balls on court green" width="1920" height="960" fetchpriority="high">
+    <picture>
+        <source media="(max-width: 767px)" srcset="{{media url='wysiwyg/thirdshot/hero_mobile.jpg'}}" width="1080" height="1350">
+        <img class="ts-hero__img" src="{{media url='wysiwyg/thirdshot/hero.jpg'}}" alt="Signature Raw Carbon, Kitchen Line Carbon and Apex paddles with Tour 40 balls on court green" width="1920" height="960" fetchpriority="high" loading="eager">
+    </picture>
     <div class="ts-hero__content">
         <span class="ts-eyebrow">New season &middot; Kitchen Line Carbon 16</span>
         <h1>Gear for the patient player.</h1>
