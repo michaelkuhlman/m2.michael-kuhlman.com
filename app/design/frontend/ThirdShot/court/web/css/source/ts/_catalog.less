@@ -240,6 +240,7 @@
             gap: 6px;
             position: relative;
             z-index: 2;
+            pointer-events: none; // taps fall through to the whole-card link (the review link is a tiny target)
             .rating-summary { padding: 0; .rating-result { width: 66px; &::before, > span::before { font-size: 14px; height: 14px; line-height: 14px; letter-spacing: -1px; } } }
             .reviews-actions { margin: 0; font-size: 12.5px; line-height: 1; a { color: @ts-muted; } }
         }
