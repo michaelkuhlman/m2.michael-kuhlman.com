@@ -4,45 +4,47 @@
     .page-footer {
         background: @ts-kitchen;
         color: rgba(244, 240, 230, .78);
-        margin-top: 80px;
+        margin-top: @ts-section;
 
         .footer.content {
             border-top: 0;
-            padding: 0 24px;
             margin-top: 0;
-            max-width: @layout__max-width;
+            padding-top: 0;
+            padding-bottom: 0;
         }
         a, a:visited { color: @ts-chalk; text-decoration: none; }
         a:hover { color: @ts-optic; text-decoration: none; }
+        a:focus-visible { outline-color: @ts-optic; }
     }
 
     .ts-footer {
         &__news {
             display: grid;
             grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-            gap: 48px;
+            gap: 56px;
             align-items: center;
-            padding: 64px 0 56px;
+            padding: 72px 0 64px;
             border-bottom: 1px solid rgba(244, 240, 230, .14);
             .ts-eyebrow { color: @ts-optic; }
             h2 {
                 color: @ts-chalk;
-                font-size: 36px;
+                font-size: ~"clamp(27px, 1.4vw + 18px, 40px)";
                 font-weight: 400;
-                line-height: 1.15;
+                line-height: 1.14;
                 margin: 0;
-                max-width: 560px;
+                max-width: 580px;
             }
         }
         &__news-form {
             .block.newsletter {
                 width: 100%;
-                max-width: none;
-                margin: 0;
+                max-width: 520px;
+                margin: 0 0 0 auto;
                 float: none;
                 .title { display: none; }
-                .form.subscribe { display: flex; gap: 10px; }
-                .field { flex: 1; margin: 0; min-width: 0; }
+                .content { width: 100%; }
+                .form.subscribe { display: flex; gap: 10px; width: 100%; }
+                .field.newsletter { flex: 1; margin: 0; min-width: 0; }
                 .field, .control, label { display: block; width: 100%; margin-right: 0; }
                 .field .control::before { display: none; }
                 input {
@@ -50,12 +52,13 @@
                     width: 100%;
                     height: 54px;
                     border-radius: 999px;
-                    border: 1px solid rgba(244, 240, 230, .35);
+                    border: 1px solid rgba(244, 240, 230, .32);
                     background: rgba(255, 255, 255, .06);
                     color: @ts-chalk;
                     padding: 0 22px;
                     font-size: 15px;
-                    &::placeholder { color: rgba(244, 240, 230, .6); }
+                    &::placeholder { color: rgba(244, 240, 230, .62); }
+                    &:hover { border-color: rgba(244, 240, 230, .5); }
                     &:focus { border-color: @ts-optic; box-shadow: 0 0 0 3px rgba(217, 242, 79, .2); }
                 }
                 .actions { display: block; width: auto; }
@@ -68,47 +71,48 @@
                     font-weight: 700;
                     padding: 0 28px;
                     margin: 0;
-                    &:hover { background: #E6FA70; }
+                    &:hover { background: #E6FA70; box-shadow: 0 10px 28px -10px rgba(217, 242, 79, .6); }
                 }
                 div.mage-error { color: #FFB8A0; }
             }
         }
-        &__fine { font-size: 12.5px; color: rgba(244, 240, 230, .55); margin: 12px 0 0 22px; }
+        &__fine { font-size: 12.5px; color: rgba(244, 240, 230, .6); margin: 12px 0 0; max-width: 520px; margin-left: auto; padding-left: 22px; }
 
         &__grid {
             display: grid;
             grid-template-columns: 1.6fr 1fr 1fr 1fr 1.5fr;
             gap: 40px;
-            padding: 56px 0 48px;
+            padding: 60px 0 52px;
         }
         &__brand {
-            img { width: 196px; height: auto; display: block; margin-bottom: 16px; }
-            p { font-size: 14px; line-height: 1.65; max-width: 300px; }
+            img { width: 188px; height: auto; display: block; margin-bottom: 18px; }
+            p { font-size: 14px; line-height: 1.65; max-width: 300px; margin: 0; }
         }
         &__col {
             h4 {
                 font: 600 ~"12px/1" @ts-sans;
-                letter-spacing: .14em;
+                letter-spacing: .16em;
                 text-transform: uppercase;
                 color: @ts-optic;
                 margin: 8px 0 18px;
             }
             ul { list-style: none; margin: 0; padding: 0; }
-            li { margin: 0 0 11px; font-size: 14.5px; }
-            p { font-size: 14px; line-height: 1.65; }
+            li { margin: 0; font-size: 14.5px; }
+            li a { display: inline-block; padding: 5px 0; white-space: nowrap; }
+            p { font-size: 14px; line-height: 1.65; margin: 0; }
         }
         &__demo a { text-decoration: underline !important; text-underline-offset: 3px; }
     }
 
     .copyright {
         background: #10291F;
-        color: rgba(244, 240, 230, .55);
-        padding: 18px 24px;
+        color: rgba(244, 240, 230, .62);
+        padding: 20px @ts-gutter;
         font-size: 12.5px;
         display: flex;
         justify-content: center;
         flex-wrap: wrap;
-        gap: 6px 22px;
+        gap: 6px 24px;
         text-align: center;
     }
 
@@ -117,15 +121,17 @@
         .ts-footer__brand, .ts-footer__demo { grid-column: ~"1 / -1"; }
     }
 
-    @media (max-width: 767px) {
-        .page-footer { margin-top: 56px; }
-        .page-footer .footer.content { padding: 0 18px; }
-        .ts-footer {
-            &__news { grid-template-columns: 1fr; gap: 24px; padding: 44px 0 40px; h2 { font-size: 27px; } }
-            &__news-form .block.newsletter .form.subscribe { flex-direction: column; }
-            &__news-form .block.newsletter .action.subscribe { width: 100%; }
-            &__fine { margin-left: 4px; }
-            &__grid { grid-template-columns: 1fr 1fr; gap: 30px 20px; padding: 40px 0 34px; }
-        }
-    }
+
 }
+
+// Phone rules (emitted after Luma's own mobile rules)
+.media-width(@extremum, @break) when (@extremum = 'max') and (@break = @screen__m) {
+        .ts-footer {
+            &__news { grid-template-columns: 1fr; gap: 26px; padding: 48px 0 40px; }
+            &__news-form .block.newsletter { margin: 0; max-width: none; .form.subscribe { flex-direction: column; } .action.subscribe { width: 100%; } }
+            &__fine { margin: 12px 0 0; padding: 0; text-align: center; }
+            &__grid { grid-template-columns: 1fr 1fr; gap: 28px 20px; padding: 40px 0 36px; }
+            &__col li a { padding: 7px 0; }
+        }
+        .copyright { flex-direction: column; padding: 18px @ts-gutter-m; }
+    }
