@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!-- Product page inside the quick-view dialog: gallery + buy box only. -->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <meta name="robots" content="NOINDEX,NOFOLLOW"/>
+    </head>
+    <body>
+        <attribute name="class" value="ts-ux-qv-frame"/>
+        <referenceContainer name="header.container" remove="true"/>
+        <referenceContainer name="footer-container" remove="true"/>
+        <referenceContainer name="page.top" remove="true"/>
+        <referenceContainer name="content.aside" remove="true"/>
+        <referenceBlock name="ts.demo.notice" remove="true"/>
+        <referenceBlock name="ts.ui.script" remove="true"/>
+        <referenceBlock name="copyright" remove="true"/>
+        <referenceBlock name="product.info.details" remove="true"/>
+        <referenceBlock name="ts.pdp.usps" remove="true"/>
+        <referenceBlock name="product.info.overview" remove="true"/>
+        <referenceContainer name="product.info.main">
+            <block class="Magento\Catalog\Block\Product\View" name="ts.ux.qv.full" after="-"
+                   template="ThirdShot_ShopperUx::quickview-link.phtml"/>
+        </referenceContainer>
+    </body>
+</page>

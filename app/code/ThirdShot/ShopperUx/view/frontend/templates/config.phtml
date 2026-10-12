@@ -1,0 +1,12 @@
+<?php
+/**
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+/** @var \ThirdShot\ShopperUx\ViewModel\Config $vm */
+$vm = $block->getData('view_model');
+?>
+<script type="text/x-magento-init"><?= /* @noEscape */ json_encode(
+    ['*' => ['ThirdShot_ShopperUx/js/app' => $vm->getConfig()]],
+    JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+) ?></script>

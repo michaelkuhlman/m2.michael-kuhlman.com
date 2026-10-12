@@ -1,0 +1,21 @@
+<?php
+/**
+ * A row of products from this browser's lists: "recent" (recently viewed) or "saved".
+ * Empty and hidden until JS fills it (FPC-safe).
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$kind = $block->getData('kind') === 'saved' ? 'saved' : 'recent';
+$title = (string)($block->getData('title') ?: __('Recently viewed'));
+?>
+<section class="ts-ux-strip ts-ux-strip--<?= $escaper->escapeHtmlAttr($kind) ?>" data-ts-ux-strip="<?= $escaper->escapeHtmlAttr($kind) ?>"
+         data-limit="<?= (int)($block->getData('limit') ?: 12) ?>" hidden aria-label="<?= $escaper->escapeHtmlAttr($title) ?>">
+    <div class="ts-ux-strip__head">
+        <h2 class="ts-ux-strip__title"><?= $escaper->escapeHtml($title) ?></h2>
+        <button type="button" class="ts-ux-strip__clear" data-ts-ux-clear="<?= $escaper->escapeHtmlAttr($kind) ?>"><?= $escaper->escapeHtml(__('Clear')) ?></button>
+    </div>
+    <div class="products wrapper grid products-grid">
+        <ol class="products list items product-items ts-ux-strip__row"></ol>
+    </div>
+</section>

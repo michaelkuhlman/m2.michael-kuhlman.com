@@ -1,0 +1,25 @@
+<?php
+/**
+ * The /saved page: products saved with the heart, kept in this browser (no account needed).
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+?>
+<div class="ts-ux-saved" data-ts-ux-strip="saved" data-limit="48">
+    <p class="ts-ux-saved__intro">
+        <?= $escaper->escapeHtml(__('Tap the heart on any product to keep it here. Saved items stay in this browser, no account needed.')) ?>
+        <span class="ts-ux-saved__count" data-role="count"></span>
+    </p>
+    <div class="ts-ux-saved__empty" data-role="empty" hidden>
+        <p class="ts-ux-saved__empty-title"><?= $escaper->escapeHtml(__('Nothing saved yet')) ?></p>
+        <p><?= $escaper->escapeHtml(__('Browse the shop and tap the heart on anything you want to come back to.')) ?></p>
+        <a class="action primary" href="<?= $escaper->escapeUrl($block->getUrl('', ['_direct' => 'paddles.html'])) ?>"><?= $escaper->escapeHtml(__('Shop paddles')) ?></a>
+    </div>
+    <div class="products wrapper grid products-grid">
+        <ol class="products list items product-items"></ol>
+    </div>
+    <div class="ts-ux-saved__foot">
+        <button type="button" class="ts-ux-strip__clear" data-ts-ux-clear="saved"><?= $escaper->escapeHtml(__('Clear saved items')) ?></button>
+    </div>
+</div>

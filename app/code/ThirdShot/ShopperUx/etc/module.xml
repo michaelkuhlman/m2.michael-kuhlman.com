@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Third Shot Supply Co. shopper experience: instant (AJAX) filtering and sorting, infinite scroll, live search with
+ * product previews, quick view, an added-to-bag drawer, a free-shipping meter, instant cart quantities, a guest
+ * "Saved" list, recently viewed products, a price slider and back-to-top. Storefront only, FPC-safe: everything
+ * shopper-specific lives in the browser (customer-data sections, localStorage) or in uncached JSON endpoints.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+    <module name="ThirdShot_ShopperUx">
+        <sequence>
+            <module name="Magento_Catalog"/>
+            <module name="Magento_CatalogSearch"/>
+            <module name="Magento_LayeredNavigation"/>
+            <module name="Magento_Swatches"/>
+            <module name="Magento_Checkout"/>
+            <module name="Magento_Review"/>
+            <module name="Magento_Search"/>
+        </sequence>
+    </module>
+</config>

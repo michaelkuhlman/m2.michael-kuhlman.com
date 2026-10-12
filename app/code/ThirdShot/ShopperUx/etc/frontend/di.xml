@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="ThirdShot\ShopperUx\Model\SearchSuggest">
+        <arguments>
+            <argument name="searchCollectionFactory" xsi:type="object">Magento\CatalogSearch\Model\ResourceModel\Fulltext\SearchCollectionFactory</argument>
+        </arguments>
+    </type>
+    <!-- The layered-navigation price filter renders as a two-handle slider -->
+    <type name="Magento\LayeredNavigation\Block\Navigation\FilterRenderer">
+        <plugin name="thirdshot_shopperux_price_slider" type="ThirdShot\ShopperUx\Plugin\PriceSliderRenderer" sortOrder="20"/>
+    </type>
+</config>

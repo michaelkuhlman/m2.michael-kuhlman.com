@@ -1,0 +1,140 @@
+// ThirdShot_ShopperUx - listing (see ../_module.less for variables and mixins)
+
+& when (@media-common = true) {
+    // ---------- 1. instant filtering: loading state ----------
+    body.ts-ux-loading::before {
+        content: '';
+        position: fixed;
+        z-index: 1000;
+        top: 0;
+        left: 0;
+        height: 3px;
+        width: 100%;
+        background: linear-gradient(90deg, @ts-kitchen, @ts-optic, @ts-kitchen);
+        background-size: 200% 100%;
+        animation: ts-ux-bar 1s linear infinite;
+    }
+    body.ts-ux-loading .column.main .products.wrapper,
+    body.ts-ux-loading .column.main .ts-ux-more,
+    body.ts-ux-loading .column.main .message.empty {
+        opacity: .45;
+        transition: opacity .15s;
+        pointer-events: none;
+    }
+    @keyframes ts-ux-bar { from { background-position: 200% 0; } to { background-position: 0 0; } }
+
+    // the pager and per-page picker give way to infinite scroll
+    body.ts-ux-listing .column.main .products.wrapper ~ .toolbar-products { display: none; }
+    body.ts-ux-listing .column.main .toolbar-products .limiter { display: none; }
+
+    // phones: "Show N items" at the foot of the open filter drawer
+    .ts-ux-apply { display: none; }
+    // phones: active filters as removable chips under the toolbar (desktop has them in the sidebar)
+    .ts-ux-chips { display: none; }
+    // ---------- 2. infinite scroll ----------
+    .ts-ux-more {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        margin: 48px 0 8px;
+        text-align: center;
+        &[hidden] { display: none; }
+        &__count { margin: 0; font-size: 13.5px; color: @ts-muted; }
+        &__bar {
+            width: 220px;
+            max-width: 70%;
+            height: 3px;
+            border-radius: 3px;
+            background: @ts-line;
+            overflow: hidden;
+            span { display: block; height: 100%; background: @ts-kitchen; border-radius: inherit; transition: width .4s @ts-ease; }
+        }
+        &__btn { min-width: 200px; }
+        &__btn[hidden] { display: none !important; }
+        &__sentinel { height: 1px; width: 100%; }
+        &.is-loading &__btn { opacity: .6; pointer-events: none; }
+        &.is-done &__bar { display: none; }
+    }
+    .ts-ux-prev { text-align: center; margin: 0 0 32px; }
+    .products-grid .product-items > .ts-ux-new { animation: ts-ux-in .5s @ts-ease both; }
+    @keyframes ts-ux-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+    // ---------- 9. price slider ----------
+    .ts-ux-price {
+        position: relative;
+        padding: 6px 4px 8px;
+        &__track { position: relative; height: 4px; margin: 14px 11px 0; border-radius: 4px; background: @ts-line; }
+        &__fill { position: absolute; top: 0; bottom: 0; background: @ts-kitchen; border-radius: inherit; }
+        &__ranges {
+            position: relative;
+            height: 0;
+            margin: 0;
+            input[type='range'] {
+                position: absolute;
+                z-index: 3;
+                top: -15px;
+                left: 0;
+                width: 100%;
+                height: 26px;
+                margin: 0;
+                padding: 0;
+                border: 0;
+                background: none;
+                pointer-events: none;
+                -webkit-appearance: none;
+                appearance: none;
+                &::-webkit-slider-runnable-track { background: none; border: 0; height: 26px; }
+                &::-moz-range-track { background: none; border: 0; }
+                &::-webkit-slider-thumb {
+                    -webkit-appearance: none;
+                    pointer-events: auto;
+                    width: 22px;
+                    height: 22px;
+                    margin-top: 2px;
+                    border-radius: 50%;
+                    background: #fff;
+                    border: 2px solid @ts-kitchen;
+                    box-shadow: 0 2px 6px rgba(19, 32, 27, .25);
+                    cursor: grab;
+                }
+                &::-moz-range-thumb {
+                    pointer-events: auto;
+                    width: 18px;
+                    height: 18px;
+                    border-radius: 50%;
+                    background: #fff;
+                    border: 2px solid @ts-kitchen;
+                    box-shadow: 0 2px 6px rgba(19, 32, 27, .25);
+                    cursor: grab;
+                }
+                &:focus-visible { outline: 0; }
+                &:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px fade(@ts-optic, 90%); }
+                &:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 4px fade(@ts-optic, 90%); }
+            }
+        }
+        &__fields {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            margin-top: 26px;
+            label { flex: 1; display: block; margin: 0; > span:first-child { display: block; font-size: 12px; color: @ts-muted; margin-bottom: 4px; } }
+        }
+        &__input {
+            position: relative;
+            display: block;
+            i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-style: normal; color: @ts-muted; font-size: 14px; }
+            input {
+                width: 100%;
+                height: 40px;
+                padding: 0 8px 0 24px;
+                border: 1px solid @ts-line;
+                border-radius: 10px;
+                background: #fff;
+                font-size: 14px;
+                -moz-appearance: textfield;
+                &::-webkit-outer-spin-button, &::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+            }
+        }
+        &__dash { width: 10px; height: 1px; background: @ts-muted; margin-bottom: 20px; }
+    }
+}

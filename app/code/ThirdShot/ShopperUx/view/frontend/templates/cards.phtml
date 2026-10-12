@@ -1,0 +1,59 @@
+<?php
+/**
+ * One product card in the native listing markup (see Magento_Catalog::product/list.phtml).
+ *
+ * @var \ThirdShot\ShopperUx\Block\ProductCards $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+use Magento\Framework\App\Action\Action;
+
+$product = $block->getCurrentProduct();
+if (!$product) {
+    return;
+}
+$id = (int)$product->getId();
+$url = $product->getProductUrl();
+$name = (string)$product->getName();
+?>
+<li class="item product product-item ts-ux-card">
+    <div class="product-item-info" id="product-item-info_<?= $id ?>" data-container="product-grid">
+        <a href="<?= $escaper->escapeUrl($url) ?>" class="product photo product-item-photo" tabindex="-1">
+            <?= $block->getImage($product, 'category_page_grid')->toHtml() ?>
+        </a>
+        <div class="product details product-item-details">
+            <strong class="product name product-item-name">
+                <a class="product-item-link" href="<?= $escaper->escapeUrl($url) ?>"><?= $escaper->escapeHtml($name) ?></a>
+            </strong>
+            <?= $block->getReviewsSummaryHtml($product, \Magento\Catalog\Block\Product\ReviewRendererInterface::SHORT_VIEW) ?>
+            <?= /* @noEscape */ $block->getProductPrice($product) ?>
+            <div class="product-item-inner">
+                <div class="product actions product-item-actions">
+                    <div class="actions-primary">
+                        <?php if (!$product->isSaleable()): ?>
+                            <div class="stock unavailable"><span><?= $escaper->escapeHtml(__('Out of stock')) ?></span></div>
+                        <?php elseif ($block->needsOptions($product)): ?>
+                            <button type="button" class="action tocart primary" data-ts-qv="<?= $id ?>"
+                                    data-ts-qv-url="<?= $escaper->escapeUrl($url) ?>">
+                                <span><?= $escaper->escapeHtml(__('Choose options')) ?></span>
+                            </button>
+                        <?php else: ?>
+                            <?php $post = $block->getAddToCartPostParams($product); ?>
+                            <form data-role="tocart-form" data-product-sku="<?= $escaper->escapeHtmlAttr($product->getSku()) ?>"
+                                  action="<?= $escaper->escapeUrl($post['action']) ?>"
+                                  data-mage-init='{"catalogAddToCart": {}}' method="post">
+                                <input type="hidden" name="product" value="<?= $id ?>">
+                                <input type="hidden" name="<?= /* @noEscape */ Action::PARAM_NAME_URL_ENCODED ?>"
+                                       value="<?= /* @noEscape */ $post['data'][Action::PARAM_NAME_URL_ENCODED] ?>">
+                                <input name="form_key" type="hidden" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>">
+                                <button type="submit" title="<?= $escaper->escapeHtmlAttr(__('Add to Cart')) ?>"
+                                        class="action tocart primary">
+                                    <span><?= $escaper->escapeHtml(__('Add to Cart')) ?></span>
+                                </button>
+                            </form>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</li>

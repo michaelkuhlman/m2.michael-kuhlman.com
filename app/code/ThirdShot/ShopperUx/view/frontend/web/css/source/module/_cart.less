@@ -1,0 +1,63 @@
+// ThirdShot_ShopperUx - cart (see ../_module.less for variables and mixins)
+
+& when (@media-common = true) {
+    // ---------- 7. free-shipping meter ----------
+    .ts-ux-ship {
+        &__msg { margin: 0 0 8px; font-size: 13.5px; color: @ts-ink; strong { font-weight: 700; } }
+        &__bar {
+            height: 6px;
+            border-radius: 6px;
+            background: @ts-sand;
+            overflow: hidden;
+            span { display: block; height: 100%; border-radius: inherit; background: @ts-kitchen; transition: width .5s @ts-ease; }
+        }
+        &.is-free &__msg { color: @ts-kitchen; &::before { .ux-icon(@ux-i-check, 15px); margin: -2px 6px 0 0; vertical-align: middle; } }
+        &.is-free &__bar span { background: linear-gradient(90deg, @ts-kitchen, @ts-court); }
+    }
+    #minicart-content-wrapper .ts-ux-ship-slot {
+        padding: 2px 0 16px;
+        margin-bottom: 14px;
+        border-bottom: 1px solid @ts-line;
+    }
+    .cart-summary .ts-ux-ship-slot { margin: 0 0 20px; padding: 14px 16px; border-radius: 12px; background: #fff; border: 1px solid @ts-line; }
+    .ts-ux-ship-slot:empty { display: none !important; }
+    // ---------- 8. bag page quantity steppers ----------
+    .ts-ux-qty {
+        display: inline-flex;
+        align-items: center;
+        height: 44px;
+        border: 1px solid @ts-line;
+        border-radius: 999px;
+        background: #fff;
+        overflow: hidden;
+        input.input-text.qty {
+            width: 40px !important;
+            height: 42px !important;
+            min-height: 0;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            text-align: center;
+            font-weight: 600;
+            font-size: 15px;
+            -moz-appearance: textfield;
+            &::-webkit-outer-spin-button, &::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        }
+        &__btn {
+            .ux-round-btn(40px);
+            height: 42px;
+            border-radius: 0;
+            background: transparent;
+            color: @ts-ink;
+            &:hover { background: fade(@ts-kitchen, 7%); color: @ts-kitchen; border: 0; }
+        }
+        &__minus::before { .ux-icon(@ux-i-minus, 18px); }
+        &__minus.is-remove::before { -webkit-mask-image: url(@ux-i-trash); mask-image: url(@ux-i-trash); }
+        &__plus::before { .ux-icon(@ux-i-plus, 18px); }
+    }
+    body.ts-ux-cart-live .cart.main.actions .action.update { display: none; }
+    .cart.items .ts-ux-pending .col.subtotal, .cart.items .ts-ux-pending .col.price { opacity: .45; transition: opacity .2s; }
+    .cart.items .ts-ux-removing { opacity: .4; pointer-events: none; }
+}

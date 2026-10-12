@@ -1,0 +1,43 @@
+<?php
+/**
+ * @var \ThirdShot\ShopperUx\Block\PriceSlider $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$config = $block->getConfig();
+if (!$config) {
+    return;
+}
+$uid = 'ts-ux-price-' . substr(sha1((string)$config['url']), 0, 6);
+?>
+<form class="ts-ux-price" method="get" action="<?= $escaper->escapeUrl(strtok((string)$config['url'], '?')) ?>"
+      data-mage-init='<?= $escaper->escapeHtmlAttr(json_encode(['ThirdShot_ShopperUx/js/price-slider' => $config])) ?>'>
+    <?php foreach ($block->getCarriedParams() as $name => $value): ?>
+        <input type="hidden" name="<?= $escaper->escapeHtmlAttr($name) ?>" value="<?= $escaper->escapeHtmlAttr($value) ?>">
+    <?php endforeach; ?>
+    <input type="hidden" name="<?= $escaper->escapeHtmlAttr($config['param']) ?>" value="" data-role="range">
+    <div class="ts-ux-price__track" data-role="track" aria-hidden="true">
+        <span class="ts-ux-price__fill" data-role="fill"></span>
+    </div>
+    <div class="ts-ux-price__ranges">
+        <input type="range" data-role="from" min="<?= (int)$config['min'] ?>" max="<?= (int)$config['max'] ?>" step="1"
+               value="<?= (int)$config['from'] ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Minimum price')) ?>">
+        <input type="range" data-role="to" min="<?= (int)$config['min'] ?>" max="<?= (int)$config['max'] ?>" step="1"
+               value="<?= (int)$config['to'] ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Maximum price')) ?>">
+    </div>
+    <div class="ts-ux-price__fields">
+        <label for="<?= $uid ?>-min">
+            <span><?= $escaper->escapeHtml(__('Min')) ?></span>
+            <span class="ts-ux-price__input"><i><?= $escaper->escapeHtml($config['symbol']) ?></i>
+                <input id="<?= $uid ?>-min" type="number" inputmode="numeric" data-role="from-input"
+                       min="<?= (int)$config['min'] ?>" max="<?= (int)$config['max'] ?>" value="<?= (int)$config['from'] ?>"></span>
+        </label>
+        <span class="ts-ux-price__dash" aria-hidden="true"></span>
+        <label for="<?= $uid ?>-max">
+            <span><?= $escaper->escapeHtml(__('Max')) ?></span>
+            <span class="ts-ux-price__input"><i><?= $escaper->escapeHtml($config['symbol']) ?></i>
+                <input id="<?= $uid ?>-max" type="number" inputmode="numeric" data-role="to-input"
+                       min="<?= (int)$config['min'] ?>" max="<?= (int)$config['max'] ?>" value="<?= (int)$config['to'] ?>"></span>
+        </label>
+    </div>
+    <noscript><button type="submit" class="action secondary"><?= $escaper->escapeHtml(__('Apply')) ?></button></noscript>
+</form>

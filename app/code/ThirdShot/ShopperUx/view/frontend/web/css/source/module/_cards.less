@@ -1,0 +1,185 @@
+// ThirdShot_ShopperUx - cards (see ../_module.less for variables and mixins)
+
+& when (@media-common = true) {
+    // ---------- 3. card tools: save (heart) + quick view ----------
+    .ts-ux-card-tools {
+        position: absolute;
+        z-index: 4;
+        top: 10px;
+        right: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .ts-ux-heart, .ts-ux-eye {
+        .ux-round-btn(38px);
+        background: fade(@ts-paper, 92%);
+        color: @ts-ink;
+        box-shadow: 0 2px 10px -4px rgba(19, 32, 27, .35);
+        -webkit-backdrop-filter: blur(6px);
+        backdrop-filter: blur(6px);
+        transition: background-color .2s, color .2s, opacity .25s @ts-ease, transform .25s @ts-ease;
+        &:hover, &:focus-visible { background: @ts-paper; color: @ts-kitchen; }
+        span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    }
+    .ts-ux-heart {
+        &::before { .ux-icon(@ux-i-heart, 19px); }
+        &[aria-pressed='true'] { color: @ts-clay; &::before { -webkit-mask-image: url(@ux-i-heart-f); mask-image: url(@ux-i-heart-f); } }
+        &.is-pop::before { animation: ts-ux-pop .4s @ts-ease; }
+    }
+    .ts-ux-eye { &::before { .ux-icon(@ux-i-eye, 20px); } }
+    @keyframes ts-ux-pop { 0% { transform: scale(1); } 40% { transform: scale(1.35); } 100% { transform: scale(1); } }
+
+    // quick view: pointer devices only (on touch, the card opens the product page)
+    .ts-ux-eye { display: none; }
+    @media (hover: hover) and (pointer: fine) {
+        .ts-ux-eye { display: inline-flex; opacity: 0; transform: translateY(-4px); }
+        .product-item:hover .ts-ux-eye, .product-item:focus-within .ts-ux-eye { opacity: 1; transform: none; }
+    }
+
+    // product page "Save for later"
+    .ts-ux-save {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 4px 0 14px;
+        padding: 8px 0;
+        background: none;
+        border: 0;
+        box-shadow: none;
+        color: @ts-ink;
+        font: 500 14px @ts-sans;
+        cursor: pointer;
+        &::before { .ux-icon(@ux-i-heart, 20px); }
+        &:hover { color: @ts-kitchen; background: none; border: 0; .ts-ux-save-text { text-decoration: underline; } }
+        &[aria-pressed='true'] { &::before { color: @ts-clay; -webkit-mask-image: url(@ux-i-heart-f); mask-image: url(@ux-i-heart-f); } }
+        &.is-pop::before { animation: ts-ux-pop .4s @ts-ease; }
+    }
+    // guests cannot use Magento's wish list without signing in; "Save for later" replaces it
+    .product-info-main .product-social-links .action.towishlist,
+    .product-info-main .product-addto-links .action.towishlist { display: none; }
+
+    .ts-ux-toast {
+        position: fixed;
+        z-index: 1200;
+        left: 50%;
+        bottom: 24px;
+        transform: translate(-50%, 20px);
+        opacity: 0;
+        pointer-events: none;
+        background: @ts-ink;
+        color: @ts-chalk;
+        border-radius: 999px;
+        padding: 12px 20px;
+        font-size: 14px;
+        box-shadow: 0 12px 30px -10px rgba(19, 32, 27, .5);
+        transition: opacity .25s, transform .3s @ts-ease;
+        white-space: nowrap;
+        a { color: @ts-optic; font-weight: 600; margin-left: 6px; text-decoration: underline; }
+        &.is-on { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+    }
+
+    // header link to Saved
+    .ts-ux-saved-link {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 999px;
+        color: @ts-ink;
+        text-decoration: none;
+        transition: background-color .2s, color .2s;
+        &::before { .ux-icon(@ux-i-heart, 22px); }
+        &:hover, &:focus-visible { background: fade(@ts-kitchen, 7%); color: @ts-kitchen; text-decoration: none; }
+        &:visited { color: @ts-ink; }
+        .ts-ux-saved-count {
+            position: absolute;
+            top: 4px;
+            right: 2px;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            border-radius: 999px;
+            background: @ts-clay;
+            color: #fff;
+            font: 700 ~"10.5px/18px" @ts-sans;
+            text-align: center;
+            &:empty { display: none; }
+        }
+    }
+    // ---------- 10. recently viewed / saved ----------
+    .ts-ux-strip {
+        clear: both;
+        margin: 56px 0 24px;
+        &[hidden] { display: none; }
+        &__head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+        &__title { margin: 0; font: 450 ~"clamp(24px, 1.2vw + 18px, 32px)/1.15" @ts-serif; }
+        .products-grid { margin: 0; }
+    }
+    .ts-ux-strip__clear {
+        background: none;
+        border: 0;
+        box-shadow: none;
+        padding: 6px 0;
+        color: @ts-muted;
+        font-size: 13.5px;
+        font-weight: 500;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        cursor: pointer;
+        &:hover { color: @ts-kitchen; background: none; border: 0; }
+    }
+    // a horizontally scrolling row (beats the theme's 3/4-column grid)
+    body .ts-ux-strip .products-grid .product-items.ts-ux-strip__row {
+        display: grid;
+        grid-template-columns: none;
+        grid-auto-flow: column;
+        grid-auto-columns: ~"calc((100% - 72px) / 4)";
+        gap: 24px;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: thin;
+        padding-bottom: 10px;
+        > .product-item { scroll-snap-align: start; }
+    }
+    .ts-ux-saved {
+        &__intro { color: @ts-muted; margin: -6px 0 28px; font-size: 15px; }
+        &__count { display: inline-block; margin-left: 6px; color: @ts-ink; font-weight: 600; &:empty { display: none; } }
+        &__empty { text-align: center; padding: 56px 20px; border: 1px dashed @ts-line; border-radius: 18px; margin-bottom: 24px;
+            &[hidden] { display: none; }
+            p { margin: 0 0 10px; color: @ts-muted; }
+            .action { margin-top: 10px; }
+        }
+        &__empty-title { font: 450 ~"26px/1.2" @ts-serif; color: @ts-ink !important; }
+        &__foot { margin-top: 24px; text-align: center; }
+        &:not(.is-filled) &__foot, &:not(.is-filled) .products.wrapper { display: none; }
+        .product-item.ts-ux-gone { opacity: 0; transform: scale(.96); transition: opacity .25s, transform .25s; }
+    }
+    // ---------- 11. back to top ----------
+    .ts-ux-top {
+        .ux-round-btn(48px);
+        position: fixed;
+        z-index: 90;
+        right: 20px;
+        bottom: 20px;
+        background: fade(@ts-ink, 88%);
+        color: @ts-chalk;
+        box-shadow: 0 10px 24px -10px rgba(0, 0, 0, .5);
+        opacity: 0;
+        transform: translateY(10px);
+        pointer-events: none;
+        transition: opacity .25s, transform .3s @ts-ease, bottom .3s @ts-ease;
+        &::before { .ux-icon(@ux-i-up, 22px); }
+        &:hover { background: @ts-kitchen; color: @ts-chalk; }
+        &.is-on { opacity: 1; transform: none; pointer-events: auto; }
+    }
+    body.ts-has-sticky-atc .ts-ux-top { bottom: 96px; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .ts-ux-qv__panel, .ts-ux-drawer__panel, .ts-ux-top, .ts-ux-toast { transition: none; }
+        .products-grid .product-items > .ts-ux-new { animation: none; }
+    }
+}

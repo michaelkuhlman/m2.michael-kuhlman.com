@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
+    <router id="standard">
+        <!-- JSON endpoints: /shopux/search/suggest, /shopux/product/cards -->
+        <route id="shopux" frontName="shopux">
+            <module name="ThirdShot_ShopperUx"/>
+        </route>
+        <!-- The guest "Saved" list: /saved -->
+        <route id="saved" frontName="saved">
+            <module name="ThirdShot_ShopperUx"/>
+        </route>
+    </router>
+</config>

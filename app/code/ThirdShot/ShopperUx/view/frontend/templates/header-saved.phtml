@@ -1,0 +1,12 @@
+<?php
+/**
+ * Header link to the guest "Saved" list; the count is filled in by JS from localStorage (FPC-safe).
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+?>
+<a class="ts-ux-saved-link" href="<?= $escaper->escapeUrl($block->getUrl('saved')) ?>"
+   aria-label="<?= $escaper->escapeHtmlAttr(__('Saved items')) ?>" title="<?= $escaper->escapeHtmlAttr(__('Saved')) ?>">
+    <span class="ts-ux-saved-count" aria-hidden="true"></span>
+</a>

@@ -1,0 +1,13 @@
+<?php
+/**
+ * @var \Magento\Catalog\Block\Product\View $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$product = $block->getProduct();
+if (!$product) {
+    return;
+}
+?>
+<a class="ts-ux-qv-full" href="<?= $escaper->escapeUrl($product->getProductUrl()) ?>" target="_top">
+    <?= $escaper->escapeHtml(__('View full details')) ?>
+</a>

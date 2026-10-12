@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="header-wrapper">
+            <block class="Magento\Framework\View\Element\Template" name="ts.ux.header.saved" after="ts.header.account"
+                   template="ThirdShot_ShopperUx::header-saved.phtml"/>
+        </referenceContainer>
+        <referenceContainer name="before.body.end">
+            <block class="Magento\Framework\View\Element\Template" name="ts.ux.config"
+                   template="ThirdShot_ShopperUx::config.phtml">
+                <arguments>
+                    <argument name="view_model" xsi:type="object">ThirdShot\ShopperUx\ViewModel\Config</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>
