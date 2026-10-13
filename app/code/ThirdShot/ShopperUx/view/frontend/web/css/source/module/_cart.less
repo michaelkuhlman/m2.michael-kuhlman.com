@@ -57,7 +57,18 @@
         &__minus.is-remove::before { -webkit-mask-image: url(@ux-i-trash); mask-image: url(@ux-i-trash); }
         &__plus::before { .ux-icon(@ux-i-plus, 18px); }
     }
-    body.ts-ux-cart-live .cart.main.actions .action.update { display: none; }
+    // !important: the global secondary-button rule in _base.less (long :not() chain) outranks any plain selector
+    body.ts-ux-cart-live .cart.main.actions .action.update { display: none !important; }
     .cart.items .ts-ux-pending .col.subtotal, .cart.items .ts-ux-pending .col.price { opacity: .45; transition: opacity .2s; }
     .cart.items .ts-ux-removing { opacity: .4; pointer-events: none; }
+}
+
+// Phones: the bag stepper is a primary touch control, keep every segment at least 44px
+// (beats the 36x38 compact rule in ../_module.less by specificity)
+.media-width(@extremum, @break) when (@extremum = 'max') and (@break = @screen__m) {
+    body .cart.item .ts-ux-qty {
+        height: 44px;
+        .ts-ux-qty__btn { width: 44px; height: 42px; }
+        input.input-text.qty { width: 40px !important; height: 42px !important; }
+    }
 }
