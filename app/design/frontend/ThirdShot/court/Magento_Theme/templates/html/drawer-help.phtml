@@ -1,0 +1,21 @@
+<?php
+/**
+ * Phone menu drawer: a "Help" group under Shop and Account (the drawer's bottom half was empty).
+ * Hidden on desktop, where the footer carries the same links.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$links = [
+    ['saved', __('Saved items')],
+    ['shipping-returns', __('Shipping & Returns')],
+    ['faq', __('FAQ')],
+    ['contact', __('Contact')],
+    ['sales/guest/form', __('Order status')],
+];
+?>
+<ul class="ts-drawer-help">
+    <?php foreach ($links as [$path, $label]): ?>
+        <li><a href="<?= $escaper->escapeUrl($block->getUrl($path)) ?>"><?= $escaper->escapeHtml($label) ?></a></li>
+    <?php endforeach; ?>
+</ul>

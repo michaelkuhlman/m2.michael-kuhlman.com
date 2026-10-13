@@ -21,6 +21,16 @@
                    template="Magento_Theme::html/ui-script.phtml"/>
         </referenceContainer>
 
+        <!-- phone drawer: Help links under Shop / Account -->
+        <referenceBlock name="navigation.sections">
+            <block class="Magento\Framework\View\Element\Template" name="store.help" group="navigation-sections"
+                   after="store.links" template="Magento_Theme::html/drawer-help.phtml">
+                <arguments>
+                    <argument name="title" translate="true" xsi:type="string">Help</argument>
+                </arguments>
+            </block>
+        </referenceBlock>
+
         <referenceBlock name="logo">
             <arguments>
                 <argument name="logo_file" xsi:type="string">images/logo.svg</argument>
