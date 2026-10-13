@@ -142,16 +142,39 @@
             transform .2s @ts-ease, box-shadow .2s @ts-ease;
     }
     .action.primary, button.action.primary, .action-primary {
-        padding: 13px 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-height: @ts-btn-h;
+        padding: 0 28px;
         font-size: 15px;
         line-height: 1.2;
+        text-align: center;
         &:hover { box-shadow: 0 8px 20px -6px rgba(23, 58, 46, .45); }
         &:active { transform: translateY(1px); box-shadow: none; }
         &[disabled], &.disabled { opacity: .55; box-shadow: none; }
     }
-    // secondary (Luma "action" buttons: update cart, apply coupon...)
-    button.action:not(.primary):not(.tocart):not(.search):not(.close):not(.action-close):not(.delete):not(.edit):not(.nav-toggle) {
+    // secondary (Luma "action" buttons: update cart, apply coupon...) and secondary links styled as buttons
+    button.action:not(.primary):not(.tocart):not(.search):not(.close):not(.action-close):not(.delete):not(.edit):not(.nav-toggle):not([class*='ts-ux']),
+    a.action.secondary:not([class*='ts-ux']) {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: @ts-btn-h;
+        padding: 0 24px;
         border-radius: 999px;
+        font-size: 15px;
+        line-height: 1.2;
+        text-align: center;
+    }
+    a.action.secondary:not([class*='ts-ux']) {
+        border: 1.5px solid @ts-kitchen;
+        color: @ts-kitchen;
+        background: transparent;
+        font-weight: 600;
+        text-decoration: none;
+        &:hover { background: @ts-kitchen; color: @ts-chalk; text-decoration: none; }
     }
 
     .ts-btn {
@@ -159,7 +182,7 @@
         align-items: center;
         justify-content: center;
         gap: 10px;
-        min-height: 50px;
+        min-height: @ts-btn-h;
         padding: 0 28px;
         text-decoration: none;
         font-family: @ts-sans;
@@ -204,7 +227,7 @@
         &::placeholder { color: #7D877F; }
     }
     input[type='text'], input[type='email'], input[type='password'], input[type='tel'], input[type='number'],
-    input[type='search'], input[type='url'], select { min-height: 48px; }
+    input[type='search'], input[type='url'], select { min-height: @ts-btn-h; }
     select {
         -webkit-appearance: none;
         appearance: none;
@@ -228,7 +251,15 @@
     .fieldset > .fields > .field.required > .label::after,
     .fieldset > .field._required > .label::after { color: @ts-clay; }
     div.mage-error, div.field-error { color: #A8401C; font-size: 13px; margin-top: 6px; }
-    input.mage-error, select.mage-error, textarea.mage-error { border-color: #C9603A; }
+    input.mage-error, select.mage-error, textarea.mage-error {
+        border-color: #C9603A;
+        // the green focus ring used to hide the error state on the field being fixed
+        &:focus { border-color: #C9603A; box-shadow: 0 0 0 3px rgba(201, 96, 58, .18); }
+    }
+
+    // headlines break evenly, paragraphs avoid one-word last lines
+    h1, h2, h3, .page-title { text-wrap: balance; }
+    p, .ts-lede { text-wrap: pretty; }
     .field-tooltip .field-tooltip-action::before { color: @ts-muted; }
     .fieldset > .legend, .fieldset > .legend span { font-family: @ts-serif; font-weight: 450; }
 

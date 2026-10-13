@@ -9,4 +9,13 @@
     <type name="Magento\LayeredNavigation\Block\Navigation\FilterRenderer">
         <plugin name="thirdshot_shopperux_price_slider" type="ThirdShot\ShopperUx\Plugin\PriceSliderRenderer" sortOrder="20"/>
     </type>
+    <type name="ThirdShot\ShopperUx\Observer\ShortMenuLabels">
+        <arguments>
+            <argument name="labels" xsi:type="array">
+                <item name="bags-covers" xsi:type="string">Bags</item>
+                <item name="apparel-headwear" xsi:type="string">Apparel</item>
+                <item name="court-training" xsi:type="string">Training</item>
+            </argument>
+        </arguments>
+    </type>
 </config>

@@ -76,23 +76,12 @@
 // Desktop / tablet (styles-l)
 .media-width(@extremum, @break) when (@extremum = 'min') and (@break = @screen__m) {
     body .header.content .ts-ux-saved-link { order: 4; }
-    // the Saved heart costs the one-row header ~52px: give it back from the search pill and the nav padding
-    // (html-prefixed: the theme's _extend.less compiles after module styles)
-    @media (min-width: 1280px) and (max-width: 1439px) {
-        html body .header.content .block-search { width: 156px; flex: none; }
-        html body .header.content .nav-sections { margin-right: 14px; }
-        html body .navigation .level0 > .level-top { padding-left: 9px; padding-right: 9px; &::after { left: 9px; right: 9px; } }
-    }
-    @media (min-width: 1440px) {
-        html body .header.content .block-search { width: 176px; flex: none; }
-        html body .header.content .nav-sections { margin-right: 16px; }
-        html body .navigation .level0 > .level-top { padding-left: 12px; padding-right: 12px; &::after { left: 12px; right: 12px; } }
-    }
 }
 
 // Phones (after Luma's and the theme's mobile rules)
 .media-width(@extremum, @break) when (@extremum = 'max') and (@break = @screen__m) {
-    body .header.content .ts-ux-saved-link { order: 4; width: 40px; }
+    body .header.content .ts-ux-saved-link { order: 4; width: 44px; }
+    body .nav-toggle { margin-left: -12px; }
     // 97% opaque sticky header let page text ghost through behind the logo on phones
     html body .page-header { background: @ts-chalk; }
     .ts-ux-qv {

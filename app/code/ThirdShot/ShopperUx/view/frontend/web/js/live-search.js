@@ -31,15 +31,6 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
         panel.setAttribute('aria-label', 'Search suggestions');
         // inside .control: on phones that is the field that drops down under the header, so the panel follows it
         (form.querySelector('.control') || form).appendChild(panel);
-        // the pill is narrower at 1280-1439 (room for the Saved heart): keep the placeholder whole
-        var fullPh = input.getAttribute('placeholder') || '', narrow = window.matchMedia('(min-width: 1280px) and (max-width: 1439px)');
-        function fitPlaceholder() {
-            input.setAttribute('placeholder', narrow.matches ? 'Search' : fullPh);
-        }
-        fitPlaceholder();
-        if (narrow.addEventListener) {
-            narrow.addEventListener('change', fitPlaceholder);
-        }
         input.setAttribute('aria-controls', 'ts-ux-search');
         input.setAttribute('aria-autocomplete', 'list');
 
