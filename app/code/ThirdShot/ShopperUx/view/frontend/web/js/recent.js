@@ -26,12 +26,24 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
         return input ? Number(input.value) : 0;
     }
 
+    /** On the bag page the "recently viewed" strip leaves out what is already in the bag. */
     function render(box) {
+        if (document.body.classList.contains('checkout-cart-index') && box.getAttribute('data-ts-ux-strip') === 'recent') {
+            require(['Magento_Customer/js/customer-data'], function (customerData) {
+                var items = (customerData.get('cart')() || {}).items || [];
+                draw(box, items.map(function (i) { return Number(i.product_id); }));
+            });
+            return;
+        }
+        draw(box, []);
+    }
+
+    function draw(box, exclude) {
         var kind = box.getAttribute('data-ts-ux-strip'),
             key = kind === 'saved' ? 'ts-ux-saved' : KEY,
             limit = Number(box.getAttribute('data-limit') || 12),
             skip = currentProductId(),
-            ids = util.list(key).filter(function (x) { return x !== skip; }).slice(0, limit),
+            ids = util.list(key).filter(function (x) { return x !== skip && exclude.indexOf(x) < 0; }).slice(0, limit),
             list = box.querySelector('.product-items'),
             empty = box.querySelector('[data-role="empty"]'),
             seq = (box.tsUxSeq = (box.tsUxSeq || 0) + 1);

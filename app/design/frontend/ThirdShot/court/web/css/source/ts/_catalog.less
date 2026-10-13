@@ -116,6 +116,23 @@
             .swatch-option-link-layered { display: inline-block; padding: 0; }
             .swatch-option.color { width: 30px; height: 30px; margin: 0 10px 10px 0; border-radius: 999px; }
             .swatch-option.text { border-radius: 999px; padding: 6px 12px; height: auto; background: @ts-paper; border: 1px solid @ts-line; margin: 0 8px 8px 0; }
+            // colour / image swatches as rows (swatch + name), like the text filters (template: Magento_Swatches)
+            .ts-swatch-rows {
+                .swatch-attribute-options { display: block; margin: 0; }
+                .swatch-option-link-layered {
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-start;
+                    gap: 12px;
+                    min-height: 44px;
+                    padding: 0;
+                    color: @ts-body;
+                    font-size: 14.5px;
+                    &:hover { color: @ts-kitchen; .swatch-option { box-shadow: 0 0 0 2px @ts-chalk, 0 0 0 3.5px @ts-ink; } }
+                }
+                .swatch-option.color, .swatch-option.image { flex: none; width: 24px; min-width: 24px; height: 24px; margin: 0; border-radius: 999px; float: none; }
+                .swatch-option.disabled + .ts-swatch-name { color: @ts-muted; text-decoration: line-through; }
+            }
             .price { font-weight: 500; }
         }
     }
@@ -129,9 +146,9 @@
         .sorter-options {
             min-height: @ts-pill-h;
             height: @ts-pill-h;
-            border-radius: 999px;
+            border-radius: 999px 0 0 999px;
             padding-left: 18px;
-            margin: 0 8px 0 10px;
+            margin: 0 0 0 10px;
             font-weight: 500;
             color: @ts-ink;
             background-color: @ts-paper;
@@ -147,7 +164,11 @@
             width: @ts-pill-h;
             height: @ts-pill-h;
             border: 1px solid @ts-line;
-            border-radius: 999px;
+            border-left: 0;
+            // one segmented pill with the select: [ Featured  v | arrow ]
+            border-radius: 0 999px 999px 0;
+            width: 48px;
+            padding-right: 4px;
             background: @ts-paper;
             color: @ts-ink;
             vertical-align: middle;
@@ -202,6 +223,15 @@
     .block.upsell .products-grid .product-items,
     .block.crosssell .products-grid .product-items {
         grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    @media (min-width: 1024px) {
+        // 1-3 cross-sell picks fill the row instead of leaving a 4th column empty
+        .block.crosssell .products-grid .product-items:not(:has(> .product-item:nth-child(4))) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        // related / upsell are scroll strips (_product.less); with 1-3 cards they fill the row as thirds
+        body.catalog-product-view .block.related .products-grid .product-items:not(:has(> .product-item:nth-child(4))),
+        body.catalog-product-view .block.upsell .products-grid .product-items:not(:has(> .product-item:nth-child(4))) {
+            grid-auto-columns: ~"calc((100% - 48px) / 3)";
+        }
     }
 
     .products-grid .product-item {
@@ -321,15 +351,16 @@
         .cms-index-index .block.widget .products-grid .product-items,
         .block.related .products-grid .product-items,
         .block.upsell .products-grid .product-items,
-        .block.crosssell .products-grid .product-items { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        // full-width grids (home, 1-column pages, related / upsell / cross-sell, /saved/) fit 3 cards of ~230px
-        .page-layout-1column .products-grid .product-items,
-        .cms-index-index .block.widget .products-grid .product-items,
-        .block.related .products-grid .product-items,
-        .block.upsell .products-grid .product-items,
         .block.crosssell .products-grid .product-items { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px 20px; }
+        // the listing is full width here (filters in the drawer) and every other grid fits 3 cards of ~227px
+        .page-layout-1column .products-grid .product-items { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px 20px; }
+        // home widgets hold 4 or 8 products: 4-up so no row is left with an orphan
+        .cms-index-index .block.widget .products-grid .product-items { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 36px 16px; }
+        // cart cross-sell: 4-up when it has 4+ picks
+        .block.crosssell .products-grid .product-items:has(> .product-item:nth-child(4)) { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 36px 16px; }
         body .ts-ux-strip .products-grid .product-items.ts-ux-strip__row { grid-auto-columns: ~"calc((100% - 40px) / 3)"; gap: 20px; }
-        body.page-layout-2columns-left .ts-ux-strip .products-grid .product-items.ts-ux-strip__row { grid-auto-columns: ~"calc((100% - 24px) / 2)"; gap: 24px; }
+        // ~227px (and 165px home) cards wrap many names: two lines reserved so prices stay on one line per row
+        .products-grid .product-item .product-item-name { min-height: ~"calc(2 * 1.35em)"; }
         .ts-cat-hero__copy { padding: 32px; }
         .category-view { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
     }
@@ -364,6 +395,138 @@
 
 }
 
+// Phone listing chrome, also used on tablets (768-1023): [ Filter ] [ Sort ] row + the full-screen filter drawer
+.ts-filter-drawer() {
+    // toolbar row: [ Filter ] [ Sort ]
+    .page-with-filter .columns { position: relative; padding-top: 0; }
+    .page-with-filter .toolbar-products {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px 12px;
+        margin-bottom: 22px;
+        // Luma's clearfix pseudo-elements are flex items here: the empty ::after took a 10px gap at the right
+        &::before, &::after { display: none; }
+        .sorter { float: none; width: ~"calc(50% - 6px)"; position: static; display: flex; align-items: center; margin: 0; padding: 0; }
+        .sorter-label { display: none; }
+        .sorter-options { flex: 1; margin: 0; width: 100%; font-size: 15px; border-radius: 999px; }
+        .sorter-action { display: none; }
+        .toolbar-amount { order: 3; flex: 1 0 100%; line-height: 1.2; padding-top: 4px; position: static; font-size: 13px; }
+    }
+    .block.filter {
+        margin-bottom: 0;
+        .filter-title strong {
+            position: absolute;
+            box-sizing: border-box;
+            z-index: 3;
+            top: 0;
+            left: 0;
+            width: ~"calc(50% - 6px)";
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: 1px solid @ts-line;
+            border-radius: 999px;
+            background: @ts-paper;
+            box-shadow: none;
+            color: @ts-ink;
+            font: 600 ~"14.5px/1" @ts-sans;
+            letter-spacing: 0;
+            text-transform: none;
+            padding: 0 16px;
+            &::before { .ts-icon(@ts-i-filter, 18px); }
+        }
+    }
+    // the open drawer
+    .filter.active {
+        .filter-title {
+            height: 64px;
+            border-bottom: 1px solid @ts-line;
+            background: @ts-chalk;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            strong {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                left: auto;
+                width: 44px;
+                height: 44px;
+                padding: 0;
+                border: 0;
+                background: transparent;
+                font-size: 0;
+                &::before { .ts-icon(@ts-i-close, 22px); color: @ts-ink; }
+                &::after { display: none; }
+            }
+            &::before {
+                content: 'Filter';
+                font: 450 ~"24px/1" @ts-serif;
+                color: @ts-ink;
+            }
+        }
+        .filter-subtitle { display: none; }
+        .filter-options, .filter-content > .block-subtitle + .items {
+            top: 64px;
+            background: @ts-chalk;
+            padding: 4px 20px 40px;
+        }
+        .filter-options-title { font-size: 16px; padding-top: 19px; padding-bottom: 19px; &::after { top: 21px; } }
+        // the header's hairline is the first group's top rule (two lines 4px apart before)
+        .filter-options { padding-top: 0; }
+        .filter-options-item:first-child .filter-options-title { border-top: 0; }
+        .filter-current { padding: 14px 20px 0; }
+    }
+}
+
+// Luma's own phone rules for the layered-nav drawer (styles-m only), re-applied on tablets where styles-l has
+// already laid the filters out as a sidebar
+.ts-luma-filter-drawer() {
+    .page-with-filter .columns { display: flex; flex-wrap: wrap; position: relative; padding-top: 0; }
+    .page-with-filter .columns .sidebar-main { order: 0; flex: 1 0 100%; width: 100%; float: none; padding: 0; }
+    .page-with-filter .columns .column.main { order: 1; flex: 1 0 100%; width: 100%; float: none; padding-left: 0; padding-right: 0; }
+    .page-with-filter .columns .sidebar-additional { order: 2; flex: 1 0 100%; width: 100%; float: none; padding: 0; }
+    .block.filter { margin-bottom: 0; }
+    .block.filter .filter-title, .sidebar-main .block.filter .filter-title { display: block; margin: 0; }
+    .block.filter .filter-subtitle { display: none; }
+    .block.filter .filter-current, .block.filter .filter-actions { display: none; }
+    .block.filter .filter-options { display: none; }
+    .filter.active { position: relative; visibility: visible; z-index: 99; }
+    .filter.active .filter-title { position: fixed; left: 0; right: 0; top: 0; z-index: 2; }
+    .filter.active .filter-options {
+        display: block;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 10;
+        overflow: auto;
+        clear: none;
+    }
+    .filter.active .filter-options-item:last-child { margin-bottom: 48px; }
+    body.filter-active .page-header { display: none; }
+    body.filter-active .page-wrapper { height: 0; margin-top: -999999em; visibility: hidden; }
+    body.filter-active .columns { z-index: 999; }
+}
+// tablet-only tweaks on top of the phone chrome
+.ts-tablet-filter() {
+    // compact pills instead of two halves of a 720px row; the count sits between them
+    .page-with-filter .toolbar-products .sorter { width: 240px; }
+    .block.filter .filter-title strong { width: 240px; }
+    .page-with-filter .toolbar-products .toolbar-amount { order: 0; flex: 1 1 auto; padding: 0 0 0 252px; line-height: 44px; }
+    // a phone-width column centred in the tablet-wide sheet
+    .filter.active .filter-options {
+        padding-left: ~"max(20px, calc((100% - 640px) / 2))";
+        padding-right: ~"max(20px, calc((100% - 640px) / 2))";
+    }
+    .filter.active .filter-title { padding-left: ~"max(20px, calc((100% - 640px) / 2))"; }
+    .filter.active .filter-title strong { right: ~"max(10px, calc((100% - 640px) / 2 - 10px))"; }
+}
+
 // Desktop rules (styles-l.css, after Luma's own)
 .media-width(@extremum, @break) when (@extremum = 'min') and (@break = @screen__m) {
     body {
@@ -377,10 +540,13 @@
             .toolbar-amount { order: 1; float: none; }
             .sorter { order: 2; float: none; margin-left: auto; display: flex; align-items: center; }
         }
-        // tablet: a 110px filter column wrapped "Core / Thickness"; give it ~190px
-        @media (max-width: 1023px) {
-            &.page-layout-2columns-left .sidebar-main { width: 28%; padding-right: 24px; }
-            &.page-layout-2columns-left .column.main { width: 72%; }
+    }
+    // tablets list like phones: Filter pill + drawer and a full-width 3-up grid (the sidebar left a ~2000px dead column)
+    @media (max-width: 1023px) {
+        html {
+            .ts-luma-filter-drawer();
+            .ts-filter-drawer();
+            .ts-tablet-filter();
         }
     }
     // undo Luma's "lifted white card" hover on listings
@@ -425,10 +591,13 @@
             .product-item-actions .actions-primary .action.tocart, .product-item-actions .actions-primary .stock {
                 pointer-events: auto;
                 box-sizing: border-box;
-                display: block;
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 margin: 0;
                 width: 100%;
-                padding: 13px 16px;
+                min-height: @ts-btn-h-sm;
+                padding: 0 16px;
                 font-size: 14px;
                 background: fade(@ts-paper, 94%);
                 color: @ts-ink;
@@ -436,7 +605,8 @@
                 box-shadow: 0 6px 20px -8px rgba(19, 32, 27, .35);
                 -webkit-backdrop-filter: blur(6px);
                 backdrop-filter: blur(6px);
-                &:hover { background: @ts-kitchen; color: @ts-chalk; }
+                &:hover { background: @ts-kitchen; color: @ts-chalk; box-shadow: 0 6px 20px -8px rgba(19, 32, 27, .35); }
+                &:active { transform: none; }
             }
             .product-item-actions .actions-primary .stock { display: none; }
             &:hover .product-item-inner, &:focus-within .product-item-inner,
@@ -483,88 +653,5 @@
             .product-reviews-summary .reviews-actions { font-size: 12px; }
         }
 
-        // toolbar row: [ Filter ] [ Sort ]
-        .page-with-filter .columns { position: relative; padding-top: 0; }
-        .page-with-filter .toolbar-products {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px 12px;
-            margin-bottom: 22px;
-            // Luma's clearfix pseudo-elements are flex items here: the empty ::after took a 10px gap at the right
-            &::before, &::after { display: none; }
-            .sorter { float: none; width: ~"calc(50% - 6px)"; position: static; display: flex; align-items: center; margin: 0; padding: 0; }
-            .sorter-label { display: none; }
-            .sorter-options { flex: 1; margin: 0; width: 100%; font-size: 15px; }
-            .sorter-action { display: none; }
-            .toolbar-amount { order: 3; flex: 1 0 100%; line-height: 1.2; padding-top: 4px; position: static; font-size: 13px; }
-        }
-        .block.filter {
-            margin-bottom: 0;
-            .filter-title strong {
-                position: absolute;
-                box-sizing: border-box;
-                z-index: 3;
-                top: 0;
-                left: 0;
-                width: ~"calc(50% - 6px)";
-                height: 44px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 8px;
-                border: 1px solid @ts-line;
-                border-radius: 999px;
-                background: @ts-paper;
-                box-shadow: none;
-                color: @ts-ink;
-                font: 600 ~"14.5px/1" @ts-sans;
-                letter-spacing: 0;
-                text-transform: none;
-                padding: 0 16px;
-                &::before { .ts-icon(@ts-i-filter, 18px); }
-            }
-        }
-        // the open drawer
-        .filter.active {
-            .filter-title {
-                height: 64px;
-                border-bottom: 1px solid @ts-line;
-                background: @ts-chalk;
-                display: flex;
-                align-items: center;
-                padding: 0 20px;
-                strong {
-                    position: absolute;
-                    top: 10px;
-                    right: 10px;
-                    left: auto;
-                    width: 44px;
-                    height: 44px;
-                    padding: 0;
-                    border: 0;
-                    background: transparent;
-                    font-size: 0;
-                    &::before { .ts-icon(@ts-i-close, 22px); color: @ts-ink; }
-                    &::after { display: none; }
-                }
-                &::before {
-                    content: 'Filter';
-                    font: 450 ~"24px/1" @ts-serif;
-                    color: @ts-ink;
-                }
-            }
-            .filter-subtitle { display: none; }
-            .filter-options, .filter-content > .block-subtitle + .items {
-                top: 64px;
-                background: @ts-chalk;
-                padding: 4px 20px 40px;
-            }
-            .filter-options-title { font-size: 16px; padding-top: 19px; padding-bottom: 19px; &::after { top: 21px; } }
-            // the header's hairline is the first group's top rule (two lines 4px apart before)
-            .filter-options { padding-top: 0; }
-            .filter-options-item:first-child .filter-options-title { border-top: 0; }
-            .filter-current { padding: 14px 20px 0; }
-        }
+        .ts-filter-drawer();
     }

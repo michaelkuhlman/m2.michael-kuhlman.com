@@ -74,8 +74,9 @@
     .ts-ux-chip {
         display: inline-flex;
         align-items: center;
-        min-height: 34px;
+        min-height: @ts-btn-h-sm;
         padding: 0 14px;
+        @media (pointer: coarse) { min-height: 44px; }
         border: 1px solid @ts-line;
         border-radius: 999px;
         background: #fff;

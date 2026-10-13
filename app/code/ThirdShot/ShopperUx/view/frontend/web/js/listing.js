@@ -340,30 +340,6 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
                 '</span> of <span class="toolbar-number">' + t + '</span>';
     }
 
-    /**
-     * Search "Did you mean": drop suggestions that are only a truncation of the query ("paddl" for "paddle") and
-     * related terms already offered above; drop a block left empty.
-     */
-    function tidySuggestions() {
-        if (!document.body.classList.contains('catalogsearch-result-index')) {
-            return;
-        }
-        var q = (new URL(location.href).searchParams.get('q') || '').trim().toLowerCase(), seen = {};
-        Array.prototype.forEach.call(document.querySelectorAll(MAIN + ' .search.results > dl.block'), function (dl) {
-            Array.prototype.forEach.call(dl.querySelectorAll('dd'), function (dd) {
-                var term = (dd.textContent || '').trim().toLowerCase();
-                if (!term || seen[term] || term === q || (q.indexOf(term) === 0 && term.length < q.length)) {
-                    dd.parentNode.removeChild(dd);
-                } else {
-                    seen[term] = 1;
-                }
-            });
-            if (!dl.querySelector('dd')) {
-                dl.parentNode.removeChild(dl);
-            }
-        });
-    }
-
     function appendFrom(doc, where) {
         var src = doc.querySelector(MAIN + ' .product-items'), l = list();
         if (!src || !l) {
@@ -586,7 +562,6 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
 
     function afterSwap() {
         $('body').addClass('ts-ux-listing');
-        tidySuggestions();
         buildMore();
         $(document).trigger('ts-ux:listing-updated');
     }

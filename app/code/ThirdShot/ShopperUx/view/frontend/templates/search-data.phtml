@@ -1,0 +1,51 @@
+<?php
+/**
+ * Search "Did you mean" (suggestions) and "Related search terms" (recommendations), as one chip row each.
+ * Replaces Magento_AdvancedSearch::search_data.phtml:
+ *  - suggestions only show when the query found no products (with results they read as a correction);
+ *  - a term that is the query itself or a truncation of it ("paddl" for "paddle") is dropped;
+ *  - a related term already offered as a suggestion is dropped.
+ *
+ * @var \Magento\AdvancedSearch\Block\SearchData $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$layout = $block->getLayout();
+$isSuggestions = $block->getNameInLayout() === 'search_suggestions';
+if ($isSuggestions) {
+    $list = $layout->getBlock('search_result_list');
+    $collection = $list ? $list->getLoadedProductCollection() : null;
+    if ($collection && $collection->getSize() > 0) {
+        return;
+    }
+}
+$query = mb_strtolower(trim((string)$block->getRequest()->getParam('q')));
+$skip = [$query => true];
+if (!$isSuggestions && ($suggest = $layout->getBlock('search_suggestions'))) {
+    $list = $layout->getBlock('search_result_list');
+    $collection = $list ? $list->getLoadedProductCollection() : null;
+    if (!$collection || !$collection->getSize()) {
+        foreach ($suggest->getItems() as $item) {
+            $skip[mb_strtolower((string)$item->getQueryText())] = true;
+        }
+    }
+}
+$terms = [];
+foreach ($block->getItems() as $item) {
+    $text = trim((string)$item->getQueryText());
+    $key = mb_strtolower($text);
+    if ($text === '' || isset($skip[$key]) || ($query !== '' && mb_strpos($query, $key) === 0)) {
+        continue;
+    }
+    $skip[$key] = true;
+    $terms[] = $text;
+}
+if (!$terms) {
+    return;
+}
+?>
+<dl class="block">
+    <dt class="title"><?= $escaper->escapeHtml(__($block->getTitle())) ?></dt>
+    <?php foreach ($terms as $text): ?>
+        <dd class="item"><a href="<?= $escaper->escapeUrl($block->getLink($text)) ?>"><?= $escaper->escapeHtml($text) ?></a></dd>
+    <?php endforeach; ?>
+</dl>

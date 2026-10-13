@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
-        <referenceContainer name="content">
+        <!-- full width under results + filters (inside "content" it started in the results column) -->
+        <referenceContainer name="columns">
             <block class="Magento\Framework\View\Element\Template" name="ts.ux.recent" after="-"
                    template="ThirdShot_ShopperUx::strip.phtml">
                 <arguments>
@@ -11,5 +12,8 @@
                 </arguments>
             </block>
         </referenceContainer>
+        <!-- "Did you mean" only when the query found nothing; no truncated or repeated terms -->
+        <referenceBlock name="search_suggestions" template="ThirdShot_ShopperUx::search-data.phtml"/>
+        <referenceBlock name="search_recommendations" template="ThirdShot_ShopperUx::search-data.phtml"/>
     </body>
 </page>

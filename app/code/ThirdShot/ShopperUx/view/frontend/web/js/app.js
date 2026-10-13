@@ -23,6 +23,7 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
             ship.init();
         });
         require(['ThirdShot_ShopperUx/js/recent'], function (recent) { recent.init(); });
+        require(['ThirdShot_ShopperUx/js/nobreak'], function (nobreak) { nobreak(); });
         require(['ThirdShot_ShopperUx/js/back-to-top'], function (top) { top.init(); });
 
         if (cls.contains('page-products')) {

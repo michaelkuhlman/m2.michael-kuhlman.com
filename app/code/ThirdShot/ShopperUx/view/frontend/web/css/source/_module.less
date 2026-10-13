@@ -78,9 +78,78 @@
 @import 'module/_overlays.less';
 @import 'module/_cart.less';
 
+// Listing chrome shared by phones and tablets (768-1023 list like phones: Filter pill + drawer)
+.ux-filter-drawer() {
+// filter drawer: sticky "Show N items" at the bottom
+.filter.active .ts-ux-apply {
+    display: block;
+    position: fixed;
+    z-index: 120; // above the drawer's .filter-options (Luma: 99)
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+    background: @ts-chalk;
+    border-top: 1px solid @ts-line;
+    .action { width: 100%; min-height: 50px; }
+}
+.filter.active .filter-options { padding-bottom: 110px !important; }
+.sidebar-main .block.filter:not(.active) .filter-current { display: none; }
+.block.filter:not(.active) .filter-title strong[data-ts-count]::after {
+    content: attr(data-ts-count);
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    box-sizing: border-box;
+    border-radius: 999px;
+    background: @ts-court;
+    color: @ts-chalk;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: center;
+}
+.ts-ux-fchips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: -6px 0 20px;
+}
+.ts-ux-fchips--drawer { margin: 14px 0 14px; }
+.ts-ux-fchip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: @ts-btn-h-sm;
+    padding: 0 12px 0 14px;
+    position: relative;
+    &::before { content: ''; position: absolute; inset: -2px 0; } // 44px hit area
+    border: 1px solid @ts-line;
+    border-radius: 999px;
+    background: @ts-paper;
+    color: @ts-ink;
+    font-size: 13.5px;
+    text-decoration: none;
+    span { font-weight: 600; }
+    &::after { content: '\00d7'; margin-left: 4px; font-size: 18px; line-height: 1; color: @ts-muted; }
+    &:hover, &:focus { color: @ts-ink; text-decoration: none; border-color: @ts-ink; }
+    &--clear { padding-left: 6px; background: transparent; border-color: transparent; color: @ts-clay; font-weight: 600; &::after { content: none; } }
+}
+}
+
+& when (@media-common = true) {
+    // 404 quick links (CMS page): 44px pills like every other chip row
+    body.cms-noroute-index .ts-404__links a { display: inline-flex; align-items: center; box-sizing: border-box; min-height: @ts-pill-h; padding: 0 18px; }
+}
+
 // Desktop / tablet (styles-l)
 .media-width(@extremum, @break) when (@extremum = 'min') and (@break = @screen__m) {
     body .header.content .ts-ux-saved-link { order: 4; }
+    @media (max-width: 1023px) {
+        html {
+            .ux-filter-drawer();
+            .filter.active .ts-ux-apply .action { display: flex; max-width: 640px; margin: 0 auto; }
+        }
+    }
 }
 
 // Phones (after Luma's and the theme's mobile rules)
@@ -94,60 +163,7 @@
         &__panel { width: 100vw; height: 92vh; height: ~"92dvh"; border-radius: 20px 20px 0 0; transform: translateY(40px); }
     }
     body.ts-ux-qv-frame .page-main { padding-top: 16px; }
-    // filter drawer: sticky "Show N items" at the bottom
-    .filter.active .ts-ux-apply {
-        display: block;
-        position: fixed;
-        z-index: 120; // above the drawer's .filter-options (Luma: 99)
-        left: 0;
-        right: 0;
-        bottom: 0;
-        padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
-        background: @ts-chalk;
-        border-top: 1px solid @ts-line;
-        .action { width: 100%; min-height: 50px; }
-    }
-    .filter.active .filter-options { padding-bottom: 110px !important; }
-    .sidebar-main .block.filter:not(.active) .filter-current { display: none; }
-    .block.filter:not(.active) .filter-title strong[data-ts-count]::after {
-        content: attr(data-ts-count);
-        min-width: 20px;
-        height: 20px;
-        padding: 0 6px;
-        box-sizing: border-box;
-        border-radius: 999px;
-        background: @ts-court;
-        color: @ts-chalk;
-        font-size: 12px;
-        line-height: 20px;
-        text-align: center;
-    }
-    .ts-ux-fchips {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin: -6px 0 20px;
-    }
-    .ts-ux-fchips--drawer { margin: 14px 0 14px; }
-    .ts-ux-fchip {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        min-height: @ts-btn-h-sm;
-        padding: 0 12px 0 14px;
-        position: relative;
-        &::before { content: ''; position: absolute; inset: -2px 0; } // 44px hit area
-        border: 1px solid @ts-line;
-        border-radius: 999px;
-        background: @ts-paper;
-        color: @ts-ink;
-        font-size: 13.5px;
-        text-decoration: none;
-        span { font-weight: 600; }
-        &::after { content: '\00d7'; margin-left: 4px; font-size: 18px; line-height: 1; color: @ts-muted; }
-        &:hover, &:focus { color: @ts-ink; text-decoration: none; border-color: @ts-ink; }
-        &--clear { padding-left: 6px; background: transparent; border-color: transparent; color: @ts-clay; font-weight: 600; &::after { content: none; } }
-    }
+    .ux-filter-drawer();
     // same card width and gap as the 2-up listing grid
     body .ts-ux-strip .products-grid .product-items.ts-ux-strip__row { grid-auto-columns: ~"calc((100% - 12px) / 2)"; gap: 12px; }
     .ts-ux-strip__head { margin-bottom: 24px; }
