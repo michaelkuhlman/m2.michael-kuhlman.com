@@ -124,8 +124,8 @@ Reload, never restart, shared services: `sudo nginx -t && sudo systemctl reload 
   critical CSS in the background (~2 min, log `var/log/thirdshot-critical-css.log`); `--no-critical` skips that.
 - **PHP change in app/code**: `sudo -u m2 php bin/magento setup:di:compile` then `cache:flush`.
 - **Product photos: Blender rendering is PAUSED at Michael's request (2026-10-11); do not start render jobs unless he
-  asks.** 61 renders exist (paddles, balls, bags, covers); 22 products show the branded placeholder
-  (`Magento_Catalog/web/images/product/placeholder/*.jpg` in the theme). When new images exist: put
+  asks.** Every product has photos now (Blender renders + the 2026-10-11/12 Gemini set); the branded placeholder
+  (`Magento_Catalog/web/images/product/placeholder/*.jpg` in the theme) only shows for new products. When new images exist: put
   `<SKU>_<n>.jpg` in `_build/renders/jpg/`, then `thirdshot:demo:seed --step=products,composite` (products without a
   gallery pick them up; `--fresh` to replace existing galleries). Pipeline if resumed: `_build/scripts/render_all.sh SKU`
   then `export_jpg.py` (Blender 4.4 Cycles CPU, no AVX here: ~75 s per 800x1000 frame, always niced).
@@ -137,6 +137,19 @@ Reload, never restart, shared services: `sudo nginx -t && sudo systemctl reload 
   Pages load the `.webp` siblings, so purge `file.jpg.webp` and `file.jpg.w480/.w800/.w1200.webp` too (or purge
   everything). The local WebP files regenerate by themselves (cron drops any older than its source).
 - **CMS content**: edit `_build/cms/...html`, then `thirdshot:demo:seed --step=cms` and `cache:flush`.
+
+## Design system (design pass 2026-10-12)
+- Control heights are tokens in `_theme.less`: `@ts-btn-h` 48 (buttons + fields), `@ts-btn-h-lg` 56 (the one big CTA:
+  add to bag, checkout, place order, Next), `@ts-btn-h-sm` 40 (compact card/drawer buttons, 44 on touch), `@ts-pill-h`
+  44 (search, sort, filter pill, icon buttons). Nothing tappable under 44px on phones (a `::after` hit area counts).
+  `.action.primary`, `button.action` secondaries and `a.action.secondary` are inline-flex pills in `ts/_base.less`.
+- Content edge = page container (1320 max, 24px gutter; 16px on phones); section spacing `@ts-section`; grid gutter 24px.
+- Main-menu labels are shortened by `ThirdShot\ShopperUx\Observer\ShortMenuLabels` (URL key => label in
+  ShopperUx `etc/frontend/di.xml`: Bags, Apparel, Training) so the one-row >=1280 header keeps a wide search field.
+  Category pages keep their full names.
+- Luma's clearfix `::before/::after` become flex/grid items whenever a container is made flex: hide them.
+- Critical CSS is a snapshot: after REMOVING or lowering a rule, regenerate it (`_build/perf/critical-css.sh`) before
+  judging the result in a browser.
 
 ## Quality gates
 - `php -l` every changed PHP/PHTML file; `setup:di:compile` must pass; LESS must compile (deploy_theme.sh fails loudly).
