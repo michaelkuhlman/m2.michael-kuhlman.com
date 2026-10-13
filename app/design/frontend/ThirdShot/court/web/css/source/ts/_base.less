@@ -331,7 +331,8 @@
 
     @media (prefers-reduced-motion: reduce) {
         html { scroll-behavior: auto; }
-        *, *::before, *::after {
+        // fotorama measures its stage through transitionend: killing its transitions left fullscreen blank
+        *:not([class*='fotorama']), *:not([class*='fotorama'])::before, *:not([class*='fotorama'])::after {
             animation-duration: .01ms !important;
             animation-iteration-count: 1 !important;
             transition-duration: .01ms !important;
