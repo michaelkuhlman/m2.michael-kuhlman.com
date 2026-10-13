@@ -244,6 +244,7 @@
             margin: 0;
             border: 0;
         }
+        .nav-sections-item-content#store\.help { display: none !important; }
         .navigation {
             background: transparent;
             font-weight: 500;
@@ -462,7 +463,8 @@
             width: auto;
         }
         .nav-sections-item-content#store\.menu::before,
-        .nav-sections-item-content#store\.links::before {
+        .nav-sections-item-content#store\.links::before,
+        .nav-sections-item-content#store\.help::before {
             display: block;
             padding: 0 22px 10px;
             font: 600 ~"11.5px/1" @ts-sans;
@@ -472,6 +474,23 @@
         }
         .nav-sections-item-content#store\.menu::before { content: 'Shop'; }
         .nav-sections-item-content#store\.links::before { content: 'Account'; margin-top: 30px; }
+        .nav-sections-item-content#store\.help::before { content: 'Help'; margin-top: 30px; }
+        .ts-drawer-help {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            li { margin: 0; }
+            a {
+                display: flex;
+                align-items: center;
+                min-height: 46px;
+                padding: 0 22px;
+                font-size: 16px;
+                font-weight: 500;
+                color: @ts-ink;
+                text-decoration: none;
+            }
+        }
 
         .navigation {
             background: transparent;
