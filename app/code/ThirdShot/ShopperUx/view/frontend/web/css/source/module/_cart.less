@@ -26,13 +26,14 @@
         display: inline-flex;
         align-items: center;
         height: 44px;
-        border: 1px solid @ts-line;
+        border: 0;
+        box-shadow: inset 0 0 0 1px @ts-line;   // drawn inside, so the segments get the full 44px
         border-radius: 999px;
         background: #fff;
         overflow: hidden;
         input.input-text.qty {
             width: 40px !important;
-            height: 42px !important;
+            height: 44px !important;
             min-height: 0;
             margin: 0 !important;
             padding: 0 !important;
@@ -47,14 +48,15 @@
         }
         &__btn {
             .ux-round-btn(40px);
-            height: 42px;
+            height: 44px;
             border-radius: 0;
             background: transparent;
             color: @ts-ink;
             &:hover { background: fade(@ts-kitchen, 7%); color: @ts-kitchen; border: 0; }
         }
         &__minus::before { .ux-icon(@ux-i-minus, 18px); }
-        &__minus.is-remove::before { -webkit-mask-image: url(@ux-i-trash); mask-image: url(@ux-i-trash); }
+        // qty 1 is the floor: removing is the trash icon in the row's edit/remove pair
+        &__minus.is-remove { opacity: .3; pointer-events: none; }
         &__plus::before { .ux-icon(@ux-i-plus, 18px); }
     }
     // !important: the global secondary-button rule in _base.less (long :not() chain) outranks any plain selector
@@ -68,7 +70,7 @@
 .media-width(@extremum, @break) when (@extremum = 'max') and (@break = @screen__m) {
     body .cart.item .ts-ux-qty {
         height: 44px;
-        .ts-ux-qty__btn { width: 44px; height: 42px; }
-        input.input-text.qty { width: 40px !important; height: 42px !important; }
+        .ts-ux-qty__btn { width: 44px; height: 44px; }
+        input.input-text.qty { width: 40px !important; height: 44px !important; }
     }
 }

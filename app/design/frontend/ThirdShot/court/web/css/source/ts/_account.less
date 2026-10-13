@@ -8,7 +8,8 @@
         .fieldset > .field { margin-bottom: 18px; }
         .fieldset::after { color: @ts-clay; font-size: 12.5px; margin-top: 16px; }
         .field.note { font-size: 14.5px; color: @ts-body; margin-bottom: 20px; }
-        .action.primary, .actions-toolbar .primary a.action.primary { display: inline-flex; align-items: center; justify-content: center; min-width: 180px; min-height: @ts-btn-h; padding: 0 30px; font-size: 15.5px; }
+        // .column.main: the footer newsletter Subscribe is an .action.primary too
+        .column.main .action.primary, .column.main .actions-toolbar .primary a.action.primary { display: inline-flex; align-items: center; justify-content: center; min-width: 180px; min-height: @ts-btn-h; padding: 0 30px; font-size: 15.5px; }
         .actions-toolbar .secondary .action { display: inline-block; padding: 12px 0; margin: 0; font-weight: 600; font-size: 14px; color: @ts-kitchen; text-decoration: underline; text-underline-offset: 3px; }
         // Luma's clearfix pseudo-elements become flex items (and take the gap) once the toolbar is flex
         .actions-toolbar::before, .actions-toolbar::after { display: none !important; content: none; }
@@ -74,9 +75,25 @@
         margin: 0 auto;
         width: 100%;
         .fieldset { .ts-account-card(); > .legend { font-family: @ts-serif; font-size: 24px; font-weight: 450; margin: 0 0 20px; padding: 0; border: 0; } > .legend + br { display: none; } }
-        .actions-toolbar { display: flex; align-items: center; gap: 20px; flex-wrap: wrap-reverse; justify-content: flex-start; margin: 0; padding: 0 38px; .primary, .secondary { float: none; margin: 0; } .secondary:empty { display: none; } }
+        // the buttons are the foot of the (last) card: CTA first, Back as a text link under it
+        .actions-toolbar {
+            display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+            margin: -24px 0 0; padding: 4px 38px 32px;
+            background: @ts-paper; border: 1px solid @ts-line; border-top: 0; border-radius: 0 0 22px 22px;
+            .primary, .secondary { float: none; margin: 0; } .secondary:empty { display: none; }
+            .secondary .action { padding: 10px 0; }
+        }
         #password-strength-meter-container { border-radius: 8px; margin-top: 8px; }
     }
+    .form-create-account .fieldset.create.account,
+    .form.password.forget > .fieldset, .form.password.reset > .fieldset, .form.form-orders-search > .fieldset {
+        border-bottom: 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; padding-bottom: 24px;
+    }
+    // Luma's "remote shopping assistance" opt-in means nothing in a demo store
+    .form-create-account .field.choice:has(input[name='assistance_allowed']),
+    .form-create-account .field.choice:has(#assistance_allowed_checkbox) { display: none; }
+    // one page-head pattern for the account entry pages: no breadcrumb, centred title
+    .sales-guest-form .breadcrumbs { display: none; }
 
 
 }
@@ -90,7 +107,8 @@
         }
         .login-container { grid-template-columns: 1fr; gap: 16px; .block { padding: 26px 20px; border-radius: 18px; } }
         .block-customer-login .actions-toolbar { .primary { flex: 1 1 100%; } .secondary { flex: 1 1 100%; } }
-        .form-create-account, .form.password.forget, .form.password.reset, .form.form-orders-search { .fieldset { padding: 26px 20px; border-radius: 18px; } .actions-toolbar { flex-direction: column-reverse; align-items: stretch; text-align: center; padding: 0; } }
+        .form-create-account, .form.password.forget, .form.password.reset, .form.form-orders-search { .fieldset { padding: 26px 20px; border-radius: 18px; } .actions-toolbar { flex-direction: column; align-items: stretch; text-align: center; padding: 4px 20px 24px; border-radius: 0 0 18px 18px; } .fieldset.create.account, > .fieldset { padding-bottom: 20px; } }
+        .form-create-account .fieldset.create.account, .form.password.forget > .fieldset, .form.password.reset > .fieldset, .form.form-orders-search > .fieldset { border-radius: 18px 18px 0 0; }
     }
 
 .media-width(@extremum, @break) when (@extremum = 'min') and (@break = @screen__m) {

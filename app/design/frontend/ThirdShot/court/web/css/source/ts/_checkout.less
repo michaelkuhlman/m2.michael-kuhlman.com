@@ -3,9 +3,9 @@
 & when (@media-common = true) {
     // ---- cart --------------------------------------------------------------
     .checkout-cart-index {
-        .page-title-wrapper .page-title { margin: 12px 0 30px; }
+        .page-title-wrapper .page-title { margin: 40px 0 30px; }
         .cart-container {
-            .form-cart { margin-bottom: 30px; }
+            .form-cart { margin-bottom: 0; }
             .cart.table-wrapper {
                 thead th.col {
                     font-size: 11.5px;
@@ -35,14 +35,21 @@
                 .col.qty .input-text.qty { border-radius: 999px; height: 44px; min-height: 44px; width: 68px; text-align: center; font-weight: 600; margin: 0; }
                 .cart.item { position: relative; }
                 .item-info td { padding-bottom: 26px; }
+                // prices on the stepper's centre line (stepper 44px from the cell top)
+                .col.price .price-excluding-tax, .col.subtotal .price-excluding-tax,
+                .col.price .price-including-tax, .col.subtotal .price-including-tax { display: block; line-height: 44px; }
+                .col.price .cart-price, .col.subtotal .cart-price { display: inline-block; line-height: 44px; }
                 .item-actions td { padding: 0; }
+                // edit + remove as an icon pair under the item name (glyphs on the text edge)
                 .actions-toolbar {
                     position: absolute;
-                    right: 0;
+                    left: 123px;
+                    right: auto;
                     bottom: 14px;
                     display: flex;
-                    justify-content: flex-end;
-                    gap: 4px;
+                    justify-content: flex-start;
+                    gap: 2px;
+                    > .gift-options-cart-item { display: none; }
                     > .action {
                         position: static;
                         top: auto;
@@ -62,9 +69,8 @@
                     .action-delete::before { .ts-icon(@ts-i-trash, 19px); }
                     .action-towishlist { display: none; }
                 }
-                // at qty 1 the stepper's minus already is a trash button: no second trash icon
-                .cart.item:has(.ts-ux-qty__minus.is-remove) .actions-toolbar .action-delete { display: none; }
             }
+            .cart.table-wrapper { margin-bottom: 0; }
             .cart.main.actions {
                 display: flex;
                 justify-content: flex-end;
@@ -169,6 +175,9 @@
         .authentication-wrapper {
             margin-top: 22px;
             max-width: none;
+            font-size: 14px;
+            color: @ts-muted;
+            &::before { content: 'Have an account?'; margin-right: 6px; }
             .action-auth-toggle {
                 font-size: 14px;
                 font-weight: 600;
@@ -357,7 +366,13 @@
             > .title { display: block; font-family: @ts-serif; font-size: 24px; font-weight: 450; border: 0; padding: 0; margin-bottom: 14px; }
             .table-totals { border-top: 1px solid @ts-line; margin-top: 4px; .mark, .amount { padding: 8px 0; font-size: 14.5px; } .mark { color: @ts-body; font-weight: 500; } }
             .grand.totals { border-top: 1px solid @ts-line; .mark, .amount { padding-top: 16px; } .mark strong, .amount strong { font-size: 19px; font-weight: 700; } }
-            .totals.shipping .label, .totals.shipping .value { font-size: 12.5px; color: @ts-muted; }
+            // step 1: subtotal + total only (the shipping row would say "method not available" before an address exists)
+            .table-totals .mark { width: auto; }
+            // "Shipping" reads like the other rows; the method name under it is the quiet caption
+            .totals.shipping .mark .label { display: block; font-size: 14.5px; color: @ts-body; font-weight: 500; }
+            .totals.shipping .mark .value { display: block; margin-top: 2px; font-size: 12.5px; color: @ts-muted; font-weight: 400; }
+            .totals.shipping .amount .price { font-size: 14.5px; color: @ts-ink; }
+            .totals.sub .mark, .totals.sub .amount { font-size: 14.5px; }
             .items-in-cart {
                 > .title {
                     border: 0;
@@ -445,6 +460,8 @@
         .modal-custom.opc-sidebar .modal-inner-wrap { background: @ts-chalk; }
     }
 
+    body.checkout-index-index:has(#shipping:not([style*='none'])) .opc-block-summary .totals.shipping { display: none; }
+
     // ---- success -------------------------------------------------------------
     .checkout-onepage-success {
         .page-title-wrapper { text-align: center; margin-top: 30px; .page-title { margin-bottom: 18px; } }
@@ -468,6 +485,11 @@
 
 // Desktop (styles-l.css)
 .media-width(@extremum, @break) when (@extremum = 'min') and (@break = @screen__m) {
+    // logo on the same centre line as the full site header (77px row >=1280; 14px top inset below that)
+    body.checkout-index-index .page-header .header.content { min-height: 77px; }
+    @media (max-width: 1279px) {
+        body.checkout-index-index .page-header .header.content { min-height: 72px; padding-bottom: 14px; }
+    }
     body.checkout-index-index {
         .opc-wrapper { width: 60%; padding-right: 0; }
         .opc-sidebar { width: 36%; position: sticky; top: 24px; float: right; }
@@ -481,11 +503,14 @@
         .cart-summary { width: 32%; position: sticky; top: 100px; }
         // same column as the items, so it sits right under them instead of below the summary
         .cart-discount { width: 64%; padding-right: 0; float: left; clear: left; }
-        .block.crosssell { width: 100%; float: none; clear: both; padding-right: 0; padding-top: 1px; }
+        // the items' bottom rule already separates the discount row: one line, not two
+        .cart-discount .block > .title { border-top: 0; }
+        // cross-sell stays in the items column, so the sticky summary never slides over it
+        .block.crosssell { width: 64%; float: left; clear: left; padding-right: 0; padding-top: 1px; }
     }
     @media (min-width: 1024px) and (max-width: 1279px) {
         body.checkout-cart-index .cart-container {
-            .form-cart, .cart-discount { width: 60%; }
+            .form-cart, .cart-discount, .block.crosssell { width: 60%; }
             .cart-summary { width: 36%; }
         }
     }
@@ -501,9 +526,10 @@
             .form-cart { width: 100%; float: none; order: 1; }
             .cart-summary { order: 2; }
             .cart-discount { order: 3; }
-            .block.crosssell { order: 4; margin-top: 56px; }
+            .block.crosssell { order: 4; margin-top: 56px; width: 100%; float: none; }
             .cart-summary { width: 100%; float: none; position: static; margin-bottom: 8px; }
             .cart-discount { width: 100%; float: none; }
+            .cart-discount .block > .title { border-top: 1px solid @ts-line; }
         }
     }
 }
@@ -511,7 +537,7 @@
 // Phone rules (emitted after Luma's own mobile rules)
 .media-width(@extremum, @break) when (@extremum = 'max') and (@break = @screen__m) {
         .checkout-cart-index {
-            .page-title-wrapper .page-title { margin: 8px 0 18px; }
+            .page-title-wrapper .page-title { margin: 22px 0 18px; }
             .page-main { padding-left: @ts-gutter-m !important; padding-right: @ts-gutter-m !important; }
             .cart-summary { margin-left: 0 !important; margin-right: 0 !important; order: 2; margin-top: 8px; }
             .cart-container { display: flex; flex-direction: column; .form-cart { order: 1; } .cart-discount { order: 3; } .block.crosssell { order: 4; margin-top: 48px; } }
@@ -523,10 +549,13 @@
                 .product-item-photo { position: static; display: block; padding: 0; width: 84px; flex: none; }
                 .product-image-container { width: 84px !important; }
                 .product-item-details { padding: 0; display: block; flex: 1; min-width: 0; }
-                .col.price, .col.subtotal { display: none !important; }
+                .col.price { display: none !important; }
+                // line total on the name row, right-aligned
+                .col.subtotal { display: block !important; position: absolute; top: 20px; right: 0; width: auto; padding: 0 !important; text-align: right; &::before { display: none; } .price { font-size: 15px; } .cart-price, .price-excluding-tax { line-height: 1.35; } }
+                .product-item-details { padding-right: 76px !important; }
                 .col.qty { display: block !important; width: auto; text-align: left; padding: 0 0 18px 98px !important; &::before { display: none; } .input-text.qty { height: 40px; min-height: 40px; } }
                 .item-info td { padding-bottom: 18px; }
-                .actions-toolbar { bottom: 18px; height: 44px; padding: 0; margin: 0; display: flex !important; align-items: center; > .gift-options-cart-item { display: none; } > .action { width: 44px; height: 44px; } }
+                .actions-toolbar { left: auto; right: 0; bottom: 18px; height: 44px; padding: 0; margin: 0; display: flex !important; align-items: center; > .gift-options-cart-item { display: none; } > .action { width: 44px; height: 44px; } }
             }
             .cart-container .cart.main.actions { justify-content: stretch; .action { flex: 1; text-align: center; } .action.continue { flex-basis: 100%; text-align: left; } }
             .cart-container .cart-summary { margin-bottom: 24px; padding: 22px 18px; }
@@ -552,7 +581,13 @@
                 .billing-address-details { padding-left: 0; }
                 .actions-toolbar { margin: 0; }
             }
-            .authentication-wrapper { margin-top: 22px; text-align: right; }
+            .checkout-container { display: flex; flex-direction: column; }
+            .opc-progress-bar { order: 1; max-width: none; width: 100%; .opc-progress-bar-item::before { right: 12px; } }
+            .opc-estimated-wrapper { order: 2; }
+            .authentication-wrapper { order: 3; float: none; width: auto; margin: 6px 0 14px; text-align: left; }
+            .checkout-container > .messages { order: 4; }
+            .opc-wrapper { order: 5; }
+            .opc-sidebar { order: 6; }
             .opc-wrapper .action.continue { width: 100%; }
             .opc-wrapper .table-checkout-shipping-method tbody td { padding: 14px 8px; font-size: 14px; &:first-child { padding-left: 12px; } }
             .opc-wrapper .table-checkout-shipping-method .col-carrier { display: none; }
