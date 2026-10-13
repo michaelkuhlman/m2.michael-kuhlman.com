@@ -62,6 +62,7 @@
         .page-main { padding-top: 28px; padding-bottom: 28px; margin-top: 0; }
         .page.messages { display: none; }
         .product-info-main .page-title-wrapper .page-title { padding-right: 48px; }
+        .product-info-main .reviews-actions .action.add { display: none; }
         .ts-ux-qv-full {
             display: inline-flex;
             align-items: center;
@@ -87,7 +88,7 @@
                 align-items: start;
                 > * { grid-column: 1 / -1; }
                 > .product.media { grid-column: 1; grid-row: 1; width: auto !important; float: none !important; margin: 0 !important; }
-                > .product-info-main { grid-column: 2; grid-row: 1; width: auto !important; float: none !important; margin: 0 !important; }
+                > .product-info-main { grid-column: 2; grid-row: 1; align-self: center; width: auto !important; float: none !important; margin: 0 !important; }
             }
         }
     }
@@ -180,7 +181,26 @@
             grid-template-columns: 1fr 1fr;
             gap: 10px;
             margin-top: 18px;
-            .action { display: flex; align-items: center; justify-content: center; min-height: 48px; margin: 0; text-decoration: none; box-sizing: border-box; }
+            .action {
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                min-height: @ts-btn-h;
+                padding: 0 16px;
+                margin: 0;
+                text-decoration: none;
+                box-sizing: border-box;
+            }
+            .action.secondary {
+                border: 1.5px solid @ts-kitchen;
+                border-radius: 999px;
+                background: transparent;
+                color: @ts-kitchen;
+                font-weight: 600;
+                font-size: 15px;
+                &:hover { background: @ts-kitchen; color: @ts-chalk; }
+            }
         }
         &__keep {
             grid-column: ~"1 / -1";
@@ -190,7 +210,8 @@
             color: @ts-kitchen;
             font-weight: 600;
             font-size: 14px;
-            padding: 8px;
+            min-height: 44px;
+            padding: 0 8px;
             text-decoration: underline;
             text-underline-offset: 3px;
             cursor: pointer;
@@ -214,11 +235,31 @@
         list-style: none;
         margin: 0;
         padding: 0;
-        .product-item { margin: 0 !important; padding: 0 !important; width: auto !important; }
-        .product-item-photo { margin-bottom: 10px !important; border-radius: 12px !important; }
-        .product-item-name { font-size: 14px !important; }
-        .price-box .price { font-size: 14px !important; }
+        .product-item { margin: 0 !important; padding: 0 !important; width: auto !important; display: flex; }
+        .product-item-info { position: relative; display: flex; flex-direction: column; width: 100%; }
+        .product-item-photo {
+            display: block;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 10px !important;
+            border-radius: 12px !important;
+            background: #F7EDD9;
+        }
+        .product-image-container { display: block; width: 100% !important; aspect-ratio: ~"4 / 5"; }
+        .product-image-wrapper { display: block; height: 100%; padding-bottom: 0 !important; }
+        .product-image-photo { position: static; display: block; width: 100%; height: 100%; max-width: none; object-fit: cover; }
+        .product-item-details { display: flex; flex-direction: column; flex: 1; }
+        .product-item-name { display: block; margin: 0 0 4px; font: 500 ~"14px/1.35" @ts-sans !important; a, a:visited { color: @ts-ink; } }
+        .price-box {
+            display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; margin: 0 0 12px;
+            .price { font-size: 14px !important; font-weight: 600; }
+            .special-price .price { color: @ts-clay; }
+            .old-price { margin: 0; .price { font-weight: 400; color: @ts-muted; text-decoration: line-through; } }
+            .old-price .price-label, .special-price .price-label { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+        }
         .product-reviews-summary { display: none !important; }
+        .product-item-inner { margin-top: auto !important; }
+        .actions-primary, .actions-primary form { display: block; width: 100%; }
         .ts-ux-card-tools { top: 6px; right: 6px; }
         .ts-ux-heart, .ts-ux-eye { width: 34px; height: 34px; }
         // always show a compact add button under each pick
@@ -227,9 +268,12 @@
         .actions-primary .action.tocart {
             position: relative;
             z-index: 3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             width: 100%;
-            min-height: 40px;
-            padding: 8px 10px !important;
+            min-height: @ts-btn-h-sm;
+            padding: 0 10px !important;
             font-size: 13.5px !important;
             background: #fff !important;
             color: @ts-ink !important;

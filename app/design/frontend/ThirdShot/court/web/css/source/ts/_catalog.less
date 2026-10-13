@@ -1,5 +1,7 @@
 // Catalog listing: category hero, layered navigation (sidebar / mobile drawer), toolbar, product cards.
 
+@ts-i-sort: "@{ts-svg}%3Cpath d='M12 18.5V5.5M7 10.5l5-5 5 5'/%3E%3C/svg%3E";
+
 & when (@media-common = true) {
     // ---- category hero (title + description moved next to the banner by layout XML) ----
     .catalog-category-view .columns { margin-top: 0; }
@@ -53,6 +55,8 @@
             text-transform: uppercase;
             color: @ts-court;
         }
+        // "Filter by" starts on the same edge as the filter names and shares the toolbar's 44px row
+        .filter-subtitle { padding: 0; height: @ts-pill-h; line-height: @ts-pill-h; margin: 0; border-bottom: 0; }
         .filter-current {
             margin: 0 0 14px;
             .items { padding: 0; }
@@ -122,20 +126,42 @@
         .toolbar-amount { font-size: 13.5px; color: @ts-muted; padding: 0; line-height: 44px; margin: 0; }
         .sorter { padding: 0; }
         .sorter-label, .limiter-label, .limiter-text { font-size: 13.5px; color: @ts-muted; font-weight: 500; }
-        .sorter-options { min-height: 44px; height: 44px; border-radius: 999px; padding-left: 18px; margin: 0 6px 0 8px; font-weight: 500; }
+        .sorter-options {
+            min-height: @ts-pill-h;
+            height: @ts-pill-h;
+            border-radius: 999px;
+            padding-left: 18px;
+            margin: 0 8px 0 10px;
+            font-weight: 500;
+            color: @ts-ink;
+            background-color: @ts-paper;
+            border: 1px solid @ts-line;
+            &:hover { border-color: @ts-muted; }
+        }
+        // sort direction: a thin line arrow in a 44px pill matching the select (not Luma's icon-font glyph)
         .sorter-action {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 40px;
-            height: 40px;
+            box-sizing: border-box;
+            width: @ts-pill-h;
+            height: @ts-pill-h;
+            border: 1px solid @ts-line;
             border-radius: 999px;
+            background: @ts-paper;
+            color: @ts-ink;
             vertical-align: middle;
-            &::before { color: @ts-muted; font-size: 26px; }
-            &:hover { background: fade(@ts-kitchen, 7%); &::before { color: @ts-kitchen; } }
+            margin: 0;
+            top: 0; // Luma nudges it up 2px
+            text-decoration: none;
+            &::before { .ts-icon(@ts-i-sort, 18px); margin: 0; transition: transform .25s @ts-ease; }
+            &.sort-desc::before { transform: rotate(180deg); }
+            &:hover { border-color: @ts-muted; background: @ts-paper; color: @ts-kitchen; text-decoration: none; }
         }
     }
     .toolbar-products { margin-bottom: 26px; }
+    // the grid's own 36px margin + the footer's top margin already space the last row (Luma's extra 48px doubled it)
+    .page-products .column.main { padding-bottom: 0; }
     .products.wrapper ~ .toolbar {
         .toolbar-amount, .sorter { display: none; }
         .pages { margin: 30px 0 0; float: none; text-align: center; }
@@ -244,6 +270,13 @@
             .rating-summary { padding: 0; .rating-result { width: 66px; &::before, > span::before { font-size: 14px; height: 14px; line-height: 14px; letter-spacing: -1px; } } }
             .reviews-actions { margin: 0; font-size: 12.5px; line-height: 1; a { color: @ts-muted; } }
         }
+        // name -> price -> rating: a product without reviews no longer lifts its price above the row's
+        .price-box { order: 2; margin-bottom: 8px; }
+        .product-reviews-summary { order: 3; margin: 0 0 8px; }
+        // "Starting at" (grouped / bundle) sits inline with its price, like the "from - to" range
+        .price-box .minimal-price .price-container,
+        .price-box .price-from .price-container { display: inline-flex; align-items: baseline; gap: 5px; }
+        .price-box .minimal-price .price-label { display: inline; }
         .swatch-attribute { margin: 0 0 6px; position: relative; z-index: 2; }
         .swatch-attribute-options { margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
         .swatch-option {
@@ -289,8 +322,42 @@
         .block.related .products-grid .product-items,
         .block.upsell .products-grid .product-items,
         .block.crosssell .products-grid .product-items { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        // full-width grids (home, 1-column pages, related / upsell / cross-sell, /saved/) fit 3 cards of ~230px
+        .page-layout-1column .products-grid .product-items,
+        .cms-index-index .block.widget .products-grid .product-items,
+        .block.related .products-grid .product-items,
+        .block.upsell .products-grid .product-items,
+        .block.crosssell .products-grid .product-items { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px 20px; }
+        body .ts-ux-strip .products-grid .product-items.ts-ux-strip__row { grid-auto-columns: ~"calc((100% - 40px) / 3)"; gap: 20px; }
+        body.page-layout-2columns-left .ts-ux-strip .products-grid .product-items.ts-ux-strip__row { grid-auto-columns: ~"calc((100% - 24px) / 2)"; gap: 24px; }
         .ts-cat-hero__copy { padding: 32px; }
         .category-view { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    }
+
+    // ---- search: "Did you mean" / related terms as one quiet row of chips ---------------------------
+    .catalogsearch-result-index .search.results > dl.block {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 16px;
+        &:last-of-type { margin-bottom: 28px; }
+        dt.title { margin: 0 6px 0 0; font: 500 ~"14px/1.3" @ts-sans; color: @ts-muted; }
+        dd.item { margin: 0; }
+        dd.item a {
+            display: inline-flex;
+            align-items: center;
+            min-height: @ts-btn-h-sm;
+            padding: 0 16px;
+            border: 1px solid @ts-line;
+            border-radius: 999px;
+            background: @ts-paper;
+            color: @ts-ink;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            &:hover { border-color: @ts-ink; color: @ts-ink; text-decoration: none; }
+        }
     }
 
     // ---- phones ------------------------------------------------------------------------
@@ -309,6 +376,11 @@
             &::before, &::after { display: none; }
             .toolbar-amount { order: 1; float: none; }
             .sorter { order: 2; float: none; margin-left: auto; display: flex; align-items: center; }
+        }
+        // tablet: a 110px filter column wrapped "Core / Thickness"; give it ~190px
+        @media (max-width: 1023px) {
+            &.page-layout-2columns-left .sidebar-main { width: 28%; padding-right: 24px; }
+            &.page-layout-2columns-left .column.main { width: 72%; }
         }
     }
     // undo Luma's "lifted white card" hover on listings
@@ -370,6 +442,8 @@
             &:hover .product-item-inner, &:focus-within .product-item-inner,
             &:hover .product-item-info:hover .product-item-inner { opacity: 1; transform: none; }
             &:hover .product-image-photo { transform: scale(1.04); }
+            // Luma draws a 3px white strip at the top of the hover card (its seam cover): it showed above the photo
+            .product-item-inner::before { display: none; }
         }
     }
 }
@@ -389,6 +463,7 @@
             .page-title-wrapper .page-title { margin-bottom: 10px; }
         }
         .category-description { font-size: 15px; }
+        .catalogsearch-result-index .page-title-wrapper .page-title { margin-top: 24px; }
 
         .products-grid .product-items,
         .block.widget .products-grid .product-items,
@@ -402,7 +477,8 @@
         }
         .products-grid .product-item {
             .product-item-photo { margin-bottom: 12px; border-radius: 12px; }
-            .product-item-name { font-size: 14px; }
+            // 173px cards wrap most names: two lines reserved so a wrapped name does not push its price below the neighbour's
+            .product-item-name { font-size: 14px; min-height: ~"calc(2 * 1.35em)"; }
             .price-box { margin-bottom: 6px; .price { font-size: 14.5px; } .old-price .price { font-size: 13px; } }
             .product-reviews-summary .reviews-actions { font-size: 12px; }
         }
@@ -414,9 +490,11 @@
             justify-content: flex-end;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 10px 12px;
             margin-bottom: 22px;
-            .sorter { float: none; width: ~"calc(50% - 6px)"; position: static; display: flex; align-items: center; }
+            // Luma's clearfix pseudo-elements are flex items here: the empty ::after took a 10px gap at the right
+            &::before, &::after { display: none; }
+            .sorter { float: none; width: ~"calc(50% - 6px)"; position: static; display: flex; align-items: center; margin: 0; padding: 0; }
             .sorter-label { display: none; }
             .sorter-options { flex: 1; margin: 0; width: 100%; font-size: 15px; }
             .sorter-action { display: none; }
@@ -484,6 +562,9 @@
                 padding: 4px 20px 40px;
             }
             .filter-options-title { font-size: 16px; padding-top: 19px; padding-bottom: 19px; &::after { top: 21px; } }
+            // the header's hairline is the first group's top rule (two lines 4px apart before)
+            .filter-options { padding-top: 0; }
+            .filter-options-item:first-child .filter-options-title { border-top: 0; }
             .filter-current { padding: 14px 20px 0; }
         }
     }

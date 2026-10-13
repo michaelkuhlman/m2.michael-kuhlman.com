@@ -15,6 +15,11 @@
 @ts-ease: cubic-bezier(.2, .7, .2, 1);
 @ts-serif: 'Fraunces', Georgia, serif;
 @ts-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+@ts-section: ~"clamp(64px, 7vw, 112px)";
+@ts-h2: ~"clamp(28px, 1.7vw + 20px, 46px)";
+@ts-btn-h: 48px;
+@ts-btn-h-sm: 40px;
+@ts-pill-h: 44px;
 
 @ux-svg: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E";
 @ux-i-heart: "@{ux-svg}%3Cpath d='M12 20.2s-7.6-4.6-7.6-10.1A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.6 2.5c0 5.5-7.6 10.1-7.6 10.1z'/%3E%3C/svg%3E";
@@ -123,13 +128,15 @@
         gap: 8px;
         margin: -6px 0 20px;
     }
-    .ts-ux-fchips--drawer { margin: 14px 0 6px; }
+    .ts-ux-fchips--drawer { margin: 14px 0 14px; }
     .ts-ux-fchip {
         display: inline-flex;
         align-items: center;
         gap: 4px;
-        min-height: 36px;
+        min-height: @ts-btn-h-sm;
         padding: 0 12px 0 14px;
+        position: relative;
+        &::before { content: ''; position: absolute; inset: -2px 0; } // 44px hit area
         border: 1px solid @ts-line;
         border-radius: 999px;
         background: @ts-paper;
@@ -141,8 +148,11 @@
         &:hover, &:focus { color: @ts-ink; text-decoration: none; border-color: @ts-ink; }
         &--clear { padding-left: 6px; background: transparent; border-color: transparent; color: @ts-clay; font-weight: 600; &::after { content: none; } }
     }
-    body .ts-ux-strip .products-grid .product-items.ts-ux-strip__row { grid-auto-columns: 44%; gap: 12px; }
-    .ts-ux-strip { margin-top: 40px; }
+    // same card width and gap as the 2-up listing grid
+    body .ts-ux-strip .products-grid .product-items.ts-ux-strip__row { grid-auto-columns: ~"calc((100% - 12px) / 2)"; gap: 12px; }
+    .ts-ux-strip__head { margin-bottom: 24px; }
+    // pages without breadcrumbs: keep the title off the sticky header
+    .saved-index-index .page-main { padding-top: 24px; }
     .ts-ux-search {
         position: static;
         width: auto;
@@ -151,6 +161,7 @@
         max-height: ~"calc(100dvh - 220px)";
     }
     .ts-ux-drawer__body { padding: 18px 18px 28px; }
+    .ts-ux-drawer .ts-ux-mini-grid .actions-primary .action.tocart { min-height: 44px; }
     .ts-ux-drawer__head { padding-left: 18px; }
     .ts-ux-top { right: 14px; bottom: 14px; width: 44px; height: 44px; }
     .ts-ux-toast { bottom: 80px; }

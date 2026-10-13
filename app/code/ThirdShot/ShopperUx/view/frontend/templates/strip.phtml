@@ -8,11 +8,17 @@
  */
 $kind = $block->getData('kind') === 'saved' ? 'saved' : 'recent';
 $title = (string)($block->getData('title') ?: __('Recently viewed'));
+$eyebrow = (string)$block->getData('eyebrow');
 ?>
 <section class="ts-ux-strip ts-ux-strip--<?= $escaper->escapeHtmlAttr($kind) ?>" data-ts-ux-strip="<?= $escaper->escapeHtmlAttr($kind) ?>"
          data-limit="<?= (int)($block->getData('limit') ?: 12) ?>" hidden aria-label="<?= $escaper->escapeHtmlAttr($title) ?>">
     <div class="ts-ux-strip__head">
-        <h2 class="ts-ux-strip__title"><?= $escaper->escapeHtml($title) ?></h2>
+        <div class="ts-ux-strip__heading">
+            <?php if ($eyebrow !== ''): ?>
+                <span class="ts-eyebrow ts-ux-strip__eyebrow"><?= $escaper->escapeHtml($eyebrow) ?></span>
+            <?php endif; ?>
+            <h2 class="ts-ux-strip__title"><?= $escaper->escapeHtml($title) ?></h2>
+        </div>
         <button type="button" class="ts-ux-strip__clear" data-ts-ux-clear="<?= $escaper->escapeHtmlAttr($kind) ?>"><?= $escaper->escapeHtml(__('Clear')) ?></button>
     </div>
     <div class="products wrapper grid products-grid">

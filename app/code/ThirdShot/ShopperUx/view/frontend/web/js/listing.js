@@ -271,6 +271,7 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
         }
         var more = document.createElement('div');
         more.className = 'ts-ux-more';
+        more.setAttribute('data-first', String(shown()));
         more.innerHTML = '<p class="ts-ux-more__count" aria-live="polite"></p>' +
             '<div class="ts-ux-more__bar" aria-hidden="true"><span></span></div>' +
             '<button type="button" class="action secondary ts-ux-more__btn">Load more</button>' +
@@ -314,14 +315,53 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
         if (!more) {
             return;
         }
-        var n = shown(), t = Math.max(total(), n), has = !!nextUrl();
-        more.hidden = t <= 0 || (!has && t <= n && !document.querySelector('.ts-ux-prev'));
+        var n = shown(), t = Math.max(total(), n), has = !!nextUrl(),
+            first = parseInt(more.getAttribute('data-first'), 10) || n;
+        // a single page needs no footer line; after infinite scroll, "You've seen all N items" closes the list
+        more.hidden = t <= 0 || (!has && n <= first && !document.querySelector('.ts-ux-prev'));
+        updateAmount(n, t);
         more.querySelector('.ts-ux-more__count').textContent = has
             ? 'Showing ' + n + ' of ' + t
             : (t > 0 ? 'You’ve seen all ' + t + (t === 1 ? ' item' : ' items') : '');
         more.querySelector('.ts-ux-more__bar span').style.width = (t ? Math.min(100, n / t * 100) : 0) + '%';
         more.querySelector('button').hidden = !has;
         more.classList.toggle('is-done', !has);
+    }
+
+    /** The top toolbar's "Items 1-9 of 12" follows what infinite scroll has added. */
+    function updateAmount(n, t) {
+        var amount = document.querySelector(MAIN + ' .toolbar-products .toolbar-amount');
+        if (!amount || document.querySelector('.ts-ux-prev') || !t) {
+            return;
+        }
+        amount.innerHTML = n >= t
+            ? '<span class="toolbar-number">' + t + '</span> ' + (t === 1 ? 'item' : 'items')
+            : 'Items <span class="toolbar-number">1</span>-<span class="toolbar-number">' + n +
+                '</span> of <span class="toolbar-number">' + t + '</span>';
+    }
+
+    /**
+     * Search "Did you mean": drop suggestions that are only a truncation of the query ("paddl" for "paddle") and
+     * related terms already offered above; drop a block left empty.
+     */
+    function tidySuggestions() {
+        if (!document.body.classList.contains('catalogsearch-result-index')) {
+            return;
+        }
+        var q = (new URL(location.href).searchParams.get('q') || '').trim().toLowerCase(), seen = {};
+        Array.prototype.forEach.call(document.querySelectorAll(MAIN + ' .search.results > dl.block'), function (dl) {
+            Array.prototype.forEach.call(dl.querySelectorAll('dd'), function (dd) {
+                var term = (dd.textContent || '').trim().toLowerCase();
+                if (!term || seen[term] || term === q || (q.indexOf(term) === 0 && term.length < q.length)) {
+                    dd.parentNode.removeChild(dd);
+                } else {
+                    seen[term] = 1;
+                }
+            });
+            if (!dl.querySelector('dd')) {
+                dl.parentNode.removeChild(dl);
+            }
+        });
     }
 
     function appendFrom(doc, where) {
@@ -546,6 +586,7 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
 
     function afterSwap() {
         $('body').addClass('ts-ux-listing');
+        tidySuggestions();
         buildMore();
         $(document).trigger('ts-ux:listing-updated');
     }

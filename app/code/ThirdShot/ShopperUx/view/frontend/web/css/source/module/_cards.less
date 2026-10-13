@@ -37,6 +37,10 @@
         &.is-pop::before { animation: ts-ux-pop .4s @ts-ease; }
     }
     .ts-ux-eye { &::before { .ux-icon(@ux-i-eye, 20px); } }
+    // touch: the 38px heart keeps its look but gets a 44px hit area
+    @media (pointer: coarse) {
+        .ts-ux-heart { position: relative; &::after { content: ''; position: absolute; inset: -3px; border-radius: 50%; } }
+    }
     @keyframes ts-ux-pop { 0% { transform: scale(1); } 40% { transform: scale(1.35); } 100% { transform: scale(1); } }
 
     // quick view: pointer devices only (on touch, the card opens the product page)
@@ -119,19 +123,28 @@
         }
     }
     // ---------- 10. recently viewed / saved ----------
+    // reads as one of the page's sections: section spacing, an h2 like the home / related headings
     .ts-ux-strip {
         clear: both;
-        margin: 56px 0 24px;
+        margin: @ts-section 0 24px;
         &[hidden] { display: none; }
-        &__head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
-        &__title { margin: 0; font: 450 ~"clamp(24px, 1.2vw + 18px, 32px)/1.15" @ts-serif; }
+        &__head { display: flex; align-items: last baseline; justify-content: space-between; gap: 24px; margin-bottom: 36px; }
+        &__heading { min-width: 0; }
+        &__eyebrow { display: block; width: max-content; }
+        &__title { margin: 0; font: 400 ~"@{ts-h2}/1.08" @ts-serif; letter-spacing: normal; }
         .products-grid { margin: 0; }
     }
     .ts-ux-strip__clear {
+        flex: none;
+        position: relative;
         background: none;
         border: 0;
         box-shadow: none;
-        padding: 6px 0;
+        min-height: 0;
+        padding: 0;
+        line-height: 1.3;
+        // 44px hit area around the small text link
+        &::after { content: ''; position: absolute; inset: -14px -10px; }
         color: @ts-muted;
         font-size: 13.5px;
         font-weight: 500;
@@ -154,13 +167,20 @@
         padding-bottom: 10px;
         > .product-item { scroll-snap-align: start; }
     }
+    // beside the filter column the listing grid is 3-up: match it
+    @media (min-width: 1024px) {
+        body.page-layout-2columns-left .ts-ux-strip .products-grid .product-items.ts-ux-strip__row { grid-auto-columns: ~"calc((100% - 48px) / 3)"; }
+    }
+    // no breadcrumbs on /saved/: keep the title off the sticky header (phones: 24px, _module.less)
+    .saved-index-index .page-main { padding-top: 40px; }
     .ts-ux-saved {
         &__intro { color: @ts-muted; margin: -6px 0 28px; font-size: 15px; }
+        &__intro, &__empty, &__foot { clear: both; }
         &__count { display: inline-block; margin-left: 6px; color: @ts-ink; font-weight: 600; &:empty { display: none; } }
         &__empty { text-align: center; padding: 56px 20px; border: 1px dashed @ts-line; border-radius: 18px; margin-bottom: 24px;
             &[hidden] { display: none; }
             p { margin: 0 0 10px; color: @ts-muted; }
-            .action { margin-top: 10px; }
+            .action { margin-top: 10px; display: inline-flex; align-items: center; justify-content: center; }
         }
         &__empty-title { font: 450 ~"26px/1.2" @ts-serif; color: @ts-ink !important; }
         &__foot { margin-top: 24px; text-align: center; }

@@ -52,11 +52,12 @@
             overflow: hidden;
             span { display: block; height: 100%; background: @ts-kitchen; border-radius: inherit; transition: width .4s @ts-ease; }
         }
-        &__btn { min-width: 200px; }
+        &__btn { min-width: 200px; min-height: @ts-btn-h; }
         &__btn[hidden] { display: none !important; }
         &__sentinel { height: 1px; width: 100%; }
         &.is-loading &__btn { opacity: .6; pointer-events: none; }
         &.is-done &__bar { display: none; }
+        &.is-done { margin-top: 40px; }
     }
     .ts-ux-prev { text-align: center; margin: 0 0 32px; }
     .products-grid .product-items > .ts-ux-new { animation: ts-ux-in .5s @ts-ease both; }
@@ -108,6 +109,10 @@
                     border: 2px solid @ts-kitchen;
                     box-shadow: 0 2px 6px rgba(19, 32, 27, .25);
                     cursor: grab;
+                }
+                @media (pointer: coarse) {
+                    &::-webkit-slider-thumb { width: 28px; height: 28px; margin-top: -1px; }
+                    &::-moz-range-thumb { width: 24px; height: 24px; }
                 }
                 &:focus-visible { outline: 0; }
                 &:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px fade(@ts-optic, 90%); }

@@ -6,7 +6,36 @@
 define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
     'use strict';
 
-    var dialog = null, frame = null, lastFocus = null, hideTimer = null;
+    var dialog = null, frame = null, lastFocus = null, hideTimer = null, sizer = null;
+
+    /**
+     * Desktop / tablet: the panel takes the height of the product inside it (up to the CSS max), so a simple
+     * product does not float in a tall empty box. Phones keep the fixed bottom sheet.
+     */
+    function fitHeight() {
+        var panel = dialog.querySelector('.ts-ux-qv__panel'), doc, main;
+        if (sizer) {
+            sizer.disconnect();
+            sizer = null;
+        }
+        panel.style.height = '';
+        try {
+            doc = frame.contentDocument;
+            main = doc && doc.querySelector('.page-main');
+        } catch (e) {
+            return;
+        }
+        if (!main || !window.ResizeObserver || window.matchMedia('(max-width: 767px)').matches) {
+            return;
+        }
+        sizer = new window.ResizeObserver(function () {
+            var h = Math.ceil(main.getBoundingClientRect().height);
+            if (h > 200) {
+                panel.style.height = Math.min(h, 780, Math.floor(window.innerHeight * 0.9)) + 'px';
+            }
+        });
+        sizer.observe(main);
+    }
 
     function build() {
         dialog = document.createElement('div');
@@ -22,6 +51,7 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
         frame.addEventListener('load', function () {
             if (frame.getAttribute('src')) {
                 dialog.classList.add('is-ready');
+                fitHeight();
             }
         });
         $(dialog).on('click', '[data-close]', close);
@@ -80,8 +110,13 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
         dialog.classList.remove('is-open');
         util.modal(dialog, false);
         document.documentElement.classList.remove('ts-ux-lock');
+        if (sizer) {
+            sizer.disconnect();
+            sizer = null;
+        }
         hideTimer = setTimeout(function () {
             dialog.hidden = true;
+            dialog.querySelector('.ts-ux-qv__panel').style.height = '';
             frame.setAttribute('src', 'about:blank');
             frame.removeAttribute('src');
         }, util.reducedMotion() ? 0 : 220);
