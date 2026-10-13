@@ -452,8 +452,15 @@
                 display: block !important; float: none; margin: 0 -6px 0 0;
                 .action.showcart {
                     position: relative; display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; margin: 0;
-                    &::before { color: @ts-ink; flex: none; width: 23px; }
-                    .counter.qty { position: absolute; top: 3px; right: 1px; margin: 0; }
+                    // Luma's icon-font glyph settings squashed the masked bag icon here
+                    &::before { color: @ts-ink; flex: none; content: ''; width: 23px; height: 23px; font-size: 0; line-height: 0; }
+                    .counter.qty {
+                        position: absolute; top: 3px; right: 1px; margin: 0;
+                        display: inline-flex; align-items: center; justify-content: center;
+                        min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box;
+                        font-size: 0; white-space: nowrap;
+                        .counter-number { font: 700 ~"10.5px/18px" @ts-sans; }
+                    }
                 }
             }
         }
