@@ -1,0 +1,29 @@
+<?php
+/**
+ * Third Shot: service promises under the buy box. The play test and the warranty only cover paddles (see the
+ * Shipping & Returns page), so other gear gets the promises that do apply to it. Paddles are the products with a
+ * core thickness.
+ *
+ * @var \Magento\Catalog\Block\Product\View $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+
+$product = $block->getProduct();
+$isPaddle = $product && (string)$product->getData('core_thickness') !== '';
+$usps = $isPaddle
+    ? [
+        [__('Free shipping'), __('on orders over $75')],
+        [__('60-day play test'), __('on every paddle')],
+        [__('2-year warranty'), __('on core and edge')],
+    ]
+    : [
+        [__('Free shipping'), __('on orders over $75')],
+        [__('30-day returns'), __('on unused gear')],
+        [__('Same-day dispatch'), __('when you order by 1 pm PT')],
+    ];
+?>
+<ul class="ts-usps">
+    <?php foreach ($usps as [$lead, $rest]): ?>
+        <li><strong><?= $escaper->escapeHtml($lead) ?></strong> <?= $escaper->escapeHtml($rest) ?></li>
+    <?php endforeach; ?>
+</ul>
