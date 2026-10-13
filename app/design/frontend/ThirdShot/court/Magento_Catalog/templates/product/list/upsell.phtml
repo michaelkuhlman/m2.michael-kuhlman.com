@@ -1,0 +1,23 @@
+<?php
+/**
+ * Third Shot: product page upsell strip. Drops the products the "Related" strip above already shows (the seeded
+ * links overlap), hides the strip when fewer than two products are left (a lone card read as an orphan), then
+ * renders the core Magento_Catalog::product/list/items.phtml unchanged.
+ *
+ * @var \Magento\Catalog\Block\Product\ProductList\Upsell $block
+ */
+
+$items = $block->getItemCollection();
+if ($items === null) {
+    return;
+}
+$related = $block->getLayout()->getBlock('catalog.product.related');
+if ($related instanceof \Magento\Catalog\Block\Product\ProductList\Related && $related->getItems()) {
+    foreach ($related->getItems() as $relatedItem) {
+        $items->removeItemByKey($relatedItem->getId());
+    }
+}
+if (count($items->getItems()) < 2) {
+    return;
+}
+echo $block->fetchView($block->getTemplateFile('Magento_Catalog::product/list/items.phtml'));

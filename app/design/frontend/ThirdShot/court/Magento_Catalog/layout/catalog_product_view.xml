@@ -11,5 +11,7 @@
         <move element="product.info.overview" destination="product.info.main" after="product.info.price"/>
         <referenceBlock name="product.info.mailto" remove="true"/>
         <referenceBlock name="view.addto.compare" remove="true"/>
+        <!-- upsell: drop products the related strip already shows, hide it when fewer than two are left -->
+        <referenceBlock name="product.info.upsell" template="Magento_Catalog::product/list/upsell.phtml"/>
     </body>
 </page>

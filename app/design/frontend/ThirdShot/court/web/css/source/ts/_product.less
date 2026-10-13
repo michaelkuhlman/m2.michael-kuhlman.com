@@ -18,9 +18,15 @@
                 display: flex;
                 align-items: center;
                 flex-wrap: wrap;
-                gap: 4px 14px;
-                .rating-summary { padding: 0; left: 0; }
-                .reviews-actions { font-size: 13px; margin: 0; line-height: 1.3; a { color: @ts-muted; margin-right: 12px; &:hover { color: @ts-kitchen; } } .action.add { color: @ts-kitchen; text-decoration: underline; text-underline-offset: 3px; } }
+                gap: 4px 16px;
+                // Luma's 30px right margin on the stars made a 44px hole before "3 Reviews"
+                .rating-summary { padding: 0; left: 0; margin: 0; }
+                .reviews-actions {
+                    font-size: 13px; margin: 0; line-height: 1.3;
+                    display: flex; align-items: center; flex-wrap: wrap; gap: 0 16px;
+                    a { color: @ts-muted; margin: 0; &:hover { color: @ts-kitchen; } }
+                    .action.add { color: @ts-kitchen; text-decoration: underline; text-underline-offset: 3px; }
+                }
                 &.empty .reviews-actions a { color: @ts-muted; }
             }
             .product-info-price {
@@ -34,6 +40,8 @@
                 width: auto !important;
                 box-sizing: border-box;
                 clear: both;
+                // grouped products have no price of their own: keep the stock pill on the left, not stranded right
+                &:not(:has(.price-box .price)) { justify-content: flex-start; .price-box { display: none; } }
                 .price-box {
                     padding: 0;
                     margin: 0;
@@ -41,6 +49,9 @@
                     align-items: baseline;
                     flex-wrap: wrap;
                     gap: 4px 12px;
+                    // a 15px/24px strut around the 28px price made the box 43px tall with the figures at its top,
+                    // so the stock pill beside it sat ~6px low
+                    &, span { line-height: 1.15; }
                     .price { font: 600 ~"28px/1.15" @ts-sans; color: @ts-ink; letter-spacing: -0.01em; }
                     .special-price { order: 1; margin: 0; .price { color: @ts-clay; } }
                     .old-price { order: 2; margin: 0; .price { font-size: 18px; color: @ts-muted; font-weight: 400; text-decoration: line-through; } }
@@ -48,6 +59,10 @@
                     .price-label { font-size: 12.5px; color: @ts-muted; font-weight: 500; }
                     // bundle: From / To on one line
                     .price-from, .price-to { display: inline-flex; align-items: baseline; gap: 6px; margin: 0; .price { font-size: 24px; } }
+                    // Luma makes the container, label and wrapper blocks: "From" sat above $105.00, the "To" price
+                    // floated beside them half a line up
+                    .price-from, .price-to { > .price-container { display: inline-flex; align-items: baseline; gap: 6px; } .price-label, .price-wrapper { display: inline; } }
+                    .price-to > .price-container > .price-label { display: none; }
                     .price-to::before { content: '\2013'; color: @ts-muted; margin-right: 4px; }
                     .price-to .price-label { display: none; }
                     .price-from .old-price, .price-to .old-price { display: none; }
@@ -92,13 +107,30 @@
                 .swatch-attribute-selected-option { color: @ts-muted; padding-left: 8px; font-weight: 500; }
                 .swatch-attribute-options { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 12px; }
                 .swatch-option { margin: 0; }
-                .swatch-option.color { width: 36px; height: 36px; min-width: 36px; border-radius: 999px; }
+                // colour swatches: a 36px dot with a hairline, a chalk gap + ring when hovered (ink, light) or chosen
+                // (kitchen). Luma's own .swatch-option.color.selected / :hover rules add a 2px orange outline, a 1px
+                // white border and 1px 2px padding (a 40x38 box) and out-rank _catalog.less, hence the specificity here.
+                .swatch-attribute-options .swatch-option.color {
+                    position: relative;
+                    box-sizing: border-box;
+                    width: 36px; height: 36px; min-width: 36px;
+                    padding: 0;
+                    border: 0 !important;
+                    outline: 0 !important;
+                    border-radius: 999px;
+                    box-shadow: inset 0 0 0 1px rgba(19, 32, 27, .28);
+                    // 44px hit area around the 36px dot
+                    &::before { content: ''; position: absolute; inset: -4px; border-radius: 999px; }
+                    &:not(.disabled):not(.selected):hover { box-shadow: inset 0 0 0 1px rgba(19, 32, 27, .28), 0 0 0 2px @ts-chalk, 0 0 0 3.5px fade(@ts-ink, 35%) !important; }
+                    &.selected { box-shadow: inset 0 0 0 1px rgba(19, 32, 27, .28), 0 0 0 2px @ts-chalk, 0 0 0 3.5px @ts-kitchen !important; }
+                    &:focus-visible { outline: 2px solid @ts-kitchen !important; outline-offset: 4px; }
+                }
                 .swatch-option.text {
                     border-radius: 999px;
                     padding: 0 18px;
                     min-width: 56px;
-                    height: 42px;
-                    line-height: 40px;
+                    height: @ts-pill-h;
+                    line-height: @ts-pill-h - 2px;
                     font-size: 14px;
                     font-weight: 600;
                     background: @ts-paper;
@@ -133,6 +165,10 @@
                 }
             }
             .product-addto-links, .product-social-links { margin: 0; }
+            // ShopperUx's "Save for later" replaces Magento's wish list here (guests cannot use it); the
+            // .product-social-links rule below out-ranked the module's hide rule, so both showed side by side
+            .product-social-links .product-addto-links { display: none !important; }
+            .product-social-links .ts-ux-save { margin: 0; min-height: @ts-pill-h; padding: 0 2px; }
             .product-social-links {
                 text-align: left;
                 .action.towishlist, .action.mailto {
@@ -219,13 +255,41 @@
                     transform: none;
                 }
             }
-            .fotorama__wrap:has(.fotorama__nav-wrap--vertical) .fotorama__stage { width: ~"calc(100% - 130px)" !important; left: 130px !important; }
+            // 128px thumbs + a 10px gap (the same gap as between the thumbs)
+            .fotorama__wrap:has(.fotorama__nav-wrap--vertical) .fotorama__stage { width: ~"calc(100% - 138px)" !important; left: 138px !important; }
+            // one photo, no thumbs: fotorama still reserves the thumb column (inline left: 130px at full width), which
+            // left an empty strip on the left and pushed the photo out past the column, clipping its right side
+            .fotorama__wrap:not(:has(.fotorama__nav__frame)) .fotorama__stage { width: 100% !important; left: 0 !important; }
             .gallery-placeholder__image { border-radius: 18px; background: @ts-photo; aspect-ratio: ~"4 / 5"; object-fit: cover; }
+        }
+
+        // Luma's colour tooltip (a 130px colour square) covered the price and description on hover; the chosen
+        // colour's name already shows next to the "Color" label
+        .swatch-option-tooltip { display: none !important; }
+
+        // fullscreen: fotorama moves the gallery to <body>, out of reach of the .product.media rules above
+        // (it showed on white with Luma's orange thumb border and a grey box round the close button)
+        .fotorama--fullscreen {
+            &, .fotorama__stage, .fotorama__stage__shaft, .fotorama__stage__frame, .fotorama__nav-wrap, .fotorama__nav { background: @ts-chalk; }
+            .fotorama__nav { text-align: center; }
+            .fotorama__nav__frame--thumb { border-radius: 10px; overflow: hidden; }
+            .fotorama__thumb { background: @ts-photo; border-radius: 10px; }
+            .fotorama__thumb-border { border: 2px solid @ts-kitchen; border-radius: 10px; }
+            .fotorama__arr { background: transparent; }
+            .fotorama__fullscreen-icon, .fotorama__zoom-in, .fotorama__zoom-out {
+                border: 0;
+                box-shadow: none !important;
+                outline: 0;
+                &:focus-visible { outline: 2px solid @ts-kitchen; outline-offset: -8px; border-radius: 999px; }
+            }
+            .fotorama__fullscreen-icon:focus::after, .fotorama__zoom-in:focus::after, .fotorama__zoom-out:focus::after,
+            .fotorama__arr:focus::after { display: none; }
         }
 
         // ---- tabs ----
         .product.info.detailed {
             margin-top: 72px;
+            margin-bottom: 0; // the strip below brings its own 72px (56px on phones); Luma's 30px stacked on top of it
             clear: both;
             .data.item.title > .switch {
                 font: 600 ~"13px/52px" @ts-sans;
@@ -242,8 +306,10 @@
             .data.item.title.active > .switch,
             .data.item.title > .switch:hover {
                 color: @ts-kitchen;
-                box-shadow: inset 0 -3px 0 @ts-optic;
+                box-shadow: inset 0 -2px 0 @ts-kitchen;
             }
+            // the optic-yellow bar was ~1.2:1 on chalk; hover gets a quieter line than the open tab
+            .data.item.title:not(.active) > .switch:hover { color: @ts-ink; box-shadow: inset 0 -2px 0 @ts-line; }
             .data.item.content {
                 border: 0;
                 border-top: 1px solid @ts-line;
@@ -285,21 +351,61 @@
         }
         .review-form {
             max-width: 620px;
-            .action.submit.primary { border-radius: 999px; }
+            .fieldset.review-fieldset, .fieldset.additional_info { margin-bottom: 24px; }
+            .field.review-field-ratings { margin-bottom: 24px; }
+            // the vote stars are absolutely positioned; Luma reserved 58px under them (a ~75px hole before Nickname)
+            .review-control-vote { margin: 10px 0 30px; }
+            .actions-toolbar { margin-top: 8px; }
+            // it rendered as a 39px outline button; one button system: a filled 48px primary
+            .actions-toolbar .action.submit.primary {
+                display: inline-flex; align-items: center; justify-content: center;
+                min-height: @ts-btn-h; padding: 0 32px; margin: 0;
+                border-radius: 999px;
+                background: @ts-kitchen; border: 1px solid @ts-kitchen; color: @ts-chalk;
+                font: 600 15px @ts-sans;
+                &:hover { background: @ts-court; border-color: @ts-court; color: @ts-chalk; }
+            }
             .review-legend > span { font-size: 15px; font-family: @ts-sans; font-weight: 500; }
             .review-legend > strong { font-family: @ts-serif; font-size: 21px; font-weight: 500; }
             .review-field-ratings .label { font-weight: 600; }
         }
         .review-control-vote label::before, .review-control-vote::before { font-size: 26px; height: 26px; line-height: 26px; }
+        // empty stars were #C7C7C7, faint on chalk
+        .review-form .review-control-vote::before { color: #A9B0A8; }
+
+        // the success notice duplicated the added-to-bag drawer and pushed the whole page down ~60px behind it;
+        // the drawer exists only once it has opened, and errors / notices still show
+        &:has(.ts-ux-drawer) .page.messages .message-success { display: none; }
 
         // ---- related / upsell ----
+        // one look for the three strips under the product (related, upsell, recently viewed): the same heading, the
+        // same spacing and the same scrolling row, so 1-3 cards never leave an orphan or a ragged grid
         .block.related, .block.upsell {
-            margin-top: 80px;
+            margin: 72px 0 0;
             clear: both;
-            .block-title { margin-bottom: 28px; strong { font-size: @ts-h2; font-weight: 450; } }
+            .block-title {
+                margin-bottom: 24px;
+                strong { font: 450 ~"clamp(24px, 1.2vw + 18px, 32px)/1.15" @ts-serif; letter-spacing: -0.005em; }
+            }
             .block-actions, .field.choice.related { display: none; }
             .product-item-name { margin-left: 0; }
+            .products-grid { margin: 0; }
+            .products-grid .product-items {
+                display: grid;
+                grid-template-columns: none;
+                grid-auto-flow: column;
+                grid-auto-columns: ~"calc((100% - 72px) / 4)";
+                gap: 24px;
+                overflow-x: auto;
+                overscroll-behavior-x: contain;
+                scroll-snap-type: x mandatory;
+                scrollbar-width: thin;
+                padding-bottom: 10px;
+                > .product-item { scroll-snap-align: start; }
+            }
         }
+        .ts-ux-strip { margin: 72px 0 24px; }
+        .ts-ux-strip .ts-ux-strip__title { margin: 0; font: 450 ~"clamp(24px, 1.2vw + 18px, 32px)/1.15" @ts-serif; letter-spacing: -0.005em; }
     }
 
     // ---- bundle customise panel ----
@@ -355,13 +461,30 @@
         .product.media { width: 55%; }
         .product-info-main { width: 40%; }
     }
-    // tablets: gallery and buy box stacked, gallery capped so the photo stays in view
+    // side by side: the tabs clear the two floated columns, and clearance swallowed their 72px top margin (30px under
+    // the gallery at 1440, ~0 under a taller buy box at 1024). Pad instead, from whichever column ends lower.
+    @media (min-width: 1024px) {
+        body.catalog-product-view {
+            .product.media, .product-info-main { margin-bottom: 0; }
+            .product.info.detailed { margin-top: 0; padding-top: 72px; }
+        }
+    }
+    // tablets: gallery and buy box stacked in one column capped so the photo stays in view; the breadcrumbs, tabs and
+    // strips share that column, so every left edge lines up (they sat 40px left of the gallery at 768)
     @media (max-width: 1023px) {
         body.catalog-product-view {
             .column.main { display: flex; flex-direction: column; > * { order: 3; } }
-            .product.media { order: 1; width: 100%; float: none; max-width: 640px; margin: 0 auto 34px; }
+            .product.media { order: 1; width: 100%; float: none; max-width: 720px; margin: 0 auto 34px; }
             .product-info-main { order: 2; }
-            .product-info-main { width: 100%; float: none; max-width: 640px; margin: 0 auto; }
+            .product-info-main { width: 100%; float: none; max-width: 720px; margin: 0 auto; }
+            .breadcrumbs, .column.main > .product.info.detailed, .column.main > .block.related,
+            .column.main > .block.upsell, .column.main > .ts-ux-strip {
+                width: 100%; max-width: 720px; margin-left: auto; margin-right: auto; box-sizing: border-box;
+            }
+            .breadcrumbs { padding-left: 0; padding-right: 0; }
+            // a lone photo at the full 720px column was 900px tall: give it the same size as a photo beside thumbs
+            .product.media .fotorama__wrap:not(:has(.fotorama__nav__frame)) .fotorama__stage { width: ~"calc(100% - 138px)" !important; left: 69px !important; }
+            .block.related, .block.upsell { .products-grid .product-items { grid-auto-columns: ~"calc((100% - 40px) / 3)"; gap: 20px; } }
         }
     }
 }
@@ -407,8 +530,19 @@
                 }
                 .data.item.content { border-top: 0; padding: 0 0 24px; }
             }
-            .block.related, .block.upsell { margin-top: 56px; .block-title { margin-bottom: 20px; } }
+            .block.related, .block.upsell {
+                margin-top: 56px;
+                .block-title { margin-bottom: 20px; }
+                .products-grid .product-items { grid-auto-columns: 44%; gap: 12px; }
+            }
+            .ts-ux-strip { margin-top: 56px; }
             .copyright { padding-bottom: 96px; }
+            // tap targets: the review links were 16px tall, Save for later 36px, review stars 27px
+            .product-info-main .product-reviews-summary .reviews-actions a { display: inline-flex; align-items: center; min-height: @ts-pill-h; }
+            .product-info-main .product-reviews-summary { margin-bottom: 8px; }
+            .review-form .review-control-vote label { height: @ts-pill-h; }
+            .review-form .review-control-vote { margin-bottom: 48px; }
+            .review-form .actions-toolbar .action.submit.primary { width: 100%; }
         }
         .ts-sticky-atc {
             display: flex;
@@ -421,7 +555,7 @@
             z-index: 90;
             padding: 10px @ts-gutter-m;
             padding-bottom: ~"calc(10px + env(safe-area-inset-bottom))";
-            background: fade(@ts-paper, 97%);
+            background: @ts-paper; // was 97%: page text ghosted through behind the name
             border-top: 1px solid @ts-line;
             box-shadow: 0 -12px 30px -18px rgba(19, 32, 27, .35);
             transform: translateY(110%);
@@ -430,6 +564,6 @@
             &__info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
             &__name { font: 600 ~"13.5px/1.25" @ts-sans; color: @ts-ink; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
             &__price { font: 500 ~"13.5px/1.2" @ts-sans; color: @ts-muted; }
-            &__btn.action.primary { flex: none; padding: 13px 22px; font-size: 15px; margin: 0; max-width: 60%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            &__btn.action.primary { flex: none; min-height: @ts-btn-h; padding: 0 24px; font-size: 15px; margin: 0; max-width: 60%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         }
     }
