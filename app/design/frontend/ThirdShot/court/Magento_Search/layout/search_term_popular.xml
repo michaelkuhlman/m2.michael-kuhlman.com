@@ -27,5 +27,14 @@
                 </argument>
             </action>
         </referenceBlock>
+        <!-- title inside the content column so it shares the grid with the help card -->
+        <move element="page.main.title" destination="content" before="-"/>
+        <referenceContainer name="content">
+            <block class="Magento\Cms\Block\Block" name="ts.help.card" after="-">
+                <arguments>
+                    <argument name="block_id" xsi:type="string">ts-help-card</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
     </body>
 </page>

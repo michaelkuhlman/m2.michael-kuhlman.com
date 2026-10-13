@@ -97,6 +97,7 @@
         h2 { color: @ts-chalk; font-size: ~"clamp(26px, 1vw + 20px, 36px)"; font-weight: 400; margin: 0 0 12px; }
         p { margin: 0; line-height: 1.7; max-width: 760px; }
         a:not(.ts-btn) { color: @ts-optic; }
+        > div { flex: 1 1 auto; min-width: 0; }
         .ts-btn { flex: none; }
     }
 
@@ -109,6 +110,53 @@
         color: #4A3D0E;
         max-width: 760px;
         margin: 0 0 44px;
+    }
+
+    // text pages (FAQ, shipping, privacy, popular searches): 760px reading column + a sticky help card on the right
+    .ts-help-card {
+        box-sizing: border-box;
+        background: @ts-paper;
+        border: 1px solid @ts-line;
+        border-radius: 20px;
+        padding: 28px 28px 14px;
+        h2 { font-size: 26px; font-weight: 400; line-height: 1.15; margin: 0 0 10px; color: @ts-ink; }
+        p { font-size: 15px; line-height: 1.6; color: @ts-body; margin: 0 0 20px; }
+        .ts-btn { width: 100%; }
+        &__links {
+            list-style: none;
+            margin: 18px 0 0;
+            padding: 0;
+            li { margin: 0; border-top: 1px solid @ts-line; }
+            a {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                min-height: 48px;
+                font-size: 15px;
+                font-weight: 500;
+                color: @ts-ink;
+                text-decoration: none;
+                &::after { content: '\2192'; color: @ts-muted; transition: transform .25s @ts-ease, color .2s; }
+                &:hover { color: @ts-kitchen; text-decoration: none; &::after { color: @ts-kitchen; transform: translateX(3px); } }
+            }
+        }
+    }
+    // no link to the page you are on
+    .cms-faq .ts-help-card__faq, .cms-shipping-returns .ts-help-card__ship { display: none; }
+    .ts-page__aside { margin-top: @ts-section; max-width: 760px; }
+    .search-term-popular .ts-help-card { margin-top: @ts-section; max-width: 760px; }
+    @media (min-width: 1024px) {
+        .ts-page--aside, .search-term-popular .column.main {
+            display: grid;
+            grid-template-columns: minmax(0, 760px) minmax(280px, 340px);
+            justify-content: space-between;
+            column-gap: 48px;
+            align-items: start;
+        }
+        .search-term-popular .column.main { grid-template-rows: auto 1fr; }
+        .ts-page__aside, .search-term-popular .ts-help-card { position: sticky; top: 140px; margin-top: 48px; }
+        .search-term-popular .ts-help-card { grid-column: 2; grid-row: ~"1 / span 2"; }
+        .ts-page__main > .ts-page-hero { margin-top: 48px; }
     }
 
     // FAQ accordion (native <details>)
