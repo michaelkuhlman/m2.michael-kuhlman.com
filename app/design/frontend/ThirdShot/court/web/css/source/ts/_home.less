@@ -140,7 +140,7 @@
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         grid-auto-rows: ~"clamp(240px, 22vw, 320px)";
-        gap: 18px;
+        gap: 24px;        // same gutter as the product grids
     }
     .ts-cat {
         position: relative;
@@ -256,7 +256,7 @@
     .ts-quotes__grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
+        gap: 24px;
         figure {
             margin: 0;
             background: @ts-paper;
@@ -286,8 +286,15 @@
         .ts-hero::after { background: linear-gradient(90deg, rgba(14, 36, 27, .9) 0%, rgba(14, 36, 27, .7) 45%, rgba(14, 36, 27, .1) 80%), linear-gradient(0deg, rgba(14, 36, 27, .35) 0%, rgba(14, 36, 27, 0) 30%); }
         .ts-cats { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 240px; }
         .ts-cat--wide { grid-column: span 2; }
-        .ts-spotlight__copy { padding: 44px; ul { gap: 28px; } }
-        .ts-quotes__grid { grid-template-columns: 1fr 1fr; figure:last-child { grid-column: ~"1 / -1"; } }
+        // spotlight stacks (side by side the stats wrapped: "16 / mm"); quotes stay three across, just tighter
+        .ts-spotlight { grid-template-columns: 1fr; }
+        .ts-spotlight__media img { aspect-ratio: ~"16 / 9"; }
+        .ts-spotlight__copy { padding: 44px; ul { gap: 36px; } li strong { white-space: nowrap; } }
+        .ts-quotes__grid {
+            gap: 14px;
+            figure { padding: 26px 22px 22px; }
+            blockquote { font-size: 17.5px; }
+        }
     }
 
 
@@ -339,6 +346,7 @@
             gap: 12px;
             margin-bottom: 24px;
         }
+        .ts-section__head--center { align-items: center; text-align: center; }
         .ts-cats { grid-template-columns: 1fr 1fr; grid-auto-rows: 172px; gap: 10px; }
         .ts-cat { border-radius: 14px; }
         .ts-cat__label { left: 14px; bottom: 12px; right: 12px; font-size: 18px; em { font-size: 11.5px; margin-top: 3px; } }

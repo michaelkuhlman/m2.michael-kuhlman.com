@@ -74,6 +74,7 @@
             .ts-icon-btn();
             position: relative;
             &::before, &.active::before { .ts-icon(@ts-i-bag, 23px); color: inherit; font-family: inherit; margin: 0; }
+            &.active { display: inline-flex; align-items: center; justify-content: center; }   // Luma: inline-block
             .text { .ts-sr-only(); }
             .counter.qty {
                 position: absolute;
@@ -89,7 +90,8 @@
                 margin: 0;
                 box-shadow: 0 0 0 2px @ts-chalk;
                 &.empty { display: none; }
-                .loader > img { max-width: 14px; }
+                // the loading spinner widened the badge into a 28px pill over the icon while cart data loaded
+                .loader { display: none !important; }
             }
             .counter-label { .ts-sr-only(); }
         }
