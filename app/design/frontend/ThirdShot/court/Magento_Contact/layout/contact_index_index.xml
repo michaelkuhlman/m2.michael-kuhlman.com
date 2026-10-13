@@ -1,6 +1,24 @@
 <?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
+        <!-- breadcrumbs like the other content pages, so the page hero starts at the same height -->
+        <referenceBlock name="breadcrumbs">
+            <action method="addCrumb">
+                <argument name="crumbName" xsi:type="string">home</argument>
+                <argument name="crumbInfo" xsi:type="array">
+                    <item name="title" xsi:type="string" translate="true">Home</item>
+                    <item name="label" xsi:type="string" translate="true">Home</item>
+                    <item name="link" xsi:type="url" path="/"/>
+                </argument>
+            </action>
+            <action method="addCrumb">
+                <argument name="crumbName" xsi:type="string">contact</argument>
+                <argument name="crumbInfo" xsi:type="array">
+                    <item name="title" xsi:type="string" translate="true">Contact</item>
+                    <item name="label" xsi:type="string" translate="true">Contact</item>
+                </argument>
+            </action>
+        </referenceBlock>
         <referenceContainer name="content">
             <block class="Magento\Cms\Block\Block" name="ts.contact.info" before="-">
                 <arguments>

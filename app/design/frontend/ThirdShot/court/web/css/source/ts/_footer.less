@@ -17,6 +17,10 @@
         a:focus-visible { outline-color: @ts-optic; }
     }
 
+    // The space above the footer is the footer's margin (one @ts-section) alone: Luma's column padding (0, 20 or
+    // 48px depending on the page) would make it differ from page to page.
+    body .columns .column.main { padding-bottom: 0; }
+
     .ts-footer {
         &__news {
             display: grid;
@@ -50,7 +54,8 @@
                 input {
                     margin: 0;
                     width: 100%;
-                    height: 54px;
+                    height: @ts-btn-h;
+                    min-height: @ts-btn-h;
                     border-radius: 999px;
                     border: 1px solid rgba(244, 240, 230, .32);
                     background: rgba(255, 255, 255, .06);
@@ -63,7 +68,8 @@
                 }
                 .actions { display: block; width: auto; }
                 .action.subscribe {
-                    height: 54px;
+                    height: @ts-btn-h;
+                    min-height: @ts-btn-h;
                     border-radius: 999px;
                     background: @ts-optic;
                     border: 0;
@@ -73,10 +79,11 @@
                     margin: 0;
                     &:hover { background: #E6FA70; box-shadow: 0 10px 28px -10px rgba(217, 242, 79, .6); }
                 }
-                div.mage-error { color: #FFB8A0; }
+                div.mage-error { color: #FFB8A0; font-size: 12.5px; line-height: 1.5; margin-top: 8px; padding-left: 22px; }
             }
         }
-        &__fine { font-size: 12.5px; color: rgba(244, 240, 230, .6); margin: 12px 0 0; max-width: 520px; margin-left: auto; padding-left: 22px; }
+        // the note lines up with the text inside the pill input (22px padding)
+        &__fine { font-size: 12.5px; line-height: 1.5; color: rgba(244, 240, 230, .6); margin: 14px 0 0 auto; max-width: 520px; padding-left: 22px; box-sizing: border-box; }
 
         &__grid {
             display: grid;
@@ -85,7 +92,7 @@
             padding: 60px 0 52px;
         }
         &__brand {
-            img { width: 188px; height: auto; display: block; margin-bottom: 18px; }
+            img { width: 188px; max-width: none; height: auto; display: block; margin-bottom: 18px; }
             p { font-size: 14px; line-height: 1.65; max-width: 300px; margin: 0; }
         }
         &__col {
@@ -119,9 +126,28 @@
     @media (max-width: 1023px) {
         .ts-footer__grid { grid-template-columns: 1fr 1fr 1fr; }
         .ts-footer__brand, .ts-footer__demo { grid-column: ~"1 / -1"; }
+        .ts-footer__demo p { max-width: 560px; }
+        // tablet: the newsletter form gets the full row instead of a squeezed right column
+        .ts-footer__news { grid-template-columns: 1fr; gap: 28px; }
+        .ts-footer__news-form .block.newsletter { margin: 0; max-width: 560px; }
+        .ts-footer__fine { margin-left: 0; }
     }
 
 
+}
+
+// Desktop / tablet rules (styles-l, after Luma's own desktop rules)
+.media-width(@extremum, @break) when (@extremum = 'min') and (@break = @screen__m) {
+    // Luma's sticky-footer rule (margin-top: auto) beats the common one: restore one @ts-section above the footer
+    body .page-wrapper > .page-footer { margin-top: @ts-section; }
+    // Luma floats the newsletter block and caps the field at 220px: undo both so the field fills the row
+    body .ts-footer__news-form .block.newsletter {
+        float: none;
+        width: 100%;
+        .form.subscribe > .field, .form.subscribe > .actions { float: none; }
+        .field.newsletter { max-width: none; margin-right: 0; }
+        .actions { width: auto; flex: none; }
+    }
 }
 
 // Phone rules (emitted after Luma's own mobile rules)
@@ -129,9 +155,14 @@
         .ts-footer {
             &__news { grid-template-columns: 1fr; gap: 26px; padding: 48px 0 40px; }
             &__news-form .block.newsletter { margin: 0; max-width: none; .form.subscribe { flex-direction: column; } .action.subscribe { width: 100%; } }
-            &__fine { margin: 12px 0 0; padding: 0; text-align: center; }
+            &__fine { margin: 12px 0 0; padding: 0; text-align: left; }
+            &__news-form .block.newsletter div.mage-error { padding-left: 0; }
             &__grid { grid-template-columns: 1fr 1fr; gap: 28px 20px; padding: 40px 0 36px; }
-            &__col li a { padding: 7px 0; }
+            &__demo { grid-column: auto; }
+            &__col h4 { margin-bottom: 8px; }
+            // 44px tap rows on touch screens
+            &__col li a { display: flex; align-items: center; min-height: 44px; padding: 0; white-space: normal; }
         }
+
         .copyright { flex-direction: column; padding: 18px @ts-gutter-m; }
     }
