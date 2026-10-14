@@ -1,0 +1,13 @@
+# Magento var/log for m2.michael-kuhlman.com (mirror: _build/server/logrotate-m2-magento)
+# cron.log alone grows ~10 MB/day; keep a week, compressed.
+/var/www/m2.michael-kuhlman.com/var/log/*.log {
+	su m2 m2
+	daily
+	rotate 7
+	maxsize 50M
+	missingok
+	notifempty
+	compress
+	delaycompress
+	copytruncate
+}

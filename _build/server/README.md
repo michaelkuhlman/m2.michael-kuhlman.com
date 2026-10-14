@@ -8,6 +8,7 @@ Copies of the live config outside this tree. Change the live file and this copy 
 | nginx-snippet-m2_magento.conf | /etc/nginx/snippets/m2_magento.conf (Magento nginx.conf.sample, upstream m2_fastcgi, header include per location) |
 | nginx-snippet-m2_headers.conf | /etc/nginx/snippets/m2_headers.conf |
 | php-fpm-pool-m2.conf | /etc/php/8.3/fpm/pool.d/m2.conf |
+| logrotate-m2-magento | /etc/logrotate.d/m2-magento (var/log/*.log daily, 7 kept; cron.log grows ~10 MB/day) |
 
 Containers (both `--restart unless-stopped`, docker is enabled at boot):
 
