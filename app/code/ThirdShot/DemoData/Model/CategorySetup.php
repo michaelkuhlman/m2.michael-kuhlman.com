@@ -66,7 +66,7 @@ class CategorySetup
                 ->setIsAnchor(true)
                 ->setPosition($pos + 1)
                 ->setDescription($row['description'] ?? '')
-                ->setMetaTitle($row['name'] . ' | Third Shot Supply Co.')
+                ->setMetaTitle($row['name']) // the store's title suffix adds the brand
                 ->setMetaDescription($row['meta_description'] ?? '')
                 ->setDisplayMode('PRODUCTS')
                 ->setAvailableSortBy(['position', 'name', 'price'])
