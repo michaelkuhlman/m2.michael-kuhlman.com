@@ -77,6 +77,7 @@
 @import 'module/_search.less';
 @import 'module/_overlays.less';
 @import 'module/_cart.less';
+@import 'module/_bag.less';
 
 // Listing chrome shared by phones and tablets (768-1023 list like phones: Filter pill + drawer)
 .ux-filter-drawer() {
@@ -176,9 +177,6 @@
         max-height: ~"calc(100vh - 220px)";
         max-height: ~"calc(100dvh - 220px)";
     }
-    .ts-ux-drawer__body { padding: 18px 18px 28px; }
-    .ts-ux-drawer .ts-ux-mini-grid .actions-primary .action.tocart { min-height: 44px; }
-    .ts-ux-drawer__head { padding-left: 18px; }
     .ts-ux-top { right: 14px; bottom: 14px; width: 44px; height: 44px; }
     .ts-ux-toast { bottom: 80px; }
     .cart.item .ts-ux-qty { height: 40px; .ts-ux-qty__btn { height: 38px; width: 36px; } input.input-text.qty { height: 38px !important; } }

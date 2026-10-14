@@ -79,6 +79,16 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
                 '<button type="button" class="ts-ux-eye" data-ts-qv="' + id + '" data-ts-qv-url="' + util.escape(link.href) + '"' +
                 ' aria-label="Quick view: ' + util.escape(name) + '" title="Quick view"><span>Quick view</span></button>';
             tools.querySelector('.ts-ux-heart').dataset.name = name;
+            // core list.phtml gives configurable products a plain add form, and Magento answers it with a redirect
+            // to the product page: send those to quick view (options first) like the ShopperUx cards do
+            var add = info.querySelector('form[data-role="tocart-form"] .action.tocart');
+            if (add && !add.hasAttribute('data-ts-qv') && info.querySelector('[class*="swatch-opt"]')) {
+                add.setAttribute('data-ts-qv', id);
+                add.setAttribute('data-ts-qv-url', link.href);
+                add.title = 'Choose options';
+                var label = add.querySelector('span');
+                if (label) { label.textContent = 'Choose options'; }
+            }
             item.classList.add('ts-ux-has-tools');
             info.appendChild(tools);
         });

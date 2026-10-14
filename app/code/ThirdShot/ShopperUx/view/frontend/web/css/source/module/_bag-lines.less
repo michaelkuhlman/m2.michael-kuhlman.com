@@ -1,0 +1,215 @@
+// ThirdShot_ShopperUx - bag drawer lines and "Pairs well with" picks (imported by _bag.less)
+
+& when (@media-common = true) {
+    .ts-bag-line {
+        position: relative;
+        display: grid;
+        grid-template-columns: 80px minmax(0, 1fr);
+        column-gap: 14px;
+        padding: 18px 0;
+        border-bottom: 1px solid @ts-line;
+        transition: height .28s @bag-ease, opacity .2s, padding .28s @bag-ease;
+        &:last-child { border-bottom: 0; }
+        p { margin: 0; }
+
+        // the line that just went in: a soft highlight that fades out
+        &.is-new::before {
+            content: '';
+            position: absolute;
+            inset: 6px -10px;
+            border-radius: 14px;
+            background: fade(@ts-optic, 30%);
+            z-index: -1;
+            animation: ts-bag-glow 2.4s ease-out forwards;
+        }
+        &.is-removing { opacity: 0; padding-top: 0; padding-bottom: 0; overflow: hidden; pointer-events: none; }
+
+        &__img {
+            display: block;
+            width: 80px;
+            height: 100px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: @bag-photo;
+            img { display: block; width: 100%; height: 100%; object-fit: cover; }
+        }
+        &__main { display: flex; flex-direction: column; min-width: 0; }
+        &__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+        &__name {
+            font-weight: 600;
+            font-size: 15px;
+            line-height: 1.3;
+            color: @ts-ink;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            a { color: inherit; text-decoration: none; &:hover { text-decoration: underline; text-underline-offset: 3px; } }
+        }
+        &__price {
+            flex: none;
+            text-align: right;
+            line-height: 1.3;
+            strong { display: block; font-size: 15px; font-weight: 700; color: @ts-ink; font-variant-numeric: tabular-nums; transition: opacity .2s; }
+            .price { font-size: 15px; font-weight: 700; } // fallback when the section has no numeric price
+        }
+        &__each { display: block; margin-top: 2px; font-size: 12.5px; color: @ts-muted; white-space: nowrap; }
+        &.is-pending &__price strong { opacity: .5; }
+        &__opts {
+            margin-top: 4px !important;
+            font-size: 13px;
+            color: @ts-muted;
+            span + span::before { content: '\00b7'; margin: 0 6px; }
+        }
+        &__tag {
+            align-self: flex-start;
+            margin-top: 6px !important;
+            padding: 3px 9px;
+            border-radius: 999px;
+            background: @ts-kitchen;
+            color: @ts-optic;
+            font-size: 11.5px;
+            font-weight: 700;
+            letter-spacing: .02em;
+        }
+        &__row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: auto;
+            padding-top: 12px;
+        }
+        &__links { display: flex; align-items: center; gap: 2px; margin-right: -8px; }
+        &__link {
+            display: inline-flex;
+            align-items: center;
+            min-height: 44px;
+            padding: 0 8px;
+            border: 0;
+            background: none;
+            box-shadow: none;
+            color: @ts-muted;
+            font: 500 ~"13.5px/1" @ts-sans;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            cursor: pointer;
+            &:hover, &:focus-visible { color: @ts-clay; background: none; border: 0; }
+        }
+        a.ts-bag-line__link:hover { color: @ts-ink; }
+        &__err { margin-top: 8px !important; color: @ts-clay; font-size: 13px; font-weight: 500; &[hidden] { display: none; } }
+    }
+
+    // -/qty/+ stepper: 40px tall, 44px tap targets on touch screens
+    .ts-bag-qty {
+        display: inline-flex;
+        align-items: center;
+        height: 40px;
+        border-radius: 999px;
+        background: @ts-paper;
+        box-shadow: inset 0 0 0 1px @ts-line;
+        &__btn {
+            .ux-round-btn(40px);
+            background: transparent;
+            color: @ts-ink;
+            transition: background .15s, color .15s;
+            &:hover:not([disabled]), &:focus-visible { background: fade(@ts-kitchen, 8%); color: @ts-kitchen; border: 0; }
+            &:active:not([disabled]) { transform: scale(.92); }
+            &[disabled] { opacity: .3; cursor: default; background: transparent; }
+        }
+        &__minus::before { .ux-icon(@ux-i-minus, 16px); }
+        &__plus::before { .ux-icon(@ux-i-plus, 16px); }
+        &__val { min-width: 26px; text-align: center; font-weight: 600; font-size: 15px; font-variant-numeric: tabular-nums; color: @ts-ink; }
+    }
+    @media (pointer: coarse) {
+        .ts-bag-qty { height: 44px; &__btn { width: 44px; height: 44px; } }
+    }
+
+    @keyframes ts-bag-glow { 0%, 45% { opacity: 1; } 100% { opacity: 0; } }
+
+    // ---- "Pairs well with": compact rows (photo, name + price, Add) built from the shared card HTML ----
+    .ts-bag__recs {
+        margin-top: 22px;
+        padding: 18px 16px 6px;
+        border-radius: 16px;
+        background: @ts-paper;
+        border: 1px solid @ts-line;
+        &[hidden] { display: none; }
+        h3 { margin: 0 0 4px; font: 450 ~"18px/1.2" @ts-serif; color: @ts-ink; }
+    }
+    .ts-bag__picks {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        > li { margin: 0 !important; padding: 12px 0 !important; width: auto !important; border-top: 1px solid @ts-line; &:first-child { border-top: 0; } &[hidden] { display: none; } }
+        .product-item-info {
+            display: grid !important;
+            grid-template-columns: 56px minmax(0, 1fr) auto;
+            grid-template-areas: "img name btn" "img price btn";
+            grid-template-rows: auto 1fr;
+            column-gap: 12px;
+            align-items: center;
+            width: 100% !important;
+            position: relative;
+        }
+        .product-item-details, .product-item-inner, .product-item-actions, .actions-primary, form[data-role="tocart-form"] { display: contents !important; }
+        .product-item-photo {
+            grid-area: img;
+            display: block;
+            width: 56px;
+            height: 70px;
+            margin: 0 !important;
+            border-radius: 10px !important;
+            overflow: hidden;
+            background: @bag-photo;
+        }
+        .product-image-container { display: block; width: 56px !important; height: 70px; }
+        .product-image-wrapper { display: block; height: 100%; padding-bottom: 0 !important; }
+        .product-image-photo { position: static; display: block; width: 100%; height: 100%; max-width: none; object-fit: cover; }
+        .product-item-name { grid-area: name; align-self: end; display: block; margin: 0 0 2px !important; font: 500 ~"14px/1.3" @ts-sans !important; min-width: 0; a, a:visited { color: @ts-ink; text-decoration: none; } a:hover { text-decoration: underline; text-underline-offset: 3px; } }
+        .price-box {
+            grid-area: price;
+            align-self: start;
+            display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 6px; margin: 0 !important;
+            .price { font-size: 13.5px !important; font-weight: 600; }
+            .special-price .price { color: @ts-clay; }
+            .old-price { margin: 0; .price { font-weight: 400; color: @ts-muted; text-decoration: line-through; } }
+            .price-label, .old-price .price-label, .special-price .price-label { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+        }
+        .product-reviews-summary, .ts-ux-card-tools, .stock.unavailable, .swatch-opt, [class^="swatch-opt"] { display: none !important; }
+        .action.tocart {
+            grid-area: btn;
+            position: relative;
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            min-width: 0;
+            width: auto !important;
+            height: @ts-btn-h-sm;
+            min-height: 0 !important;
+            padding: 0 14px 0 10px !important;
+            margin: 0 !important;
+            border-radius: 999px !important;
+            background: transparent !important;
+            color: @ts-kitchen !important;
+            border: 1.5px solid @ts-kitchen !important;
+            box-shadow: none !important;
+            font-size: 0 !important;    // the long label stays for screen readers; the button shows "+ Add"
+            &::before { .ux-icon(@ux-i-plus, 15px); }
+            &::after { content: 'Add'; font: 600 ~"13.5px/1" @ts-sans; }
+            &[data-ts-qv]::after { content: 'Options'; }
+            &[data-ts-qv]::before { display: none; }
+            &[data-ts-qv] { padding-left: 14px !important; }
+            span { font-size: 0; }
+            &:hover, &:focus-visible { background: @ts-kitchen !important; color: @ts-chalk !important; }
+            // a hit area of 44px without a bigger button
+            &::before, &::after { position: relative; }
+            &.disabled::after { content: ''; width: 14px; height: 14px; margin-left: 0; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: ts-bag-spin .7s linear infinite; }
+            &.disabled::before { display: none; }
+        }
+    }
+    @media (pointer: coarse) {
+        .ts-bag__picks .action.tocart { height: 44px; }
+    }
+}

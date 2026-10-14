@@ -1,0 +1,289 @@
+// ThirdShot_ShopperUx - the bag drawer (js/bag-drawer.js + js/bag-lines.js). See ../_module.less for variables.
+// Phones: full-screen sheet from the right. Tablet / desktop: a floating panel inset 12px from the edges.
+
+@bag-pad: 24px;
+@bag-pad-sm: 18px;
+@bag-photo: #F7EDD9;
+@bag-ease: cubic-bezier(.32, .72, 0, 1);
+
+& when (@media-common = true) {
+    // Luma's dropdown mini cart is replaced by the drawer once its script is up (the icon is a plain link before)
+    .ts-bag-ready .minicart-wrapper .block-minicart { display: none !important; }
+
+    .minicart-wrapper .counter.qty.ts-bump { animation: ts-bag-bump .5s @ts-ease; }
+    @keyframes ts-bag-bump {
+        0% { transform: scale(1); }
+        35% { transform: scale(1.45); }
+        100% { transform: scale(1); }
+    }
+
+    // add-to-bag buttons: a spinner while the request is out (catalog-add-to-cart sets .disabled)
+    .action.tocart.disabled {
+        position: relative;
+        pointer-events: none;
+        &::after {
+            content: '';
+            width: 16px;
+            height: 16px;
+            margin-left: 10px;
+            border-radius: 50%;
+            border: 2px solid currentColor;
+            border-right-color: transparent;
+            animation: ts-bag-spin .7s linear infinite;
+            flex: none;
+        }
+    }
+    @keyframes ts-bag-spin { to { transform: rotate(360deg); } }
+
+    .ts-bag {
+        position: fixed;
+        inset: 0;
+        z-index: 1150;
+        &[hidden] { display: none; }
+
+        &__backdrop {
+            position: absolute;
+            inset: 0;
+            background: fade(@ts-ink, 38%);
+            -webkit-backdrop-filter: blur(2px);
+            backdrop-filter: blur(2px);
+            opacity: 0;
+            transition: opacity .3s;
+        }
+        &__panel {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            background: @ts-chalk;
+            box-shadow: -24px 0 64px -24px rgba(19, 32, 27, .45);
+            transform: translateX(100%);
+            transition: transform .42s @bag-ease;
+            outline: 0;
+            overflow: hidden;
+        }
+        &.is-open &__backdrop { opacity: 1; }
+        &.is-open &__panel { transform: none; }
+
+        // ---- head ----
+        &__head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 10px 10px @bag-pad-sm;
+            flex: none;
+        }
+        &__title {
+            margin: 0;
+            font: 450 ~"24px/1.2" @ts-serif;
+            letter-spacing: -.01em;
+            color: @ts-ink;
+        }
+        &__count { font: 500 ~"15px/1" @ts-sans; color: @ts-muted; letter-spacing: 0; margin-left: 2px; }
+        &__close {
+            .ux-round-btn(44px);
+            background: transparent;
+            color: @ts-ink;
+            border: 0 !important;
+            &::before { .ux-icon(@ux-i-close, 22px); }
+            &:hover, &:focus { background: fade(@ts-kitchen, 8%); color: @ts-ink; border: 0; box-shadow: none; }
+            &:focus:not(:focus-visible) { background: transparent; }
+            &:focus-visible { outline: 2px solid @ts-kitchen; outline-offset: 2px; }
+        }
+
+        // ---- "X is in your bag" strip after an add ----
+        &__added {
+            flex: none;
+            display: grid;
+            grid-template-rows: 0fr;
+            padding: 0 @bag-pad-sm;
+            transition: grid-template-rows .35s @bag-ease, padding .35s @bag-ease;
+            > p {
+                overflow: hidden;
+                min-height: 0;
+                margin: 0;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 0 14px;
+                border-radius: 12px;
+                background: @ts-kitchen;
+                color: @ts-chalk;
+                font-size: 14px;
+                line-height: 1.35;
+                strong { font-weight: 600; color: #fff; }
+            }
+        }
+        &.is-added &__added:not(:empty) {
+            grid-template-rows: 1fr;
+            padding-bottom: 6px;
+            > p { padding: 12px 14px; animation: ts-bag-in .4s @bag-ease; }
+        }
+        &__added-icon {
+            flex: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: @ts-optic url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23173A2E' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6.5 12.5l3.6 3.4L17.5 8.5'/%3E%3C/svg%3E") center / 16px no-repeat;
+        }
+
+        // ---- body ----
+        &__body {
+            flex: 1;
+            min-height: 0;
+            overflow-x: hidden;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            padding: 6px @bag-pad-sm 24px;
+        }
+        &__ship {
+            margin: 4px 0 4px;
+            &:empty { display: none; }
+            .ts-ux-ship { padding: 4px 0 16px; border-bottom: 1px solid @ts-line; }
+            .ts-ux-ship__msg { font-size: 13.5px; margin-bottom: 8px; }
+        }
+        &__lines { list-style: none; margin: 0; padding: 0; }
+
+        // loading: a placeholder row until the cart section answers (only when there is nothing to show yet)
+        &__skeleton {
+            display: none;
+            grid-template-columns: 80px minmax(0, 1fr);
+            grid-template-rows: auto auto 1fr;
+            column-gap: 14px;
+            row-gap: 10px;
+            padding: 18px 0;
+            span { display: block; height: 14px; border-radius: 7px; background: @ts-sand; grid-column: 2; animation: ts-bag-pulse 1.1s ease-in-out infinite alternate; }
+            span:last-child { width: 45%; }
+            &::before { content: ''; grid-row: ~"1 / 4"; width: 80px; height: 100px; border-radius: 12px; background: @ts-sand; animation: ts-bag-pulse 1.1s ease-in-out infinite alternate; }
+        }
+        &.is-loading &__lines:empty + &__skeleton { display: grid; }
+        &.is-loading &__empty { display: none; }
+
+        // ---- empty ----
+        &__empty {
+            text-align: center;
+            padding: 48px 12px 24px;
+            &[hidden] { display: none; }
+            p { margin: 0 auto; max-width: 300px; color: @ts-muted; font-size: 15px; line-height: 1.5; }
+            .ts-bag__empty-title { font: 450 ~"22px/1.25" @ts-serif; color: @ts-ink; margin-bottom: 8px; max-width: none; }
+        }
+        &__empty-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 18px;
+            border-radius: 50%;
+            background: @ts-sand;
+            color: @ts-kitchen;
+            &::before {
+                .ux-icon("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5.5 8h13l-1 12h-11z'/%3E%3Cpath d='M9 10V6.5a3 3 0 0 1 6 0V10'/%3E%3C/svg%3E", 32px);
+            }
+        }
+        &__empty-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 24px;
+            a {
+                display: inline-flex;
+                align-items: center;
+                min-height: @ts-pill-h;
+                padding: 0 18px;
+                border-radius: 999px;
+                border: 1px solid @ts-line;
+                background: @ts-paper;
+                color: @ts-ink;
+                font-weight: 600;
+                font-size: 14.5px;
+                text-decoration: none;
+                &:hover { border-color: @ts-kitchen; color: @ts-kitchen; text-decoration: none; }
+            }
+        }
+
+        // ---- foot ----
+        &__foot {
+            flex: none;
+            padding: 14px @bag-pad-sm ~"calc(12px + env(safe-area-inset-bottom))";
+            border-top: 1px solid @ts-line;
+            background: @ts-chalk;
+            box-shadow: 0 -12px 24px -20px rgba(19, 32, 27, .35);
+        }
+        &.is-empty &__foot { display: none; }
+        &__total {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin: 0;
+            font-size: 15px;
+            color: @ts-ink;
+            strong { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+        }
+        &__note { margin: 2px 0 14px; font-size: 13px; color: @ts-muted; }
+        .ts-bag__checkout {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 56px;
+            margin: 0;
+            box-sizing: border-box;
+            font-size: 16px;
+            text-decoration: none;
+            &::after {
+                .ux-icon(@ux-i-arrow, 18px);
+                margin-left: 10px;
+                transition: transform .2s @ts-ease;
+            }
+            &:hover::after { transform: translateX(3px); }
+        }
+        &__view {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            margin-top: 4px;
+            color: @ts-kitchen;
+            font-weight: 600;
+            font-size: 14.5px;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            &:hover { color: @ts-ink; }
+        }
+    }
+
+    @keyframes ts-bag-in { from { opacity: 0; transform: translateY(-6px); } }
+    @keyframes ts-bag-pulse { from { opacity: .55; } to { opacity: 1; } }
+
+    @media (prefers-reduced-motion: reduce) {
+        .ts-bag__panel, .ts-bag__backdrop, .ts-bag__added, .ts-bag-line { transition: none !important; }
+        .ts-bag *, .minicart-wrapper .counter.qty { animation: none !important; }
+    }
+}
+
+@import '_bag-lines.less';
+
+// Tablet and up: a floating panel with a little air around it
+.media-width(@extremum, @break) when (@extremum = 'min') and (@break = @screen__m) {
+    .ts-bag {
+        &__panel {
+            top: 12px;
+            right: 12px;
+            bottom: 12px;
+            width: ~"min(440px, calc(100vw - 24px))";
+            border-radius: 20px;
+            transform: translateX(~"calc(100% + 24px)");
+        }
+        &__head { padding: 18px 14px 12px @bag-pad; }
+        &__added { padding: 0 @bag-pad; }
+        &__body { padding: 6px @bag-pad 24px; }
+        &__foot { padding: 16px @bag-pad 18px; }
+    }
+}

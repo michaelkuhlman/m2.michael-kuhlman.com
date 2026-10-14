@@ -53,3 +53,7 @@
 "Password Strength","Password strength"
 "No Password","No password"
 "Very Strong","Very strong"
+"Add to Cart","Add to bag"
+"Adding...","Adding…"
+"You added %1 to your shopping cart.","%1 is in your bag."
+"You added %1 to your <a href=""%2"">shopping cart</a>.","%1 is in your <a href=""%2"">bag</a>."

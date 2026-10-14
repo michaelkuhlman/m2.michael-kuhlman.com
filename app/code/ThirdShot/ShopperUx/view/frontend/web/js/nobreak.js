@@ -6,7 +6,7 @@
 define([], function () {
     'use strict';
 
-    var NAMES = '.product-item-name, .ts-ux-drawer__name, .ts-ux-search__name, .product-name',
+    var NAMES = '.product-item-name, .ts-bag-line__name, .ts-ux-search__name, .product-name',
         WORD = /[^\s-]+(?:-[^\s-]+)+/g,
         queued = false;
 

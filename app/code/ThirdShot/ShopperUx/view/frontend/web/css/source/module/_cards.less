@@ -236,7 +236,79 @@
     body.ts-has-sticky-atc .ts-ux-top { bottom: 96px; }
 
     @media (prefers-reduced-motion: reduce) {
-        .ts-ux-qv__panel, .ts-ux-drawer__panel, .ts-ux-top, .ts-ux-toast { transition: none; }
+        .ts-ux-qv__panel, .ts-bag__panel, .ts-ux-top, .ts-ux-toast { transition: none; }
         .products-grid .product-items > .ts-ux-new { animation: none; }
     }
+}
+
+// Touch screens (phones, iPad): a round "add to bag" button on the photo, so a card adds in one tap like on
+// desktop hover (simple products add straight away, "Choose options" ones open quick view)
+@ux-i-bagplus: "@{ux-svg}%3Cpath d='M5.5 8h13l-1 12h-11z'/%3E%3Cpath d='M9 10V6.5a3 3 0 0 1 6 0V10'/%3E%3Cpath d='M12 12.2v5M9.5 14.7h5'/%3E%3C/svg%3E";
+& when (@media-common = true) {
+    @media (hover: none) {
+        body .products-grid .product-item:not(.ts-no-quick) {
+            .product-item-info { position: relative; }
+            .product-item-inner {
+                display: block !important;
+                position: absolute;
+                z-index: 3;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 0;
+                padding: 125% 0 0;
+                margin: 0;
+                pointer-events: none;
+                // Luma's tablet rules visually hide the inner box (1px, clip, -1px margin) until hover, which never
+                // comes on touch: undo that here
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: auto !important;
+                padding: 125% 0 0 !important;
+                width: auto !important;
+                height: 0 !important;
+                &::before { display: none !important; } // Luma's 3px hover seam cover
+                margin: 0 !important;
+                overflow: visible !important;
+                clip: auto !important;
+                clip-path: none !important;
+            }
+            .product-item-actions { position: absolute; right: 8px; bottom: 8px; margin: 0; }
+            .actions-primary, .actions-primary form { display: block; width: auto; margin: 0; padding: 0; float: none; }
+            .actions-primary .stock { display: none; }
+            .actions-primary .action.tocart {
+                .ux-round-btn(44px);
+                pointer-events: auto;
+                min-height: 0 !important;
+                margin: 0;
+                background: fade(@ts-paper, 94%);
+                color: @ts-kitchen;
+                box-shadow: 0 4px 14px -6px rgba(19, 32, 27, .45);
+                -webkit-backdrop-filter: blur(6px);
+                backdrop-filter: blur(6px);
+                font-size: 0;
+                span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+                &::before { .ux-icon(@ux-i-bagplus, 22px); }
+                &:active { transform: scale(.92); background: @ts-kitchen; color: @ts-optic; }
+                &.disabled { background: @ts-kitchen; color: @ts-optic; }
+                &.disabled::before { display: none; }
+                &.disabled::after { margin: 0; }
+            }
+        }
+        // the bag page cross-sells keep their full-width button under the name
+        body .block.crosssell .products-grid .product-item .product-item-inner { position: static; height: auto; padding: 0; pointer-events: auto; }
+        body .block.crosssell .products-grid .product-item .product-item-actions { position: static; }
+        body .block.crosssell .products-grid .product-item .actions-primary .action.tocart {
+            width: 100%; height: auto; min-height: 44px !important; border-radius: 999px; font-size: 14px; backdrop-filter: none;
+            span { position: static; width: auto; height: auto; clip: auto; }
+            &::before { display: none; }
+        }
+    }
+}
+
+& when (@media-common = true) {
+    // the card's stretched name link (::before, z-index 1) covered the bag page cross-sell buttons: a tap on
+    // "Add to bag" opened the product instead. Lift the buttons (and the round touch one) above it.
+    body .products-grid .product-item .actions-primary .action.tocart { position: relative; z-index: 2; }
 }
