@@ -335,6 +335,7 @@ return [
         'MageOS_ThemeOptimization' => 1,
         'Swissup_Ignition' => 0,
         'ThirdShot_DemoData' => 1,
+        'ThirdShot_Headless' => 1,
         'ThirdShot_Performance' => 1,
         'ThirdShot_ShopperUx' => 1
     ],
