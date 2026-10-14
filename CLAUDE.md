@@ -99,8 +99,9 @@ Reload, never restart, shared services: `sudo nginx -t && sudo systemctl reload 
 - `app/code/ThirdShot/ShopperUx/` - guest UX layer, all frontend: instant AJAX filtering/sorting + infinite scroll
   (`js/listing.js`, toolbar mixin; swaps `.column.main` + sidebar, then re-runs the x-magento-init scripts the PERF
   module moved to the end of body via `util.adoptInitScripts` + `mage/apply/main`), live search (`shopux/search/suggest`,
-  form-mini mixin), quick view (`?ts_qv=1` adds handle `shopux_quickview`), added-to-bag drawer + recommendations
-  (`shopux/product/cards`), free-shipping meter (reads `carriers/freeshipping/free_shipping_subtotal`), cart qty
+  form-mini mixin), quick view (`?ts_qv=1` adds handle `shopux_quickview`), the bag drawer (`js/bag-drawer.js` + `js/bag-lines.js`:
+  replaces Luma's dropdown mini cart, opens from the bag icon and after every add; lines edit through
+  `checkout/sidebar/updateItemQty|removeItem`; picks from `shopux/product/cards`), touch quick-add button on cards, free-shipping meter (reads `carriers/freeshipping/free_shipping_subtotal`), cart qty
   steppers (post to `checkout/cart/updatePost`), guest Saved list in localStorage + `/saved`, recently viewed strips,
   price slider (plugin on FilterRenderer; Magento's price `to` is exclusive, so the slider sends `to + 0.01`), back-to-top.
   Own LESS in `view/frontend/web/css/source/` (theme deploy picks it up). Store config: grid 9 per page (9/18/36).
