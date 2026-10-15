@@ -1,0 +1,58 @@
+<?php
+/**
+ * Search results. ThirdShot: no results is an empty state with ways forward (popular searches + categories) instead of
+ * core's lone notice beside an empty filter column.
+ *
+ * @var \Magento\CatalogSearch\Block\Result $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+// phpcs:ignoreFile -- template keeps core's structure for the results branch
+$productList = $block->getProductListHtml();
+?>
+<?php if ($block->getResultCount()): ?>
+    <?= /* @noEscape */ $block->getChildHtml('tagged_product_list_rss_link') ?>
+<div class="search results">
+    <?php if ($messages = $block->getNoteMessages()): ?>
+    <div class="message notice">
+        <div>
+            <?php foreach ($messages as $message): ?>
+                <?= /* @noEscape */ $message ?><br />
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php endif; ?>
+    <?= /* @noEscape */ $productList ?>
+</div>
+<?php else: ?>
+    <?php
+    $terms = ['carbon paddle', 'tour 40', 'grip', 'bag', 'visor'];
+    $categories = [
+        ['paddles.html', __('Paddles')],
+        ['balls.html', __('Balls')],
+        ['bags-covers.html', __('Bags & Covers')],
+        ['accessories.html', __('Accessories')],
+    ];
+    ?>
+<div class="ts-empty ts-empty--search">
+    <span class="ts-empty__icon ts-empty__icon--search" aria-hidden="true"></span>
+    <h2 class="ts-empty__title"><?= $escaper->escapeHtml($block->getNoResultText() ?: __('Nothing matched that search')) ?></h2>
+    <p><?= $escaper->escapeHtml(__('Check the spelling or try a broader word. These are what players search for most:')) ?></p>
+    <?= /* @noEscape */ $block->getAdditionalHtml() ?>
+    <?php if ($messages = $block->getNoteMessages()): ?>
+        <?php foreach ($messages as $message): ?>
+            <p><?= /* @noEscape */ $message ?></p>
+        <?php endforeach; ?>
+    <?php endif; ?>
+    <ul class="ts-empty__links" aria-label="<?= $escaper->escapeHtmlAttr(__('Popular searches')) ?>">
+        <?php foreach ($terms as $term): ?>
+            <li><a href="<?= $escaper->escapeUrl($block->getUrl('catalogsearch/result', ['_query' => ['q' => $term]])) ?>"><?= $escaper->escapeHtml($term) ?></a></li>
+        <?php endforeach; ?>
+    </ul>
+    <p class="ts-empty__more"><?= $escaper->escapeHtml(__('Or browse a category:')) ?></p>
+    <ul class="ts-empty__links ts-empty__links--cats" aria-label="<?= $escaper->escapeHtmlAttr(__('Categories')) ?>">
+        <?php foreach ($categories as [$path, $label]): ?>
+            <li><a href="<?= $escaper->escapeUrl($block->getUrl('', ['_direct' => $path])) ?>"><?= $escaper->escapeHtml($label) ?></a></li>
+        <?php endforeach; ?>
+    </ul>
+</div>
+<?php endif; ?>

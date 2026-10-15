@@ -10,12 +10,19 @@
                    template="Magento_Theme::html/demo-notice.phtml"/>
         </referenceContainer>
 
-        <!-- header: one flex row (nav moved into it, account icon added), small UI script -->
-        <move element="navigation.sections" destination="header-wrapper" after="-"/>
+        <!-- skip link: the very first stop for keyboard users (Luma keeps it in the hidden panel row) -->
+        <move element="skip_to_content" destination="after.body.start" before="-"/>
+
+        <!-- header: one flex row (nav moved into it, account icon added), small UI script.
+             Source order = visual order (menu toggle + logo, nav, search, account, saved, bag), so Tab follows
+             what the eye sees; CSS `order` still arranges the phone / tablet rows. -->
+        <move element="navigation.sections" destination="header-wrapper" after="logo"/>
+        <move element="top.search" destination="header-wrapper" after="navigation.sections"/>
         <referenceContainer name="header-wrapper">
-            <block class="Magento\Framework\View\Element\Template" name="ts.header.account" after="logo"
+            <block class="Magento\Framework\View\Element\Template" name="ts.header.account" after="top.search"
                    template="Magento_Theme::html/header-account.phtml"/>
         </referenceContainer>
+        <move element="minicart" destination="header-wrapper" after="-"/>
         <referenceContainer name="before.body.end">
             <block class="Magento\Framework\View\Element\Template" name="ts.ui.script"
                    template="Magento_Theme::html/ui-script.phtml"/>

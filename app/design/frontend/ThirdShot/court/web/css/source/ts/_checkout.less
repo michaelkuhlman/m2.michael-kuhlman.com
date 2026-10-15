@@ -30,7 +30,13 @@
                 .product-image-wrapper { padding-bottom: 125% !important; }
                 .product-item-details { vertical-align: top; }
                 .product-item-name { margin-bottom: 6px; a { color: @ts-ink; font-weight: 600; font-size: 16px; } }
-                .item-options { font-size: 13.5px; margin: 6px 0 0; dt { font-weight: 600; color: @ts-muted; } dd { margin-bottom: 4px; } }
+                // options: label above value for every option (Luma floated some labels inline), prices in the value's weight
+                .item-options {
+                    font-size: 13.5px; margin: 6px 0 0;
+                    dt { float: none; clear: none; display: block; margin: 0; font-weight: 600; color: @ts-muted; }
+                    dd { float: none; display: block; margin: 0 0 6px; word-break: normal; overflow-wrap: break-word; }
+                    dd .price { font: inherit; color: inherit; }
+                }
                 .price, .subtotal .price { font-weight: 600; font-size: 15.5px; color: @ts-ink; }
                 .col.qty .input-text.qty { border-radius: 999px; height: 44px; min-height: 44px; width: 68px; text-align: center; font-weight: 600; margin: 0; }
                 .cart.item { position: relative; }
@@ -133,6 +139,11 @@
         .block.crosssell {
             margin-top: 72px;
             .block-title { margin-bottom: 26px; strong { font-size: @ts-h2; font-weight: 450; } }
+            // "Pairs well with": buttons on one line whatever the name length or review row
+            .product-item { display: flex; }
+            .product-item-info { display: flex; flex-direction: column; width: 100%; }
+            .product-item-details { flex: 1; display: flex; flex-direction: column; }
+            .product-item-details .product-item-actions { margin-top: auto !important; } // beats the grid card spacing rule
         }
     }
 
@@ -485,6 +496,49 @@
         }
         .ts-demo-checkout-note { max-width: none !important; margin: 18px 0 0 !important; text-align: left; }
         #registration { margin-top: 26px; }
+        // what was ordered (ShopperUx order-summary.phtml)
+        .ts-order-summary {
+            margin-top: 18px;
+            padding: 26px 30px;
+            background: @ts-paper;
+            border: 1px solid @ts-line;
+            border-radius: 20px;
+            text-align: left;
+            &__title { font: 450 ~"24px/1.2" @ts-serif; color: @ts-ink; margin: 0 0 14px; }
+            &__items { list-style: none; margin: 0; padding: 0; }
+            &__item {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                gap: 16px;
+                margin: 0;
+                padding: 14px 0;
+                border-top: 1px solid @ts-line;
+            }
+            &__name { display: flex; flex-direction: column; gap: 2px; min-width: 0; strong { font-weight: 600; color: @ts-ink; } }
+            &__opt, &__qty { font-size: 13.5px; color: @ts-muted; }
+            &__price { font-weight: 600; color: @ts-ink; white-space: nowrap; }
+            &__totals {
+                display: grid;
+                grid-template-columns: 1fr auto;
+                gap: 8px 16px;
+                margin: 0;
+                padding: 16px 0 0;
+                border-top: 1px solid @ts-line;
+                font-size: 15px;
+                dt { font-weight: 400; color: @ts-body; margin: 0; }
+                dd { margin: 0; text-align: right; color: @ts-ink; }
+                .ts-order-summary__grand { font-weight: 700; font-size: 17px; color: @ts-ink; padding-top: 6px; }
+            }
+            &__ship {
+                margin-top: 18px;
+                padding-top: 16px;
+                border-top: 1px solid @ts-line;
+                h3 { font: 600 ~"12px/1.2" @ts-sans; letter-spacing: .14em; text-transform: uppercase; color: @ts-muted; margin: 0 0 8px; }
+                address { font-style: normal; font-size: 15px; line-height: 1.55; color: @ts-body; }
+                .ts-order-summary__method { margin: 8px 0 0; font-size: 14px; color: @ts-muted; }
+            }
+        }
     }
 
 

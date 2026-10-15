@@ -9,6 +9,7 @@
 @ts-sand: #E8E2D6;
 @ts-optic: #D9F24F;
 @ts-clay: #C9603A;
+@ts-clay-text: #AD4E2B; // small text on chalk / paper (4.7:1)
 @ts-ink: #13201B;
 @ts-muted: #5D6B64;
 @ts-line: #DCD4C4;
@@ -133,7 +134,7 @@
     span { font-weight: 600; }
     &::after { content: '\00d7'; margin-left: 4px; font-size: 18px; line-height: 1; color: @ts-muted; }
     &:hover, &:focus { color: @ts-ink; text-decoration: none; border-color: @ts-ink; }
-    &--clear { padding-left: 6px; background: transparent; border-color: transparent; color: @ts-clay; font-weight: 600; &::after { content: none; } }
+    &--clear { padding-left: 6px; background: transparent; border-color: transparent; color: @ts-clay-text; font-weight: 600; &::after { content: none; } }
 }
 }
 

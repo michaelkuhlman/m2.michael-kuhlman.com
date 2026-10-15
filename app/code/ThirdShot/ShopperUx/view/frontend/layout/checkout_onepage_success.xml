@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!-- Order confirmation: items, totals and ship-to under the order number. -->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="content">
+            <block class="Magento\Framework\View\Element\Template" name="ts.order.summary" after="checkout.success"
+                   template="ThirdShot_ShopperUx::order-summary.phtml">
+                <arguments>
+                    <argument name="view_model" xsi:type="object">ThirdShot\ShopperUx\ViewModel\LastOrder</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+    </body>
+</page>

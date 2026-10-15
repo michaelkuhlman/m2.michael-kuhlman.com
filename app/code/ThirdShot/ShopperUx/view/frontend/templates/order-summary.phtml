@@ -1,0 +1,60 @@
+<?php
+/**
+ * Order confirmation: what was ordered, the totals and where it ships (view model ThirdShot\ShopperUx\ViewModel\LastOrder, layout checkout_onepage_success.xml).
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+/** @var \ThirdShot\ShopperUx\ViewModel\LastOrder $vm */
+$vm = $block->getData('view_model');
+$order = $vm ? $vm->getOrder() : null;
+if (!$order) {
+    return;
+}
+$shipping = (float) $order->getShippingAmount();
+$discount = (float) $order->getDiscountAmount();
+$tax = (float) $order->getTaxAmount();
+$address = $vm->shippingAddressHtml($order);
+?>
+<section class="ts-order-summary" aria-labelledby="ts-order-summary-title">
+    <h2 id="ts-order-summary-title" class="ts-order-summary__title"><?= $escaper->escapeHtml(__('Order summary')) ?></h2>
+    <ul class="ts-order-summary__items">
+        <?php foreach ($order->getAllVisibleItems() as $item): ?>
+            <li class="ts-order-summary__item">
+                <div class="ts-order-summary__name">
+                    <strong><?= $escaper->escapeHtml($item->getName()) ?></strong>
+                    <?php foreach ($vm->itemOptions($item) as $label => $value): ?>
+                        <span class="ts-order-summary__opt"><?= $escaper->escapeHtml($label) ?>: <?= $escaper->escapeHtml($value) ?></span>
+                    <?php endforeach; ?>
+                    <span class="ts-order-summary__qty"><?= $escaper->escapeHtml(__('Qty %1', (int) $item->getQtyOrdered())) ?></span>
+                </div>
+                <span class="ts-order-summary__price"><?= $escaper->escapeHtml($vm->formatPrice((float) $item->getRowTotal(), $order)) ?></span>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+    <dl class="ts-order-summary__totals">
+        <dt><?= $escaper->escapeHtml(__('Subtotal')) ?></dt>
+        <dd><?= $escaper->escapeHtml($vm->formatPrice((float) $order->getSubtotal(), $order)) ?></dd>
+        <?php if ($discount): ?>
+            <dt><?= $escaper->escapeHtml(__('Discount')) ?></dt>
+            <dd><?= $escaper->escapeHtml($vm->formatPrice($discount, $order)) ?></dd>
+        <?php endif; ?>
+        <dt><?= $escaper->escapeHtml(__('Shipping')) ?></dt>
+        <dd><?= $escaper->escapeHtml($shipping > 0 ? $vm->formatPrice($shipping, $order) : __('Free')) ?></dd>
+        <?php if ($tax): ?>
+            <dt><?= $escaper->escapeHtml(__('Tax')) ?></dt>
+            <dd><?= $escaper->escapeHtml($vm->formatPrice($tax, $order)) ?></dd>
+        <?php endif; ?>
+        <dt class="ts-order-summary__grand"><?= $escaper->escapeHtml(__('Order total')) ?></dt>
+        <dd class="ts-order-summary__grand"><?= $escaper->escapeHtml($vm->formatPrice((float) $order->getGrandTotal(), $order)) ?></dd>
+    </dl>
+    <?php if ($address): ?>
+        <div class="ts-order-summary__ship">
+            <h3><?= $escaper->escapeHtml(__('Ships to')) ?></h3>
+            <address><?= /* @noEscape */ $address ?></address>
+            <?php if ($order->getShippingDescription()): ?>
+                <p class="ts-order-summary__method"><?= $escaper->escapeHtml($order->getShippingDescription()) ?></p>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
+</section>

@@ -99,14 +99,19 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
         $('[data-ts-save]').each(function () {
             var on = list.indexOf(Number(this.getAttribute('data-ts-save'))) !== -1;
             this.setAttribute('aria-pressed', String(on));
+            var txt = this.querySelector('.ts-ux-save-text');
+            if (txt) {
+                // a button with visible text is named by that text (an aria-label that does not contain it fails
+                // WCAG 2.5.3 label-in-name); aria-pressed carries the state
+                txt.textContent = on ? 'Saved' : 'Save for later';
+                this.removeAttribute('aria-label');
+                this.removeAttribute('title');
+                return;
+            }
             if (this.dataset.name) {
                 this.setAttribute('aria-label', heartLabel(on, this.dataset.name));
             }
             this.title = on ? 'Saved' : 'Save for later';
-            var txt = this.querySelector('.ts-ux-save-text');
-            if (txt) {
-                txt.textContent = on ? 'Saved' : 'Save for later';
-            }
         });
         var n = list.length;
         $('.ts-ux-saved-link').toggleClass('has-items', n > 0).find('.ts-ux-saved-count').text(n ? String(n) : '');

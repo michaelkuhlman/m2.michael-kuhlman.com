@@ -75,7 +75,7 @@
             }
             .block-subtitle { display: none; }
         }
-        .filter-actions { margin-bottom: 18px; a { color: @ts-clay; font-weight: 600; font-size: 13px; } }
+        .filter-actions { margin: 0 0 18px; padding: 0; a { padding: 0; color: @ts-clay-text; font-weight: 600; font-size: 13px; } }
         .filter-options { margin: 0; }
         .filter-options-title {
             font: 600 ~"14.5px/1.3" @ts-sans;
@@ -277,13 +277,13 @@
             align-items: baseline;
             gap: 2px 8px;
             .price { font: 600 ~"15.5px/1.3" @ts-sans; color: @ts-ink; }
-            .special-price { order: 1; .price { color: @ts-clay; } }
+            .special-price { order: 1; .price { color: @ts-clay-text; } }
             .old-price { order: 2; margin: 0; .price { font-weight: 400; color: @ts-muted; font-size: 14px; text-decoration: line-through; } }
             .old-price .price-label, .special-price .price-label { .ts-sr-only(); }
             .price-label { font-size: 12.5px; color: @ts-muted; font-weight: 500; }
             .minimal-price-link { display: none; }
             .price-from, .price-to { display: inline-block; margin: 0; }
-            .price-to::before { content: '\2013'; margin-right: 6px; color: @ts-muted; }
+            .price-to::before { content: 'to'; margin-right: 5px; color: @ts-muted; font-weight: 400; font-size: 13px; }
             .price-to .price-label, .price-from .price-label { .ts-sr-only(); }
             .price-from .old-price, .price-to .old-price { display: none; }
         }
@@ -409,7 +409,7 @@
         // Luma's clearfix pseudo-elements are flex items here: the empty ::after took a 10px gap at the right
         &::before, &::after { display: none; }
         .sorter { float: none; width: ~"calc(50% - 6px)"; position: static; display: flex; align-items: center; margin: 0; padding: 0; }
-        .sorter-label { display: none; }
+        .sorter-label { .ts-sr-only(); }
         .sorter-options { flex: 1; margin: 0; width: 100%; font-size: 15px; border-radius: 999px; }
         .sorter-action { display: none; }
         .toolbar-amount { order: 3; flex: 1 0 100%; line-height: 1.2; padding-top: 4px; position: static; font-size: 13px; }

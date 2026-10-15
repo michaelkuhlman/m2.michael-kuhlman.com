@@ -264,17 +264,91 @@
     .fieldset > .legend, .fieldset > .legend span { font-family: @ts-serif; font-weight: 450; }
 
     // ---- messages -----------------------------------------------------------
-    .message, .page.messages .message {
+    // Luma's .message.<type> rules (padding 45px, a 45px-wide icon box from left 16px) out-rank a plain .message:
+    // the type classes are listed so the icon sits in its own 24px slot instead of over the first words
+    .message, .page.messages .message,
+    body .message.info, body .message.notice, body .message.success, body .message.error, body .message.warning {
         border-radius: 12px;
         font-size: 14.5px;
         padding: 14px 18px 14px 52px;
-        > *:first-child::before { left: 16px !important; width: 24px; top: 50% !important; margin-top: -12px !important; }
+        > *:first-child::before { left: 16px !important; width: 24px; top: 50% !important; margin-top: -12px !important; text-align: center; }
         &.success { background: #E6F2D0; color: @ts-kitchen; > *:first-child::before { color: @ts-kitchen; } a { color: @ts-kitchen; text-decoration: underline; } }
         &.info, &.notice { background: @ts-oat; color: @ts-ink; > *:first-child::before { color: @ts-court; } }
         &.error { background: #F8E1D8; color: #7A2E16; > *:first-child::before { color: #A8401C; } }
         &.warning { background: #FFF2C9; color: #5E4A0A; }
     }
     .page.messages { max-width: @ts-container; margin: 0 auto; }
+
+    // ---- skip link: hidden until focused, then a chip over the demo bar ----------------------
+    .action.skip:focus {
+        position: absolute;
+        z-index: 1000;
+        top: 8px;
+        left: 8px;
+        right: auto;
+        padding: 12px 20px;
+        border-radius: 999px;
+        background: @ts-kitchen;
+        color: @ts-chalk;
+        font: 600 15px @ts-sans;
+        text-decoration: none;
+        box-shadow: @ts-shadow-lg;
+    }
+
+    // ---- empty states (bag page, search without results): same look as the bag drawer's ----------
+    .ts-empty {
+        text-align: center;
+        max-width: 560px;
+        margin: 24px auto 0;
+        padding: 40px 12px 8px;
+        &__icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: @ts-sand;
+            color: @ts-kitchen;
+            &::before { .ts-icon(@ts-i-bag, 32px); }
+            &--search::before { .ts-icon(@ts-i-search, 30px); }
+        }
+        &__title { font: 450 ~"30px/1.2" @ts-serif; color: @ts-ink; margin: 0 0 10px; letter-spacing: -0.015em; }
+        p { margin: 0 auto; max-width: 440px; color: @ts-body; font-size: 16px; line-height: 1.6; }
+        &__links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 28px 0 0;
+            padding: 0;
+            list-style: none;
+            li { margin: 0; }
+            a {
+                display: inline-flex;
+                align-items: center;
+                min-height: @ts-pill-h;
+                padding: 0 20px;
+                border-radius: 999px;
+                border: 1px solid @ts-line;
+                background: @ts-paper;
+                color: @ts-ink;
+                font-weight: 600;
+                font-size: 14.5px;
+                text-decoration: none;
+                &:visited { color: @ts-ink; }
+                &:hover { border-color: @ts-kitchen; color: @ts-kitchen; text-decoration: none; }
+            }
+        }
+        p&__more { margin: 32px auto 0; font-size: 14.5px; color: @ts-muted; }
+        &__more + &__links { margin-top: 12px; }
+    }
+    // search without results: no filter column, so the empty state is centered on the page
+    .catalogsearch-result-index .columns:has(.ts-empty--search) {
+        .sidebar-main, .sidebar-additional { display: none; }
+        .column.main { width: 100%; float: none; padding-left: 0; padding-right: 0; }
+    }
 
     // ---- breadcrumbs ----------------------------------------------------------
     .breadcrumbs {

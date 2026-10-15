@@ -45,7 +45,10 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
             '<div class="ts-ux-qv__panel" role="dialog" aria-modal="true" aria-label="Quick view">' +
             '<button type="button" class="ts-ux-qv__close" data-close aria-label="Close quick view"></button>' +
             '<div class="ts-ux-qv__loader" aria-hidden="true"></div>' +
-            '<iframe class="ts-ux-qv__frame" title="Product quick view"></iframe></div>';
+            '<iframe class="ts-ux-qv__frame" title="Product quick view"></iframe>' +
+            // Tab off the last control inside the frame lands here (the frame's own key events never reach this
+            // page), and goes back to the close button instead of the page behind the dialog
+            '<span class="ts-ux-qv__end" tabindex="0"></span></div>';
         document.body.appendChild(dialog);
         frame = dialog.querySelector('iframe');
         frame.addEventListener('load', function () {
@@ -55,11 +58,14 @@ define(['jquery', 'ThirdShot_ShopperUx/js/util'], function ($, util) {
             }
         });
         $(dialog).on('click', '[data-close]', close);
+        var closeBtn = dialog.querySelector('.ts-ux-qv__close');
+        dialog.querySelector('.ts-ux-qv__end').addEventListener('focus', function () { closeBtn.focus(); });
         dialog.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
                 close();
-            } else {
-                util.trapTab(e, dialog.querySelector('.ts-ux-qv__panel')); // close button <-> frame
+            } else if (e.key === 'Tab' && e.shiftKey && document.activeElement === closeBtn) {
+                e.preventDefault(); // close button <-> frame, both ways
+                frame.focus();
             }
         });
         window.addEventListener('message', function (e) {

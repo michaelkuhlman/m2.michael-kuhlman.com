@@ -1,0 +1,21 @@
+<?php
+/**
+ * Home page social card: title, description and the hero photo (1920x960).
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$title = __('Third Shot Supply Co. | Gear for the patient player');
+$description = __('Premium pickleball paddles, tour-grade balls, bags and court gear. A Magento Open Source demo store by Michael Kuhlman.');
+$image = $block->getBaseUrl() . 'media/wysiwyg/thirdshot/hero.jpg';
+$url = $block->getBaseUrl();
+?>
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="<?= $escaper->escapeHtmlAttr(__('Third Shot Supply Co.')) ?>"/>
+<meta property="og:title" content="<?= $escaper->escapeHtmlAttr($title) ?>"/>
+<meta property="og:description" content="<?= $escaper->escapeHtmlAttr($description) ?>"/>
+<meta property="og:url" content="<?= $escaper->escapeUrl($url) ?>"/>
+<meta property="og:image" content="<?= $escaper->escapeUrl($image) ?>"/>
+<meta property="og:image:width" content="1920"/>
+<meta property="og:image:height" content="960"/>
+<meta name="twitter:card" content="summary_large_image"/>

@@ -6,7 +6,7 @@
         .column.main { padding-bottom: 20px; }
         .fieldset { margin-bottom: 24px; }
         .fieldset > .field { margin-bottom: 18px; }
-        .fieldset::after { color: @ts-clay; font-size: 12.5px; margin-top: 16px; }
+        .fieldset::after { color: @ts-clay-text; font-size: 12.5px; margin-top: 16px; }
         .field.note { font-size: 14.5px; color: @ts-body; margin-bottom: 20px; }
         // .column.main: the footer newsletter Subscribe is an .action.primary too
         .column.main .action.primary, .column.main .actions-toolbar .primary a.action.primary { display: inline-flex; align-items: center; justify-content: center; min-width: 180px; min-height: @ts-btn-h; padding: 0 30px; font-size: 15.5px; }
@@ -15,7 +15,7 @@
         .actions-toolbar::before, .actions-toolbar::after { display: none !important; content: none; }
         // one "* Required Fields" style everywhere (Luma paints some of them #E02B27 and centres the login one)
         body& .column.main .form .fieldset::after, body& .column.main .form .fieldset.create.account::after, body& .column.main .fieldset.login::after {
-            color: @ts-clay; font-size: 12.5px; text-align: left; margin: 16px 0 0;
+            color: @ts-clay-text; font-size: 12.5px; text-align: left; margin: 16px 0 0;
         }
         // checkboxes: label beside the box, one row height, whole row is the hit area
         .fieldset > .field.choice {

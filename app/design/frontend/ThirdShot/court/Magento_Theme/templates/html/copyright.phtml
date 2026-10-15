@@ -6,7 +6,7 @@
  * @var \Magento\Framework\Escaper $escaper
  */
 ?>
-<small class="copyright">
+<small class="copyright" role="region" aria-label="<?= $escaper->escapeHtmlAttr(__('Legal')) ?>">
     <span>&copy; <?= (int) date('Y') ?> <?= $escaper->escapeHtml(__('Third Shot Supply Co. A fictional brand.')) ?></span>
     <span class="copyright__built"><?= $escaper->escapeHtml(__('Built on Magento Open Source (Mage-OS) with a custom theme.')) ?></span>
 </small>

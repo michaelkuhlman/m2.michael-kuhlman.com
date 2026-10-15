@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<!-- Home page: Open Graph / Twitter card tags (Magento prints them only on product pages), so a shared link previews. -->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="head.additional">
+            <block class="Magento\Framework\View\Element\Template" name="ts.home.og" template="Magento_Theme::html/og-home.phtml"/>
+        </referenceBlock>
+    </body>
+</page>

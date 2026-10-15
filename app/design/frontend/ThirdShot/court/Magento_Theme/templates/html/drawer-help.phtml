@@ -6,16 +6,18 @@
  * @var \Magento\Framework\View\Element\Template $block
  * @var \Magento\Framework\Escaper $escaper
  */
+// [path, label, CMS page?]: CMS pages live at their URL key without a trailing slash (getUrl() adds one, a 301)
 $links = [
-    ['saved', __('Saved items')],
-    ['shipping-returns', __('Shipping & Returns')],
-    ['faq', __('FAQ')],
-    ['contact', __('Contact')],
-    ['sales/guest/form', __('Order status')],
+    ['saved', __('Saved items'), false],
+    ['shipping-returns', __('Shipping & Returns'), true],
+    ['faq', __('FAQ'), true],
+    ['contact', __('Contact'), false],
+    ['sales/guest/form', __('Order status'), false],
 ];
 ?>
 <ul class="ts-drawer-help">
-    <?php foreach ($links as [$path, $label]): ?>
-        <li><a href="<?= $escaper->escapeUrl($block->getUrl($path)) ?>"><?= $escaper->escapeHtml($label) ?></a></li>
+    <?php foreach ($links as [$path, $label, $isPage]): ?>
+        <?php $url = $isPage ? $block->getUrl('', ['_direct' => $path]) : $block->getUrl($path); ?>
+        <li><a href="<?= $escaper->escapeUrl($url) ?>"><?= $escaper->escapeHtml($label) ?></a></li>
     <?php endforeach; ?>
 </ul>

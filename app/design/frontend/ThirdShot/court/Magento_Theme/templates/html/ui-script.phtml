@@ -5,12 +5,15 @@
  *  - a close button + Escape for the mobile navigation drawer
  *  - fade-up reveal of CMS sections (skipped with prefers-reduced-motion)
  *  - sticky add-to-cart bar on product pages (shown on phones by CSS once the real button scrolls away)
+ *  - keyboard access to the phone menu toggle and search toggle (core renders them as a <span> / <label>)
  *
  * @var \Magento\Framework\View\Element\Template $block
  * @var \Magento\Framework\Escaper $escaper
  * @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer
  */
 $closeLabel = $escaper->escapeJs(__('Close menu'));
+$menuLabel = $escaper->escapeJs(__('Menu'));
+$searchLabel = $escaper->escapeJs(__('Search the shop'));
 $script = <<<JS
 (function () {
     var d = document, html = d.documentElement, ticking = false;
@@ -48,6 +51,8 @@ $script = <<<JS
         });
 
         stickyAddToCart();
+        keyboardToggles();
+        desktopNavVisible();
 
         if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             return;
@@ -63,9 +68,87 @@ $script = <<<JS
         Array.prototype.forEach.call(els, function (el) { el.classList.add('ts-reveal'); io.observe(el); });
     });
 
+    // The phone menu toggle (a <span>) and search toggle (a <label>) only listen for clicks: make them real
+    // buttons for keyboard and screen-reader users. The search label is a visually hidden <label> on wider
+    // screens, where the field itself takes the focus, so it is only a tab stop on phones.
+    function keyboardToggles() {
+        var phone = window.matchMedia('(max-width: 767px)');
+        function asButton(el, label) {
+            el.setAttribute('role', 'button');
+            el.setAttribute('aria-label', label);
+            el.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); }
+            });
+        }
+        var toggle = d.querySelector('.nav-toggle');
+        if (toggle) {
+            asButton(toggle, '{$menuLabel}');
+            toggle.tabIndex = 0;
+            var syncNav = function () { toggle.setAttribute('aria-expanded', String(html.classList.contains('nav-open'))); };
+            syncNav();
+            new MutationObserver(syncNav).observe(html, {attributes: true, attributeFilter: ['class']});
+        }
+        // (a <label> may not take role="button" / aria-expanded, so it only gets the tab stop, the name and the keys)
+        var search = d.querySelector('.block-search [data-role="minisearch-label"]');
+        if (search) {
+            search.setAttribute('aria-label', '{$searchLabel}');
+            search.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); search.click(); }
+            });
+            var syncSearch = function () {
+                if (phone.matches) { search.tabIndex = 0; } else { search.removeAttribute('tabindex'); }
+            };
+            syncSearch();
+            if (phone.addEventListener) { phone.addEventListener('change', syncSearch); }
+        }
+    }
+
+    // Luma's nav sections are a tabs widget for the phone drawer: on wider screens the menu is on show, but its panel
+    // keeps role="tabpanel" + aria-hidden="true", which hides the main menu from screen readers. Undo that there.
+    // The tablist / tabpanel roles go too (a tablist whose tabs are hidden is not one); they come back on phones.
+    // Breadcrumbs become a navigation landmark (core prints a plain div).
+    function desktopNavVisible() {
+        Array.prototype.forEach.call(d.querySelectorAll('.breadcrumbs'), function (el) {
+            el.setAttribute('role', 'navigation');
+            el.setAttribute('aria-label', 'Breadcrumb');
+        });
+        var wide = window.matchMedia('(min-width: 768px)');
+        var panels = d.querySelectorAll('.nav-sections .nav-sections-item-content');
+        var lists = d.querySelectorAll('.nav-sections .section-items');
+        if (!panels.length) { return; }
+        function strip(el) {
+            var role = el.getAttribute('role');
+            if (wide.matches && role) { el.setAttribute('data-ts-role', role); el.removeAttribute('role'); }
+            if (!wide.matches && !role && el.hasAttribute('data-ts-role')) { el.setAttribute('role', el.getAttribute('data-ts-role')); }
+        }
+        var busy = false;
+        function sync() {
+            if (busy) { return; }
+            busy = true;
+            Array.prototype.forEach.call(lists, strip);
+            Array.prototype.forEach.call(panels, function (el) {
+                strip(el);
+                if (wide.matches && el.getAttribute('aria-hidden') === 'true') { el.removeAttribute('aria-hidden'); }
+            });
+            busy = false;
+        }
+        sync();
+        if (wide.addEventListener) { wide.addEventListener('change', sync); }
+        Array.prototype.forEach.call(panels, function (el) {
+            new MutationObserver(sync).observe(el, {attributes: true, attributeFilter: ['aria-hidden', 'role']});
+        });
+        Array.prototype.forEach.call(lists, function (el) {
+            new MutationObserver(sync).observe(el, {attributes: true, attributeFilter: ['role']});
+        });
+    }
+
     function stickyAddToCart() {
         if (!d.body.classList.contains('catalog-product-view') || !('IntersectionObserver' in window)) { return; }
-        var target = d.getElementById('bundle-slide') || d.getElementById('product-addtocart-button');
+        // Bundles: the bar first mirrors "Customize and add to bag"; once the options panel is open it becomes
+        // "Add to bag" (the summary's real button) and hides while that button is on screen.
+        var slide = d.getElementById('bundle-slide');
+        var atc = d.getElementById('product-addtocart-button');
+        var target = slide || atc;
         var titleEl = d.querySelector('.product-info-main .page-title');
         if (!target || !titleEl) { return; }
         var bar = d.createElement('div');
@@ -76,15 +159,20 @@ $script = <<<JS
             '<button type="button" class="action primary ts-sticky-atc__btn" tabindex="-1"></button>';
         bar.querySelector('.ts-sticky-atc__name').textContent = titleEl.textContent.trim();
         var btn = bar.querySelector('.ts-sticky-atc__btn');
-        btn.textContent = (target.textContent || '').trim();
+        var seen = {target: true, atc: true, targetAbove: false};
+        function panelOpen() {
+            var w = d.querySelector('.bundle-options-wrapper');
+            return !!(slide && atc && w && w.offsetHeight > 0);
+        }
+        function current() { return panelOpen() ? atc : target; }
         btn.addEventListener('click', function () {
-            target.click();
+            current().click();
             setTimeout(function () {
                 var err = d.querySelector('.product-add-form .mage-error:not(input), .product-add-form div.mage-error');
                 var form = d.querySelector('.product-add-form');
                 if (err && err.offsetParent) {
                     err.scrollIntoView({behavior: 'smooth', block: 'center'});
-                } else if (d.getElementById('bundle-slide') && form) {
+                } else if (slide && form && !panelOpen()) {
                     form.scrollIntoView({behavior: 'smooth', block: 'start'});
                 }
             }, 250);
@@ -92,16 +180,37 @@ $script = <<<JS
         d.body.appendChild(bar);
         function syncPrice() {
             if (d.querySelector('.table-wrapper.grouped')) { return; }
-            var p = d.querySelector('.product-info-main .price-box .price-final_price .price, .product-info-main .price-box .price');
+            var p = panelOpen() && d.querySelector('.block-bundle-summary .price-box .price');
+            p = p || d.querySelector('.product-info-main .price-box .price-final_price .price, .product-info-main .price-box .price');
             bar.querySelector('.ts-sticky-atc__price').textContent = p ? p.textContent.trim() : '';
         }
-        new IntersectionObserver(function (entries) {
-            var en = entries[0];
-            var show = !en.isIntersecting && en.boundingClientRect.top < 0;
-            if (show) { syncPrice(); }
+        function update() {
+            var open = panelOpen();
+            var show = open ? !seen.atc : (!seen.target && seen.targetAbove);
+            if (show) {
+                syncPrice();
+                btn.textContent = (current().textContent || '').trim();
+            }
             bar.classList.toggle('is-visible', show);
             d.body.classList.toggle('ts-has-sticky-atc', show);
+        }
+        new IntersectionObserver(function (entries) {
+            entries.forEach(function (en) {
+                if (en.target === target) {
+                    seen.target = en.isIntersecting;
+                    seen.targetAbove = en.boundingClientRect.top < 0;
+                } else {
+                    seen.atc = en.isIntersecting;
+                }
+            });
+            update();
         }).observe(target);
+        if (slide && atc) {
+            new IntersectionObserver(function (entries) {
+                seen.atc = entries[0].isIntersecting;
+                update();
+            }).observe(atc);
+        }
     }
 })();
 JS;

@@ -53,7 +53,7 @@
                     // so the stock pill beside it sat ~6px low
                     &, span { line-height: 1.15; }
                     .price { font: 600 ~"28px/1.15" @ts-sans; color: @ts-ink; letter-spacing: -0.01em; }
-                    .special-price { order: 1; margin: 0; .price { color: @ts-clay; } }
+                    .special-price { order: 1; margin: 0; .price { color: @ts-clay-text; } }
                     .old-price { order: 2; margin: 0; .price { font-size: 18px; color: @ts-muted; font-weight: 400; text-decoration: line-through; } }
                     .old-price .price-label, .special-price .price-label { .ts-sr-only(); }
                     .price-label { font-size: 12.5px; color: @ts-muted; font-weight: 500; }
@@ -63,7 +63,7 @@
                     // floated beside them half a line up
                     .price-from, .price-to { > .price-container { display: inline-flex; align-items: baseline; gap: 6px; } .price-label, .price-wrapper { display: inline; } }
                     .price-to > .price-container > .price-label { display: none; }
-                    .price-to::before { content: '\2013'; color: @ts-muted; margin-right: 4px; }
+                    .price-to::before { content: 'to'; color: @ts-muted; margin-right: 5px; font-weight: 400; font-size: 15px; }
                     .price-to .price-label { display: none; }
                     .price-from .old-price, .price-to .old-price { display: none; }
                 }
@@ -88,7 +88,7 @@
                     }
                     .product.attribute.sku { display: flex; gap: 4px; white-space: nowrap; .type::after { content: ''; } }
                     .stock { white-space: nowrap; }
-                    .availability.only { font-size: 12.5px; color: @ts-clay; font-weight: 600; }
+                    .availability.only { font-size: 12.5px; color: @ts-clay-text; font-weight: 600; }
                 }
             }
             .product.attribute.overview {
@@ -291,7 +291,9 @@
             margin-top: 72px;
             margin-bottom: 0; // the strip below brings its own section spacing; Luma's 30px stacked on top of it
             clear: both;
+            .data.item.title { cursor: pointer; }
             .data.item.title > .switch {
+                cursor: pointer;
                 font: 600 ~"13px/52px" @ts-sans;
                 letter-spacing: .12em;
                 text-transform: uppercase;
@@ -318,7 +320,7 @@
                 font-size: 16px;
                 line-height: 1.7;
                 color: @ts-body;
-                h3 { font-size: @ts-h3; font-weight: 500; margin: 28px 0 12px; }
+                h2, h3 { font-size: @ts-h3; font-weight: 500; margin: 28px 0 12px; } // description subheads are h2 (h1 is the name)
                 ul { padding-left: 20px; li { margin-bottom: 8px; } li::marker { color: @ts-court; } }
                 .product.attribute.description .value { max-width: 740px; }
             }
@@ -425,9 +427,45 @@
             .product-details .product.name { font-weight: 600; }
             .price-box .price { font-weight: 600; font-size: 22px; }
             .bundle-summary { margin-top: 20px; .subtitle { font-weight: 600; } }
-            .box-tocart .action.tocart { width: 100%; }
+            // price above the button (core prints it after), in ink, and one full-width 56px Add to bag
+            .product-details { display: flex; flex-direction: column; gap: 4px; }
+            .product-details .price-box { order: 2; margin: 6px 0 4px; .price-as-configured { margin: 0; } .price { color: @ts-ink; } }
+            .product-details .box-tocart { order: 3; }
+            .product-details .product-addto-links { order: 4; }
+            .box-tocart {
+                width: 100%;
+                margin: 10px 0 0;
+                .fieldset { display: flex; gap: 12px; align-items: flex-end; margin: 0; }
+                .field.qty { margin: 0; padding: 0; flex: none; .label { .ts-sr-only(); } .control { margin: 0; } }
+                .input-text.qty { width: 76px; height: @ts-btn-h-lg; border-radius: 999px; text-align: center; font-weight: 600; font-size: 16px; margin: 0; }
+                .actions { flex: 1; display: block; margin: 0; padding: 0; }
+                .action.tocart { width: 100%; height: @ts-btn-h-lg; font-size: 16px; margin: 0; padding: 0 24px; }
+            }
         }
         #bundleSummary .title strong { font-family: @ts-serif; }
+        // a quantity the shopper cannot change is noise: hide the disabled per-option Quantity fields
+        .bundle-options-wrapper .field.qty.qty-holder:has(input:disabled) { display: none; }
+        // option rows: the "+ $12.00" stays on one line with its name
+        .bundle-options-wrapper .field.choice .price-notice { white-space: nowrap; }
+        // "Go back to product details": a plain text link aligned with the content edge, not an indented pill
+        // (!important: the theme's button.action pill rules in _base.less out-rank this)
+        button.action.back.customization {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: @ts-pill-h;
+            margin: 0 0 12px;
+            padding: 0 !important;
+            border: 0 !important;
+            background: none !important;
+            box-shadow: none !important;
+            color: @ts-kitchen;
+            font: 600 ~"14.5px/1.3" @ts-sans;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            &::before { content: '\2190'; text-decoration: none; }
+            &:hover, &:focus { background: none; border: 0; color: @ts-ink; }
+        }
     }
 
     // ---- grouped table ----
@@ -442,6 +480,10 @@
             .col.qty { width: 90px; text-align: right; }
             .input-text.qty { width: 72px; height: 46px; min-height: 46px; border-radius: 999px; text-align: center; font-weight: 600; }
             .stock.unavailable { color: #9A4426; font-weight: 600; font-size: 13px; }
+            // "Enter a quantity..." sat in the 72px qty column, one word per line: one line under the row instead
+            > tbody > tr { position: relative; }
+            > tbody > tr:has(div.mage-error) > td { padding-bottom: 40px; }
+            .col.qty div.mage-error { position: absolute; right: 0; bottom: 12px; margin: 0; white-space: nowrap; font-size: 13px; text-align: right; }
         }
     }
 
@@ -489,11 +531,16 @@
 
 // Phone rules (emitted after Luma's own mobile rules)
 .media-width(@extremum, @break) when (@extremum = 'max') and (@break = @screen__m) {
-        .catalog-product-view .table-wrapper.grouped .table.grouped {
+        // body + .table-wrapper: Luma's mobile table rules (block rows, 15px cell padding, a -15px bleed past the
+        // 16px gutter) out-ranked the plain version of these
+        body.catalog-product-view .table-wrapper.grouped { margin-left: 0; margin-right: 0; }
+        body.catalog-product-view .table-wrapper.grouped .table.grouped {
             > tbody > tr { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid @ts-line; }
             > tbody > tr > td { border: 0; padding: 14px 0; display: block; }
             > tbody > tr > td.col.item { flex: 1; min-width: 0; }
             > tbody > tr > td.col.qty { flex: none; width: auto; &::before { display: none; } }
+            > tbody > tr:has(div.mage-error) { padding-bottom: 26px; }
+            > tbody > tr:has(div.mage-error) > td { padding-bottom: 14px; }
         }
     
         .catalog-product-view {

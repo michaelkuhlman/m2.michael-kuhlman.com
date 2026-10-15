@@ -97,7 +97,7 @@
             &:hover, &:focus-visible { color: @ts-clay; background: none; border: 0; }
         }
         a.ts-bag-line__link:hover { color: @ts-ink; }
-        &__err { margin-top: 8px !important; color: @ts-clay; font-size: 13px; font-weight: 500; &[hidden] { display: none; } }
+        &__err { margin-top: 8px !important; color: @ts-clay-text; font-size: 13px; font-weight: 500; &[hidden] { display: none; } }
     }
 
     // -/qty/+ stepper: 40px tall, 44px tap targets on touch screens
@@ -172,7 +172,7 @@
             align-self: start;
             display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 6px; margin: 0 !important;
             .price { font-size: 13.5px !important; font-weight: 600; }
-            .special-price .price { color: @ts-clay; }
+            .special-price .price { color: @ts-clay-text; }
             .old-price { margin: 0; .price { font-weight: 400; color: @ts-muted; text-decoration: line-through; } }
             .price-label, .old-price .price-label, .special-price .price-label { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
         }

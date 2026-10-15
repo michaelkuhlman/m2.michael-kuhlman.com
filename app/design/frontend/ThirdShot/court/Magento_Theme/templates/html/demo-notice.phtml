@@ -6,7 +6,7 @@
  * @var \Magento\Framework\Escaper $escaper
  */
 ?>
-<div class="ts-demo-notice" role="note">
+<aside class="ts-demo-notice" aria-label="<?= $escaper->escapeHtmlAttr(__('Demo store notice')) ?>">
     <div class="ts-demo-notice__inner">
         <span class="ts-demo-notice__badge"><?= $escaper->escapeHtml(__('Demo store')) ?></span>
         <span class="ts-demo-notice__text">
@@ -14,4 +14,4 @@
             <span class="ts-demo-notice__more"><?= $escaper->escapeHtml(__('A Magento Open Source portfolio build by Michael Kuhlman.')) ?></span>
         </span>
     </div>
-</div>
+</aside>

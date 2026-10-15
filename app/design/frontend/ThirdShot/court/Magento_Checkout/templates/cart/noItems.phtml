@@ -1,0 +1,33 @@
+<?php
+/**
+ * Empty bag page: the same empty state as the bag drawer (ShopperUx js/bag-drawer.js) instead of core's
+ * "Click here to continue shopping".
+ *
+ * @var \Magento\Checkout\Block\Cart $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$links = [
+    ['paddles.html', __('Paddles')],
+    ['balls.html', __('Balls')],
+    ['bags-covers.html', __('Bags & Covers')],
+];
+?>
+<div class="cart-empty ts-empty">
+    <?= $block->getChildHtml('checkout_cart_empty_widget') ?>
+    <span class="ts-empty__icon" aria-hidden="true"></span>
+    <h2 class="ts-empty__title"><?= $escaper->escapeHtml(__('Your bag is empty')) ?></h2>
+    <p><?= $escaper->escapeHtml(__('Start with a paddle, a sleeve of balls or something for the bag.')) ?></p>
+    <ul class="ts-empty__links">
+        <?php foreach ($links as [$path, $label]): ?>
+            <li><a href="<?= $escaper->escapeUrl($block->getUrl('', ['_direct' => $path])) ?>"><?= $escaper->escapeHtml($label) ?></a></li>
+        <?php endforeach; ?>
+    </ul>
+    <?= $block->getChildHtml('shopping.cart.table.after') ?>
+</div>
+<script type="text/x-magento-init">
+{
+    "*": {
+        "Magento_Checkout/js/empty-cart": {}
+    }
+}
+</script>
