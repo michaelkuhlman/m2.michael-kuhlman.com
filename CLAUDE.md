@@ -96,6 +96,9 @@ Reload, never restart, shared services: `sudo nginx -t && sudo systemctl reload 
   `etc/search_request.xml`): that is what makes "paddle" find paddles first; reindex catalogsearch_fulltext after.
   Reads `_build/catalog/products.json`, `_build/renders/jpg/*.jpg`, `_build/cms/{pages,blocks}/*.html`. Idempotent;
   images are attached only to products without a gallery; `--fresh` resets the galleries of all `TS-*` products first.
+  **Run `--step=products` only together with `composite`** (`--step=products,composite`): products re-saves the bundle's
+  simple children and the bundle drops to out of stock (seen 2026-10-14); composite sets bundles/grouped/configurables
+  back in stock, and bundle/grouped keywords live in that step too. Per-product search keywords: `keywords` in products.json.
   **Never delete and re-create products with the same SKUs**: MSI queues a source-item cleanup by SKU on delete, and the
   cron consumer then wipes the stock of the re-created products ("There are no source items with the in stock status").
   The seeder writes MSI source items explicitly. The CMS step never overwrites an existing `pub/media/wysiwyg/thirdshot/*.jpg`.
