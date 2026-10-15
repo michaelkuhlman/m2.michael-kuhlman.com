@@ -90,7 +90,10 @@ Reload, never restart, shared services: `sudo nginx -t && sudo systemctl reload 
   `_theme.less` (Luma's file + brand variables at the end), `_typography.less` (self-hosted Fraunces + Inter,
   SIL OFL), `_extend.less` imports `ts/_base|_header|_home|_catalog|_product|_checkout|_footer|_cms.less`.
   `etc/view.xml` sets 4:5 product images. Layout overrides under `Magento_*/layout/`.
-- `app/code/ThirdShot/DemoData/` - `bin/magento thirdshot:demo:seed [--step=attributes,categories,products,composite,reviews,cms] [--fresh]`.
+- `app/code/ThirdShot/DemoData/` - `bin/magento thirdshot:demo:seed [--step=attributes,categories,products,composite,positions,reviews,cms] [--fresh]`.
+  `positions` sets category positions (Featured sort) in products.json order. Each category's `keywords` go to every
+  product's meta_keyword (search weight 10, and in the weighted quick/GraphQL search via ShopperUx
+  `etc/search_request.xml`): that is what makes "paddle" find paddles first; reindex catalogsearch_fulltext after.
   Reads `_build/catalog/products.json`, `_build/renders/jpg/*.jpg`, `_build/cms/{pages,blocks}/*.html`. Idempotent;
   images are attached only to products without a gallery; `--fresh` resets the galleries of all `TS-*` products first.
   **Never delete and re-create products with the same SKUs**: MSI queues a source-item cleanup by SKU on delete, and the
