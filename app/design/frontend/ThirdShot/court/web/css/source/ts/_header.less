@@ -21,6 +21,9 @@
 }
 
 & when (@media-common = true) {
+    // phone-only search toggle button (see the phone rules below)
+    .block-search .ts-search-toggle { display: none; }
+
     .page-header {
         position: sticky;
         top: 0;
@@ -379,6 +382,19 @@
                 > span { .ts-sr-only(); }
                 &.active::before { .ts-icon(@ts-i-close, 20px); }
             }
+            // ui-script.phtml puts a real <button> in front of Luma's <label> toggle (keyboard + screen readers);
+            // it forwards clicks to the label, so the minisearch widget still does the toggling
+            .ts-search-toggle {
+                .ts-icon-btn();
+                padding: 0;
+                border: 0;
+                background: none;
+                box-shadow: none;
+                cursor: pointer;
+                &::before { .ts-icon(@ts-i-search, 22px); font-family: inherit; color: inherit; margin: 0; }
+                &[aria-expanded='true']::before { .ts-icon(@ts-i-close, 20px); }
+            }
+            &.ts-has-toggle .label { display: none; }
             .control {
                 display: none;
                 position: absolute;

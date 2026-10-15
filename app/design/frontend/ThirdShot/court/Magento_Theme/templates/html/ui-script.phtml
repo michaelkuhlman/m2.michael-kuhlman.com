@@ -68,11 +68,9 @@ $script = <<<JS
         Array.prototype.forEach.call(els, function (el) { el.classList.add('ts-reveal'); io.observe(el); });
     });
 
-    // The phone menu toggle (a <span>) and search toggle (a <label>) only listen for clicks: make them real
-    // buttons for keyboard and screen-reader users. The search label is a visually hidden <label> on wider
-    // screens, where the field itself takes the focus, so it is only a tab stop on phones.
+    // The phone menu toggle (a <span>) and search toggle (a <label>) only listen for clicks: make them usable by
+    // keyboard and screen-reader users.
     function keyboardToggles() {
-        var phone = window.matchMedia('(max-width: 767px)');
         function asButton(el, label) {
             el.setAttribute('role', 'button');
             el.setAttribute('aria-label', label);
@@ -88,18 +86,27 @@ $script = <<<JS
             syncNav();
             new MutationObserver(syncNav).observe(html, {attributes: true, attributeFilter: ['class']});
         }
-        // (a <label> may not take role="button" / aria-expanded, so it only gets the tab stop, the name and the keys)
-        var search = d.querySelector('.block-search [data-role="minisearch-label"]');
-        if (search) {
-            search.setAttribute('aria-label', '{$searchLabel}');
-            search.addEventListener('keydown', function (e) {
-                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); search.click(); }
+        // The search toggle is a <label> (no button semantics allowed on it): put a real button in front of it that
+        // forwards to the label, so the minisearch widget still does the toggling; CSS hides the label on phones.
+        var label = d.querySelector('.block-search [data-role="minisearch-label"]');
+        if (label && !d.querySelector('.ts-search-toggle')) {
+            var btn = d.createElement('button');
+            btn.type = 'button';
+            btn.className = 'ts-search-toggle';
+            btn.setAttribute('aria-label', '{$searchLabel}');
+            btn.setAttribute('aria-controls', 'search');
+            btn.addEventListener('click', function () {
+                label.click();
+                if (label.classList.contains('active')) {
+                    var input = d.getElementById('search');
+                    if (input) { setTimeout(function () { input.focus(); }, 50); }
+                }
             });
-            var syncSearch = function () {
-                if (phone.matches) { search.tabIndex = 0; } else { search.removeAttribute('tabindex'); }
-            };
+            var syncSearch = function () { btn.setAttribute('aria-expanded', String(label.classList.contains('active'))); };
             syncSearch();
-            if (phone.addEventListener) { phone.addEventListener('change', syncSearch); }
+            new MutationObserver(syncSearch).observe(label, {attributes: true, attributeFilter: ['class']});
+            label.parentNode.insertBefore(btn, label);
+            label.closest('.block-search').classList.add('ts-has-toggle');
         }
     }
 

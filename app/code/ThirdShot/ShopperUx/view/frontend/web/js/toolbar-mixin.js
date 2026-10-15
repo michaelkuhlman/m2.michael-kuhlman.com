@@ -1,6 +1,6 @@
 /**
  * Sorting / per-page / view-mode changes go through the instant listing navigation instead of a page load.
- * A new sort order starts again from the first page.
+ * A new sort order starts again from the first page; a new page size keeps the current first product in view.
  *
  * The theme's sorter offers "key~dir" values (Price: low to high / high to low) so phones, which have no
  * direction arrow, can sort both ways: such a value sets the order AND the direction in one navigation. Picking
@@ -52,9 +52,18 @@ define(['jquery'], function ($) {
                     return this._super(paramName, paramValue, defaultValue);
                 }
                 var base = this.options.url.split('?')[0],
-                    params = this.getUrlParams();
+                    params = this.getUrlParams(),
+                    page = Number(this.getCurrentPage()),
+                    newPage;
 
                 delete params[this.options.page];
+                // per page: like core, keep the first product of the current page in view
+                if (paramName === this.options.limit && page > 1) {
+                    newPage = Math.floor(this.getCurrentLimit() * (page - 1) / paramValue) + 1;
+                    if (newPage > 1) {
+                        params[this.options.page] = newPage;
+                    }
+                }
                 params[paramName] = paramValue;
                 if (paramValue == defaultValue) { // eslint-disable-line eqeqeq
                     delete params[paramName];
