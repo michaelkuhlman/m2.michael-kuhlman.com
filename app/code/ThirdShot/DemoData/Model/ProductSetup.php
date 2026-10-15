@@ -135,6 +135,10 @@ class ProductSetup
         $product->setData('short_description', $row['short_description'] ?? '');
         $product->setData('meta_title', $row['meta_title'] ?? $row['name']);
         $product->setData('meta_description', $row['meta_description'] ?? '');
+        // searchable (AttributeSetup gives meta_keyword a high search weight): paddle names never say "paddle", so
+        // without it a search for "paddle" ranked covers, cases and mounts above every paddle. Every product carries
+        // its category's keywords (a row may override): if only some had the field, its IDF would be near zero.
+        $product->setData('meta_keyword', $row['keywords'] ?? $this->data->categoryKeywords((string) $row['category']));
         $product->setData('category_ids', isset($categoryIds[$row['category']]) ? [$categoryIds[$row['category']]] : []);
         if (in_array('new', $row['flags'] ?? [], true)) {
             $product->setData('news_from_date', date('Y-m-d', strtotime('-12 days')));

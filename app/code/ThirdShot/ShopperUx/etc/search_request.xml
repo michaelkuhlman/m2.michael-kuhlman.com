@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!--
+  Search keywords (meta_keyword, filled per category by ThirdShot_DemoData) take part in the weighted part of the
+  quick search, storefront and GraphQL alike. Magento applies attribute search weights only to the fields listed in
+  partial_search (name, sku); everything else is matched through the unweighted catch-all field, so the keywords'
+  weight did nothing and "paddle" ranked covers, cases and mounts (with "Paddle" in their names) above every paddle.
+-->
+<requests xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="urn:magento:framework:Search/etc/search_request.xsd">
+    <request query="quick_search_container" index="catalogsearch_fulltext">
+        <queries>
+            <query xsi:type="matchQuery" value="$search_term$" name="partial_search">
+                <match field="meta_keyword"/>
+            </query>
+        </queries>
+    </request>
+    <request query="graphql_product_search" index="catalogsearch_fulltext">
+        <queries>
+            <query xsi:type="matchQuery" value="$search_term$" name="partial_search">
+                <match field="meta_keyword"/>
+            </query>
+        </queries>
+    </request>
+    <request query="graphql_product_search_with_aggregation" index="catalogsearch_fulltext">
+        <queries>
+            <query xsi:type="matchQuery" value="$search_term$" name="partial_search">
+                <match field="meta_keyword"/>
+            </query>
+        </queries>
+    </request>
+</requests>

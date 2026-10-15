@@ -40,6 +40,17 @@ class DataSource
         return $this->catalog;
     }
 
+    /** Search keywords of a category (products.json "keywords"): every product gets its category's, see ProductSetup. */
+    public function categoryKeywords(string $code): string
+    {
+        foreach ($this->catalog()['categories'] as $category) {
+            if (($category['code'] ?? null) === $code) {
+                return (string) ($category['keywords'] ?? '');
+            }
+        }
+        return '';
+    }
+
     /**
      * All product rows including configurable children (children get parent defaults merged in).
      *

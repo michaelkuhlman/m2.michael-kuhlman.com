@@ -1,6 +1,6 @@
 <?php
 /**
- * bin/magento thirdshot:demo:seed [--fresh] [--step=attributes,categories,products,composite,reviews,cms]
+ * bin/magento thirdshot:demo:seed [--fresh] [--step=attributes,categories,products,composite,positions,reviews,cms]
  *
  * Builds the Third Shot Supply Co. demo catalogue from _build/ (catalog JSON, rendered images, CMS HTML).
  * Idempotent: existing records are updated; images are only attached to products without a gallery.
@@ -23,12 +23,13 @@ use ThirdShot\DemoData\Model\AttributeSetup;
 use ThirdShot\DemoData\Model\CategorySetup;
 use ThirdShot\DemoData\Model\CmsSetup;
 use ThirdShot\DemoData\Model\CompositeSetup;
+use ThirdShot\DemoData\Model\PositionSetup;
 use ThirdShot\DemoData\Model\ProductSetup;
 use ThirdShot\DemoData\Model\ReviewSetup;
 
 class SeedCommand extends Command
 {
-    private const STEPS = ['attributes', 'categories', 'products', 'composite', 'reviews', 'cms'];
+    private const STEPS = ['attributes', 'categories', 'products', 'composite', 'positions', 'reviews', 'cms'];
 
     public function __construct(
         private readonly State $state,
@@ -36,6 +37,7 @@ class SeedCommand extends Command
         private readonly CategorySetup $categories,
         private readonly ProductSetup $products,
         private readonly CompositeSetup $composite,
+        private readonly PositionSetup $positions,
         private readonly ReviewSetup $reviews,
         private readonly CmsSetup $cms,
         private readonly CollectionFactory $productCollection,
@@ -85,6 +87,7 @@ class SeedCommand extends Command
                 'categories' => $categories(),
                 'products' => $this->products->install($categories(), $log),
                 'composite' => $this->composite->install($categories(), $log),
+                'positions' => $this->positions->install($categories(), $log),
                 'reviews' => $this->reviews->install($log),
                 'cms' => $this->cms->install($log),
             };

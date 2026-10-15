@@ -81,6 +81,9 @@ class AttributeSetup
             $eav->addAttributeToGroup($entity, $setId, self::GROUP, $code);
         }
 
+        // meta_keyword (products.json "keywords") is searched with the top weight (10; name 5, SKU 6), see ShopperUx etc/search_request.xml
+        $eav->updateAttribute($entity, 'meta_keyword', ['is_searchable' => 1, 'search_weight' => 10]);
+
         $this->setupColour($eav, $setId, $log);
         $this->eavConfig->clear();
         $this->makeSwatch('color', 'visual', self::COLOURS);
