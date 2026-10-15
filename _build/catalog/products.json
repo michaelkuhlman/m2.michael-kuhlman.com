@@ -2,7 +2,7 @@
  "categories": [
   {
    "code": "paddles",
-   "keywords": "pickleball paddle, paddles",
+   "keywords": "pickleball paddle, paddle, paddles",
    "name": "Paddles",
    "description": "<p>Every paddle we sell has been played, broken in and argued over in our converted paddle workshop before it reaches you. From 13 mm hand-speed specialists to 16 mm control frames, find the build that fits the way you actually play.</p>",
    "meta_description": "Carbon, fiberglass and composite pickleball paddles for control, power and all-court play, tested by players in the Third Shot Supply Co. workshop."
@@ -695,6 +695,7 @@
   },
   {
    "sku": "TS-SET-START",
+   "keywords": "pickleball starter set, beginner bundle, gift set",
    "type": "bundle",
    "name": "Court Ready Starter Set",
    "category": "paddles",
