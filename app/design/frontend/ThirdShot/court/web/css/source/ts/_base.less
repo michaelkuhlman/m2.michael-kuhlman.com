@@ -392,7 +392,18 @@
             border-radius: 999px;
             padding: 4px 9px 3px;
         }
-        a { color: @ts-optic; }
+        a {
+            color: @ts-optic;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            white-space: nowrap;
+            &:hover { color: #E6FA70; }
+        }
+        &__short { display: none; }
+    }
+    @media (max-width: 479px) {
+        .ts-demo-notice__long { display: none; }
+        .ts-demo-notice__short { display: inline; }
     }
 
     // ---- subtle reveal motion (only armed by JS, and never with reduced motion) ----

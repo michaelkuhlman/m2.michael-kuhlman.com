@@ -110,6 +110,13 @@
             p { font-size: 14px; line-height: 1.65; margin: 0; }
         }
         &__demo a { text-decoration: underline !important; text-underline-offset: 3px; }
+        // sibling builds of the same catalog (mirrored in the headless storefront's footer.css)
+        &__builds-lead { margin-top: 14px !important; color: @ts-chalk; font-weight: 600; }
+        &__demo &__builds { margin-top: 2px; }
+        &__demo &__builds a { text-decoration: none !important; }
+        &__demo &__builds a:hover { text-decoration: underline !important; }
+        &__current { display: inline-block; padding: 5px 0; color: @ts-chalk; }
+        &__here { display: inline-block; font-size: 12.5px; color: rgba(244, 240, 230, .6); }
     }
 
     // legal line: same content edges as the footer above it (container width + gutter)
@@ -130,6 +137,9 @@
         .ts-footer__grid { grid-template-columns: 1fr 1fr 1fr; }
         .ts-footer__brand, .ts-footer__demo { grid-column: ~"1 / -1"; }
         .ts-footer__demo p { max-width: 560px; }
+        .ts-footer__current { display: flex; align-items: center; min-height: 44px; padding: 0; }
+        // flex rows drop the space before the hint
+        .ts-footer__builds a, .ts-footer__current { flex-wrap: wrap; column-gap: 5px; }
         // tablet: the newsletter form gets the full row instead of a squeezed right column
         .ts-footer__news { grid-template-columns: 1fr; gap: 28px; }
         .ts-footer__news-form .block.newsletter { margin: 0; max-width: 560px; }
@@ -164,7 +174,7 @@
             &__fine { margin: 12px 0 0; padding: 0; text-align: left; }
             &__news-form .block.newsletter div.mage-error { padding-left: 0; }
             &__grid { grid-template-columns: 1fr 1fr; gap: 28px 20px; padding: 40px 0 36px; }
-            &__demo { grid-column: auto; }
+            &__demo { grid-column: ~"1 / -1"; }
             &__col h2, &__col h4 { margin-bottom: 8px; }
             // 44px tap rows on touch screens
             &__col li a { display: flex; align-items: center; min-height: 44px; padding: 0; white-space: normal; }

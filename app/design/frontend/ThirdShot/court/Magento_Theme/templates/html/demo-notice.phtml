@@ -1,6 +1,7 @@
 <?php
 /**
  * Site-wide demo notice. Static markup, safe for full page cache.
+ * Mirrors the headless storefront's bar (src/components/DemoNotice.tsx), which links back here.
  *
  * @var \Magento\Framework\View\Element\Template $block
  * @var \Magento\Framework\Escaper $escaper
@@ -10,8 +11,9 @@
     <div class="ts-demo-notice__inner">
         <span class="ts-demo-notice__badge"><?= $escaper->escapeHtml(__('Demo store')) ?></span>
         <span class="ts-demo-notice__text">
-            <?= $escaper->escapeHtml(__('No real orders, payments or shipping.')) ?>
+            <?= $escaper->escapeHtml(__('No real orders')) ?><span class="ts-demo-notice__long"><?= $escaper->escapeHtml(__(', payments or shipping')) ?></span>.
             <span class="ts-demo-notice__more"><?= $escaper->escapeHtml(__('A Magento Open Source portfolio build by Michael Kuhlman.')) ?></span>
+            <a href="https://headless.michael-kuhlman.com/"><span class="ts-demo-notice__long"><?= $escaper->escapeHtml(__('Compare the headless store')) ?></span><span class="ts-demo-notice__short"><?= $escaper->escapeHtml(__('Headless store')) ?></span></a>
         </span>
     </div>
 </aside>
