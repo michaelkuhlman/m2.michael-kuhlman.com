@@ -13,9 +13,11 @@ The store is written entirely by AI (Claude Code sessions on this server and on 
 files or runs git. So git is the only record of what changed and why: every change is a commit, every commit is on
 GitHub within seconds.
 
-- **GitHub**: private `michaelkuhlman/m2.michael-kuhlman.com` (https://github.com/michaelkuhlman/m2.michael-kuhlman.com),
+- **GitHub: PUBLIC since 2026-10-21** `michaelkuhlman/m2.michael-kuhlman.com` (https://github.com/michaelkuhlman/m2.michael-kuhlman.com),
   one branch `main`, no PRs, no CI (the hooks below run the checks). It is the off-site copy and the channel to the
-  laptop clone.
+  laptop clone. Everything committed, commit messages included, is
+  world-readable for good: no secrets, dumps, customer data, private notes about people, or server internals beyond
+  what this file already says. Commits use the GitHub noreply address, never a real mailbox.
 - **On this server git is `m2git`** (`~/bin/m2git`): `GIT_DIR=/home/kai/backups/m2/site.git`, this directory as the
   work tree, so nothing under `/var/www` can serve repository internals. Plain `git` here says "not a git
   repository": expected, never `git init`. Push/pull use the repo-only deploy key `~/.ssh/id_m2_github` via the ssh
@@ -39,8 +41,8 @@ GitHub within seconds.
     di.xml, module.xml, SVG) or JSON; Python, shell and JavaScript syntax errors. Fix, re-stage, commit again.
     Never `--no-verify`. Whole-tree audit: `M2_PRECOMMIT_ALL=1 m2git hook run pre-commit`.
   - `post-commit` / `post-merge` / `post-rewrite` push `main`; `M2_NO_AUTOPUSH=1` skips once.
-  - `pre-push` refuses force-pushes and branch deletions. GitHub's free plan has no branch protection for private
-    repos, so this hook is the protection.
+  - `pre-push` refuses force-pushes and branch deletions. A GitHub ruleset on `main` refuses them too
+    (rulesets became available when the repo went public), and secret scanning with push protection is on.
 - **Never** `--force`, never amend or rebase a pushed commit, never `stash` / `reset --hard` / `checkout -- <file>` /
   `restore` / `clean` in this tree. Undo with `m2git revert <sha>` (then its Magento step).
 - **`.gitignore` is a whitelist**: tracked are `composer.json/.lock`, `app/code/`, `app/design/`, `app/i18n/`,
@@ -75,7 +77,7 @@ GitHub within seconds.
 | PHP | pool `[m2]` `/etc/php/8.3/fpm/pool.d/m2.conf`, runs as user `m2`, socket `/run/php/php8.3-fpm-m2.sock`, 1G memory_limit |
 | nginx | `/etc/nginx/sites-available/m2.michael-kuhlman.com` + `/etc/nginx/snippets/m2_magento.conf` (copy of Magento's nginx.conf.sample, upstream renamed `m2_fastcgi`) |
 | TLS | Let's Encrypt webroot `/var/www/letsencrypt`, cert `m2.michael-kuhlman.com`, deploy hook reloads nginx |
-| DNS / edge | Cloudflare zone michael-kuhlman.com, `A m2 -> 64.7.64.210` proxied, SSL strict |
+| DNS / edge | Cloudflare zone michael-kuhlman.com, `A m2` -> this server (keep its IP out of the repo), proxied, SSL strict |
 | Database | MariaDB 10.11, db + user `m2_store` |
 | Search | docker `m2-opensearch` (opensearch 2.19.2, heap 768m, `127.0.0.1:9201`, restart unless-stopped, volume `m2-opensearch-data`) |
 | Cache / FPC / sessions | docker `m2-redis` (`127.0.0.1:6390`, maxmemory 384mb): db 0 cache, db 1 page cache, db 2 sessions |
